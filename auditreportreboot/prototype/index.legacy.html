@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Settings – Reports | FloQast</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1D2433; background: #fff; display: flex; min-height: 100vh; }
+
+    /* ── Left Rail ── */
+    .left-rail { width: 56px; background: #1D2433; display: flex; flex-direction: column; align-items: center; padding-top: 12px; flex-shrink: 0; position: fixed; top: 0; left: 0; bottom: 0; z-index: 10; }
+    .rail-logo { width: 32px; height: 32px; margin-bottom: 20px; }
+    .rail-icon { width: 20px; height: 20px; margin: 10px 0; opacity: .55; cursor: pointer; border-radius: 4px; padding: 4px; display: flex; align-items: center; justify-content: center; }
+    .rail-icon:hover { opacity: .85; }
+    .rail-icon svg { width: 20px; height: 20px; fill: #fff; }
+    .rail-spacer { flex: 1; }
+    .rail-bottom { margin-bottom: 16px; }
+
+    /* ── Main Area ── */
+    .main-area { margin-left: 56px; flex: 1; display: flex; flex-direction: column; }
+
+    /* ── Top Nav ── */
+    .top-nav { border-bottom: 1px solid #E1E6EF; padding: 0 32px; display: flex; align-items: center; height: 48px; flex-shrink: 0; background: #fff; position: sticky; top: 0; z-index: 5; }
+    .top-nav-title { font-size: 15px; font-weight: 600; margin-right: 24px; white-space: nowrap; }
+    .top-nav-tabs { display: flex; gap: 0; height: 100%; }
+    .top-nav-tab { font-size: 13px; color: #424867; padding: 0 12px; display: flex; align-items: center; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; text-decoration: none; }
+    .top-nav-tab:hover { color: #1D2433; }
+    .top-nav-tab.active { color: #1D2433; border-bottom-color: #1FAC76; font-weight: 500; }
+
+    /* ── Content ── */
+    .content { padding: 32px; overflow-y: auto; }
+
+    /* ── Section ── */
+    .report-section { margin-bottom: 48px; }
+    .report-title { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+    .report-desc { font-size: 13px; color: #6B7280; margin-bottom: 20px; line-height: 1.5; }
+
+    /* ── Card Grid ── */
+    .card-grid { display: flex; gap: 0; border: 1px solid #E1E6EF; border-radius: 6px; background: #fff; }
+    .card-col { padding: 14px 18px; min-width: 0; flex: none; }
+    .card-col:not(:last-child) { border-right: 1px solid #E1E6EF; }
+
+    .col-label { font-size: 13px; font-weight: 600; color: #1D2433; margin-bottom: 8px; }
+
+    /* ── Search Input ── */
+    .search-input { width: 100%; padding: 5px 10px 5px 28px; border: 1px solid #CBD2E1; border-radius: 4px; font-size: 12px; outline: none; margin-bottom: 8px; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23ADB2BB' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") 8px center no-repeat; }
+    .search-input:focus { border-color: #1FAC76; }
+
+    /* ── Custom Checkbox / Radio ── */
+    .check-item { display: flex; align-items: center; gap: 7px; padding: 2.5px 0; cursor: pointer; font-size: 13px; white-space: nowrap; }
+    .check-item.indent-1 { padding-left: 22px; }
+    .check-item input[type="checkbox"],
+    .check-item input[type="radio"] { -webkit-appearance: none; -moz-appearance: none; appearance: none; width: 15px; height: 15px; border: 1.5px solid #CBD2E1; border-radius: 3px; cursor: pointer; flex-shrink: 0; position: relative; background: #fff; }
+    .check-item input[type="radio"] { border-radius: 50%; }
+    .check-item input[type="checkbox"]:checked { background: #1FAC76; border-color: #1FAC76; }
+    .check-item input[type="checkbox"]:checked::after { content: ''; position: absolute; left: 4px; top: 1px; width: 5px; height: 9px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+    .check-item input[type="radio"]:checked { border-color: #1FAC76; background: #fff; }
+    .check-item input[type="radio"]:checked::after { content: ''; position: absolute; top: 3px; left: 3px; width: 7px; height: 7px; border-radius: 50%; background: #1FAC76; }
+    .check-item label { cursor: pointer; user-select: none; line-height: 1.4; }
+    .check-item .link-label { color: #1FAC76; cursor: pointer; }
+
+    .group-header { font-size: 13px; font-weight: 600; margin-top: 8px; display: flex; align-items: center; gap: 8px; }
+    .group-header .count { font-weight: 400; color: #6B7280; font-size: 12px; }
+
+    /* ── Scrollable column ── */
+    .scroll-col { }
+
+    /* ── Date Range ── */
+    .date-inputs { display: flex; gap: 12px; margin-top: 8px; }
+    .date-field { display: flex; flex-direction: column; gap: 4px; }
+    .date-field span { font-size: 12px; color: #424867; font-weight: 500; }
+    .date-field input[type="text"] { padding: 6px 8px; border: 1px solid #CBD2E1; border-radius: 4px; font-size: 13px; width: 130px; color: #ADB2BB; outline: none; }
+    .date-field input[type="text"]:focus { border-color: #1FAC76; }
+
+    /* ── Export Button ── */
+    .export-wrap { position: relative; display: inline-block; margin-top: 20px; }
+    .export-btn { display: inline-flex; align-items: center; gap: 6px; background: #1FAC76; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; font-size: 13px; font-weight: 500; cursor: pointer; }
+    .export-btn:hover { background: #1C895F; }
+    .export-btn .caret { margin-left: 4px; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid #fff; }
+    .export-menu { display: none; position: absolute; top: 100%; left: 0; margin-top: 4px; background: #fff; border: 1px solid #E1E6EF; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,.1); min-width: 180px; z-index: 20; overflow: hidden; }
+    .export-menu.open { display: block; }
+    .export-menu-item { padding: 10px 16px; font-size: 13px; cursor: pointer; color: #1D2433; }
+    .export-menu-item:hover { background: #F1F3F9; }
+
+    /* ── Login Report (smaller card) ── */
+    .login-card { border: 1px solid #E1E6EF; border-radius: 6px; padding: 20px 24px; display: inline-block; min-width: 260px; }
+
+    hr.section-divider { border: none; border-top: 1px solid #E1E6EF; margin: 40px 0; }
+  </style>
+</head>
+<body>
+
+<!-- Left Rail -->
+<div class="left-rail">
+  <svg class="rail-logo" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="6" fill="#1FAC76"/><text x="6" y="22" font-size="16" font-weight="bold" fill="#fff" font-family="Arial">FQ</text></svg>
+  <div class="rail-icon"><svg viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z" stroke="#fff" fill="none" stroke-width="2"/></svg></div>
+  <div class="rail-icon"><svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke="#fff" fill="none" stroke-width="2"/></svg></div>
+  <div class="rail-icon" style="background:rgba(255,255,255,.15);opacity:1;"><svg viewBox="0 0 24 24"><path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke="#fff" fill="none" stroke-width="2"/></svg></div>
+  <div class="rail-icon"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke="#fff" fill="none" stroke-width="2"/></svg></div>
+  <div class="rail-icon"><svg viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" stroke="#fff" fill="none" stroke-width="2"/></svg></div>
+  <div class="rail-icon"><svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke="#fff" fill="none" stroke-width="2"/></svg></div>
+  <div class="rail-icon"><svg viewBox="0 0 24 24"><path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" stroke="#fff" fill="none" stroke-width="2"/></svg></div>
+  <div class="rail-spacer"></div>
+  <div class="rail-icon rail-bottom"><svg viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.573-1.066z" stroke="#fff" fill="none" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="#fff" fill="none" stroke-width="2"/></svg></div>
+  <div class="rail-icon rail-bottom"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#fff" fill="none" stroke-width="2"/><path d="M12 8v4m0 4h.01" stroke="#fff" fill="none" stroke-width="2" stroke-linecap="round"/></svg></div>
+</div>
+
+<!-- Main Area -->
+<div class="main-area">
+
+  <!-- Top Nav -->
+  <div class="top-nav">
+    <span class="top-nav-title">Admin Settings</span>
+    <div class="top-nav-tabs">
+      <a class="top-nav-tab" href="#">Workflows</a>
+      <a class="top-nav-tab" href="#">Entities</a>
+      <a class="top-nav-tab" href="#">Team Members</a>
+      <a class="top-nav-tab" href="#">Roles</a>
+      <a class="top-nav-tab" href="#">Groups</a>
+      <a class="top-nav-tab" href="#">Checklist</a>
+      <a class="top-nav-tab" href="#">Reconciliations</a>
+      <a class="top-nav-tab" href="#">API Keys</a>
+      <a class="top-nav-tab active" href="#">Reports</a>
+      <a class="top-nav-tab" href="#">AI</a>
+      <a class="top-nav-tab" href="#">Connections</a>
+      <a class="top-nav-tab" href="#">Financial Data Model</a>
+      <a class="top-nav-tab" href="#">File Upload</a>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- ═══ Audit Report ═══ -->
+    <div class="report-section">
+      <h1 class="report-title">Audit Report</h1>
+      <p class="report-desc" style="white-space:nowrap;">This report is designed to allow Admins of FloQast to see what changes are being made and who is making the changes.</p>
+
+      <div class="card-grid">
+
+        <!-- Products -->
+        <div class="card-col products">
+          <div class="col-label">Products</div>
+          <div class="check-item">
+            <input type="checkbox" id="all-products" checked>
+            <label for="all-products">Select All Products</label>
+          </div>
+          <div class="check-item" style="margin-top:4px;">
+            <input type="checkbox" id="prod-close" checked>
+            <label for="prod-close" class="link-label">Close & Ops</label>
+          </div>
+          <div class="check-item indent-1">
+            <input type="checkbox" id="prod-checklist" checked>
+            <label for="prod-checklist">Checklist</label>
+          </div>
+          <div class="check-item indent-1">
+            <input type="checkbox" id="prod-recs" checked>
+            <label for="prod-recs">Reconciliations</label>
+          </div>
+          <div class="check-item">
+            <input type="checkbox" id="prod-projects" checked>
+            <label for="prod-projects" class="link-label">Projects</label>
+          </div>
+          <div class="check-item">
+            <input type="checkbox" id="prod-compliance" checked>
+            <label for="prod-compliance" class="link-label">Compliance Management</label>
+          </div>
+          <div class="check-item">
+            <input type="checkbox" id="prod-intercompany" checked>
+            <label for="prod-intercompany" class="link-label">Intercompany</label>
+          </div>
+          <div class="check-item">
+            <input type="checkbox" id="prod-reporting" checked>
+            <label for="prod-reporting" class="link-label">Reporting</label>
+          </div>
+          <div class="check-item">
+            <input type="checkbox" id="prod-ai-variance" checked>
+            <label for="prod-ai-variance" class="link-label">AI Variance</label>
+          </div>
+          <div class="check-item">
+            <input type="checkbox" id="prod-classic-variance" checked>
+            <label for="prod-classic-variance" class="link-label">Classic Variance</label>
+          </div>
+          <div class="check-item">
+            <input type="checkbox" id="prod-ai-matching" checked>
+            <label for="prod-ai-matching" class="link-label">AI Matching</label>
+          </div>
+          <div class="check-item">
+            <input type="checkbox" id="prod-classic-matching" checked>
+            <label for="prod-classic-matching" class="link-label">Classic Matching</label>
+          </div>
+          <div class="check-item">
+            <input type="checkbox" id="prod-amort" checked>
+            <label for="prod-amort" class="link-label">Amortization</label>
+          </div>
+          <div class="check-item">
+            <input type="checkbox" id="prod-depreciation" checked>
+            <label for="prod-depreciation" class="link-label">Depreciation</label>
+          </div>
+          <div class="check-item">
+            <input type="checkbox" id="prod-defender" checked>
+            <label for="prod-defender" class="link-label">Detect</label>
+          </div>
+          <div class="check-item">
+            <input type="checkbox" id="prod-transform" checked>
+            <label for="prod-transform" class="link-label">Transform</label>
+          </div>
+          <div class="check-item">
+            <input type="checkbox" id="prod-request-agent" checked>
+            <label for="prod-request-agent" class="link-label">Request Agent</label>
+          </div>
+          <div class="check-item">
+            <input type="checkbox" id="prod-admin" checked>
+            <label for="prod-admin" class="link-label">Admin Settings</label>
+          </div>
+          <div class="check-item indent-1">
+            <input type="checkbox" id="prod-admin-workflows" checked>
+            <label for="prod-admin-workflows">Workflows</label>
+          </div>
+          <div class="check-item indent-1">
+            <input type="checkbox" id="prod-admin-entities" checked>
+            <label for="prod-admin-entities">Entities</label>
+          </div>
+          <div class="check-item indent-1">
+            <input type="checkbox" id="prod-admin-team" checked>
+            <label for="prod-admin-team">Team Members</label>
+          </div>
+          <div class="check-item indent-1">
+            <input type="checkbox" id="prod-admin-roles" checked>
+            <label for="prod-admin-roles">Roles</label>
+          </div>
+          <div class="check-item indent-1">
+            <input type="checkbox" id="prod-admin-groups" checked>
+            <label for="prod-admin-groups">Groups</label>
+          </div>
+          <div class="check-item indent-1">
+            <input type="checkbox" id="prod-admin-checklist" checked>
+            <label for="prod-admin-checklist">Checklist</label>
+          </div>
+          <div class="check-item indent-1">
+            <input type="checkbox" id="prod-admin-recs" checked>
+            <label for="prod-admin-recs">Reconciliations</label>
+          </div>
+          <div class="check-item indent-1">
+            <input type="checkbox" id="prod-admin-api" checked>
+            <label for="prod-admin-api">API Keys</label>
+          </div>
+          <div class="check-item indent-1">
+            <input type="checkbox" id="prod-admin-ai" checked>
+            <label for="prod-admin-ai">AI</label>
+          </div>
+          <div class="check-item indent-1">
+            <input type="checkbox" id="prod-admin-connections" checked>
+            <label for="prod-admin-connections">Connections</label>
+          </div>
+          <div class="check-item indent-1">
+            <input type="checkbox" id="prod-admin-fdm" checked>
+            <label for="prod-admin-fdm">Financial Data Model</label>
+          </div>
+          <div class="check-item indent-1">
+            <input type="checkbox" id="prod-admin-upload" checked>
+            <label for="prod-admin-upload">File Upload</label>
+          </div>
+          <div class="check-item">
+            <input type="checkbox" id="prod-login" checked>
+            <label for="prod-login" class="link-label">Login</label>
+          </div>
+        </div>
+
+        <!-- Workspaces -->
+        <div class="card-col workspaces">
+          <div class="col-label">Workspaces</div>
+          <input class="search-input" type="text" placeholder="Search">
+          <div class="scroll-col">
+            <div class="check-item">
+              <input type="checkbox" id="all-ws" checked>
+              <label for="all-ws"><strong>Select All Workspaces</strong></label>
+            </div>
+            <div style="margin-top:8px;">
+              <div class="check-item">
+                <input type="checkbox" id="ws-entities" checked>
+                <label for="ws-entities"><strong>Entities</strong> <span class="count" style="color:#6B7280;font-size:12px;">(3)</span></label>
+              </div>
+              <div class="check-item indent-1">
+                <input type="checkbox" id="ws-entity-1" checked>
+                <label for="ws-entity-1">Entity 1</label>
+              </div>
+              <div class="check-item indent-1">
+                <input type="checkbox" id="ws-entity-2" checked>
+                <label for="ws-entity-2">Entity 2</label>
+              </div>
+              <div class="check-item indent-1">
+                <input type="checkbox" id="ws-entity-3" checked>
+                <label for="ws-entity-3">Entity 3</label>
+              </div>
+            </div>
+            <div style="margin-top:8px;">
+              <div class="check-item">
+                <input type="checkbox" id="ws-compliance" checked>
+                <label for="ws-compliance"><strong>Compliance Programs</strong> <span class="count" style="color:#6B7280;font-size:12px;">(3)</span></label>
+              </div>
+              <div class="check-item indent-1">
+                <input type="checkbox" id="ws-comp-1" checked>
+                <label for="ws-comp-1">Compliance Program 1</label>
+              </div>
+              <div class="check-item indent-1">
+                <input type="checkbox" id="ws-comp-2" checked>
+                <label for="ws-comp-2">Compliance Program 2</label>
+              </div>
+              <div class="check-item indent-1">
+                <input type="checkbox" id="ws-comp-3" checked>
+                <label for="ws-comp-3">Compliance Program 3</label>
+              </div>
+            </div>
+            <div style="margin-top:8px;">
+              <div class="check-item">
+                <input type="checkbox" id="ws-projects" checked>
+                <label for="ws-projects"><strong>Projects</strong> <span class="count" style="color:#6B7280;font-size:12px;">(3)</span></label>
+              </div>
+              <div class="check-item indent-1">
+                <input type="checkbox" id="ws-proj-1" checked>
+                <label for="ws-proj-1">Project 1</label>
+              </div>
+              <div class="check-item indent-1">
+                <input type="checkbox" id="ws-proj-2" checked>
+                <label for="ws-proj-2">Project 2</label>
+              </div>
+              <div class="check-item indent-1">
+                <input type="checkbox" id="ws-proj-3" checked>
+                <label for="ws-proj-3">Project 3</label>
+              </div>
+            </div>
+            <div style="margin-top:8px;">
+              <div class="check-item">
+                <input type="checkbox" id="ws-consol" checked>
+                <label for="ws-consol"><strong>Consolidation Project</strong></label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Event Types + Date Range stacked -->
+        <div class="card-col" style="display:flex;flex-direction:column;gap:0;padding:0;">
+          <div style="padding:14px 18px;border-bottom:1px solid #E1E6EF;">
+            <div class="col-label">Event Types</div>
+            <div class="check-item">
+              <input type="checkbox" id="all-events">
+              <label for="all-events">Select All Event Types</label>
+            </div>
+            <div class="check-item" style="margin-top:4px; align-items: flex-start;">
+              <input type="checkbox" id="evt-config" checked style="margin-top:3px;">
+              <label for="evt-config"><strong>Configurational Events</strong><br><span style="font-size:12px;color:#6B7280;white-space:normal;">A change that impacts multiple items or global settings. Typically performed by users with elevated permissions (e.g., Admin, Manager, Sys Admin).</span></label>
+            </div>
+            <div class="check-item" style="align-items: flex-start;">
+              <input type="checkbox" id="evt-operational" style="margin-top:3px;">
+              <label for="evt-operational"><strong>Operational Events</strong><br><span style="font-size:12px;color:#6B7280;white-space:normal;">A change made to an individual item.</span></label>
+            </div>
+          </div>
+          <div style="padding:14px 18px;">
+            <div class="col-label">Date Range</div>
+            <div class="check-item">
+              <input type="radio" name="audit-date" id="audit-7" checked>
+              <label for="audit-7">Past 7 Days</label>
+            </div>
+            <div class="check-item">
+              <input type="radio" name="audit-date" id="audit-30">
+              <label for="audit-30">Past 30 Days</label>
+            </div>
+            <div class="check-item">
+              <input type="radio" name="audit-date" id="audit-90">
+              <label for="audit-90">Past 90 Days</label>
+            </div>
+            <div class="check-item">
+              <input type="radio" name="audit-date" id="audit-custom">
+              <label for="audit-custom" class="link-label">Custom Date Range</label>
+            </div>
+            <div class="date-inputs">
+              <div class="date-field">
+                <span>Start Date</span>
+                <input type="text" placeholder="MM / DD / YYYY">
+              </div>
+              <div class="date-field">
+                <span>End Date</span>
+                <input type="text" placeholder="MM / DD / YYYY">
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="export-wrap">
+        <button class="export-btn" onclick="toggleMenu(this)">Export Report <span class="caret"></span></button>
+        <div class="export-menu">
+          <div class="export-menu-item">Download as Excel</div>
+          <div class="export-menu-item">Download as PDF</div>
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+</div>
+
+<script>
+  function toggleMenu(btn) {
+    var menu = btn.nextElementSibling;
+    var isOpen = menu.classList.contains('open');
+    document.querySelectorAll('.export-menu').forEach(function(m) { m.classList.remove('open'); });
+    if (!isOpen) menu.classList.add('open');
+  }
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.export-wrap')) {
+      document.querySelectorAll('.export-menu').forEach(function(m) { m.classList.remove('open'); });
+    }
+  });
+</script>
+
+</body>
+</html>

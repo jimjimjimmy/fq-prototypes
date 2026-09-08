@@ -1,0 +1,458 @@
+# Data Explorer — Q3 2026 Scoped Release (DRAFT)
+
+| Field | Value |
+|---|---|
+| **Target release** | 2026-09-30 |
+| **Epic** | _(link to epic)_ |
+| **Idea Link** | IDEA-2616 |
+| **Document status** | DRAFT |
+| **Document owner** | Alex Kearns |
+| **Designer** | Natasha Clark · Kristin Johnson |
+| **Tech lead** | _(assign)_ |
+| **Technical writers** | _(assign)_ |
+| **QA** | _(assign)_ |
+| **Depends on** | Connection(s) must be configured, a Model must exist, and at least one successful pipeline run must have completed. |
+| **Related sub-PRDs** | [1 of 4: Model Creation & Source Configuration](https://floqast.atlassian.net/wiki/spaces/Data/pages/4450189505) · [2 of 4: Field Mapping](https://floqast.atlassian.net/wiki/spaces/Data/pages/4449927443) · [3 of 4: Testing & Publishing](https://floqast.atlassian.net/wiki/spaces/Data/pages/4449468593) · [4 of 4: Versioning & Lifecycle](https://floqast.atlassian.net/wiki/spaces/Data/pages/4443013309) |
+| **Confluence** | https://floqast.atlassian.net/wiki/spaces/Data/pages/4633067751/Data+Explorer+Q3+2026 |
+| **Original (full scope)** | [prd-data-explorer.md](./prd-data-explorer.md) |
+| **Q4 follow-on** | [prd-data-explorer-q4.md](./prd-data-explorer-q4.md) — version selector, audit, dimension resolution, sensitive column masking |
+
+---
+
+## 🎯 Objective
+
+This PRD covers the Q3 scoped release of the Data Explorer tab within the Model detail view in Data Studio. It defines how users view, filter, and explore the output of the last successful pipeline run directly inside FloQast — without needing to query an external database or data lake.
+
+Navigation path: Data Studio → Catalog → [Select a Model] → Data Explorer
+
+For dimension models: Data Studio → Dimensions → [Select a Dimension] → Data Explorer
+
+Primary users: FloQast admins, accountants, data stewards, and controllers who need to validate or explore processed pipeline output.
+
+**Q3 scope — last successful run viewer:** This release focuses on showing data from the most recent successful pipeline run in a filterable, sortable grid. There is no version selector in Q3 — users always see the last run's output. Version selection, archived version audit, dimension-linked column resolution, and sensitive column masking are deferred to Q4 (see [prd-data-explorer-q4.md](./prd-data-explorer-q4.md)).
+
+**Why "Data Explorer" and not "Data Preview":** The name "Data Preview" created semantic overlap with the "Data Test" tab (PRD 3 — Testing & Publishing). Data Explorer better conveys the post-transformation, exploratory intent and serves a broader audience than testing.
+
+---
+
+## 🔤 Definitions
+
+For a complete glossary of terms used across the Model Creation series, see the shared [Definitions & Terms (Data Studio)](https://floqast.atlassian.net/wiki/spaces/Data/pages/4464869409) page.
+
+| Term | Definition |
+|---|---|
+| **Data Explorer** | The tab within the Model detail view where users explore post-transformation pipeline output. Read-only. |
+| **Last successful pipeline run** | The most recent execution in which the model's transformation completed and produced output. See OQ-A for the multi-source definition. |
+
+---
+
+## 🏅 Why This Is Important
+
+**What we have today:**
+
+Users who want to inspect processed pipeline output must leave Data Studio and attempt to see data through a downstream application, or — if they are an internal user — must have access to internal APIs and know how to navigate them.
+
+**This experience does not include:**
+
+- Any in-platform visibility into what data the pipeline has produced
+- A self-service way for non-technical users to validate transformations
+- Filtering or exploration tools suited to accounting workflows
+
+**Why this is must-have for Q3:** Implementation partners and admins will rely on it as part of standard setup. Engineering has existing work in progress to surface pipeline output data; Q3 builds the read, filter, and explore layer on top of that foundation.
+
+---
+
+## 💡 Key Benefits
+
+- Validate pipeline output without leaving FloQast — no database access, SQL, API use, or support ticket required
+- Filter and explore the last successful run using interactive, column-type-aware controls
+- Sort and navigate production-scale data comfortably without performance degradation
+- Build user confidence in the data transformation process through direct inspection
+- Reduce support escalations related to "I can't see what my pipeline is producing"
+- Lay the groundwork for version audit, dimension resolution, and sensitive column features in Q4
+
+---
+
+## ✅ Use Cases
+
+| #   | Persona      | Scenario                                                                                                           | Expected Outcome                                                                                                                                                                                 |
+| --- | ------------ | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | Data Steward | Post-run validation — after a pipeline run completes, the steward wants to confirm the output looks correct        | Data loads in the grid and the steward can scroll, sort, and spot-check records without leaving FloQast                                                                                          |
+| 2   | Accountant   | Data reconciliation — the accountant wants to compare processed data against the source system to confirm accuracy | The accountant can filter by account or specific field values to isolate the relevant records from the last run — they can then compare those against their source system open in a separate tab |
+| 3   | Controller   | Quick data check — the controller needs to confirm what the most recent run produced                               | The most recent successful run data is immediately visible in the grid                                                                                                                           |
+| 4   | Accountant   | Targeted data exploration — the accountant needs to find all records where a specific field meets a condition      | The accountant uses column filters (multi-select, numeric range, or date range) to narrow results to the relevant rows                                                                           |
+| 5   | Admin        | Triage — a user in Report Builder sees a bad value and needs to trace it back to the transformed pipeline output   | The admin locates the record in Data Explorer, identifies the unexpected value, and determines which source field or mapping rule produced it                                                    |
+
+---
+
+## 📊 Success Metrics
+
+| Goal | Metric | Baseline | Target |
+|---|---|---|---|
+| Increase in-platform visibility into pipeline data | % of active Model users who visit the Data Explorer tab within 30 days of launch | 0% (new feature) | 60% |
+| Reduce time to validate pipeline output | Median time from tab open to first filter applied | N/A | <30 seconds |
+| Reduce support escalations | Support tickets related to "I can't see my pipeline data" | Establish pre-launch baseline | Decrease post-launch |
+| Maintain good UX performance | P95 initial data load time | N/A | <3 seconds |
+
+---
+
+## 🤔 Assumptions
+
+- Connection, Model, and pipeline infrastructure exist prior to this feature being built and are not in scope for this PRD.
+- Draft version data must never be accessible via Data Explorer — enforced at the API level, not only in the UI.
+- Users who can view a Model have permission to view its Data Explorer tab.
+- The Q3 release always shows data from the last successful pipeline run. There is no version selector.
+- Column display names in the grid use human-readable labels sourced from the Model field mapping configuration where available (fallback to raw field name when no label exists).
+- "Last successful pipeline run" means the most recent execution in which the model's transformation completed and produced output. Multi-source definition to be confirmed with Engineering (see OQ-A).
+
+---
+
+## 🌟 Milestones
+
+| Milestone                              | Description                                                                                                                                                                                                       | Target Date |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| Phase 1 — Core Explorer (Q3)           | Data Explorer tab visible, AG-Grid showing last successful pipeline run data, basic sort/resize/reorder, per-column filtering (multi-select / date range / numeric), paginated navigation for large datasets, empty state handling | 2026-09-30  |
+| Phase 2 — Version Audit + Masking (Q4) | Version selector enabling users to view data from any Active or Archived version (not just the last run), sensitive column obfuscation and reveal logging, dimension-linked column resolution, FK orphan flagging | Q4 2026     |
+| Phase 3 — AI Exploration (V2)          | Natural language query bar, AI translates user questions into filter criteria                                                                                                                                     | TBD         |
+
+---
+
+## 🗺️ Scope
+
+### In Scope (Q3)
+
+- Read-only grid view of the last successful pipeline run output (Source → Target)
+- AG-Grid with sorting, column resizing, and column reordering
+- Per-column filtering: multi-select (text), date range picker (date), numeric comparators (number)
+- Active filter indicator and "Clear all filters" action
+- Filter state persistence within session
+- Pagination controls allowing users to navigate large datasets without performance degradation
+- Empty state handling for all pre-requisite failure cases
+
+### Out of Scope (Q3 — Deferred to Q4 or later)
+
+- Version selector and switching between Active / Archived versions
+- Audit of data from Archived model versions
+- Dimension-linked column resolution (FK display name, orphan flagging)
+- Sensitive column obfuscation and reveal logging
+- Draft version data (never shown — enforced at API level)
+- Data export or download functionality
+- Custom calculated columns or transformations within the explorer UI
+- AI-assisted data exploration (V2)
+- REBAC-gated reveal permissions
+
+---
+
+## 📋 Requirements — User Stories
+
+### Quick Reference
+
+| # | Story | Importance |
+|---|---|---|
+| DP1-LC | View Last Successful Run Data | High |
+| DP2-LC | Filter Data by Column Values | High |
+| DP3-LC | Navigate Large Datasets (Pagination) | High |
+| DP6-LC | Understand Empty States | Medium |
+| DP-RUN-LC | Pipeline Run Awareness & Data Freshness | High |
+
+---
+
+### DP1-LC — View Last Successful Run Data
+
+**User Story:** As a Data Steward or Accountant, I want to view the processed data from the most recent successful pipeline run so that I can validate the pipeline is producing correct output.
+
+**Importance:** High
+
+**Details:** When all pre-requisites are met (Connection exists, Model has had at least one successful pipeline run), the Data Explorer tab loads the most recent successful run's output in an AG-Grid. There is no version selector in Q3 — the grid always shows the last run. What constitutes "last successful pipeline run" for models with multiple source datasets is subject to engineering confirmation (see OQ-A).
+
+**Permission hierarchy for Data Explorer access:**
+
+| Tier | Who | Access |
+|---|---|---|
+| 1 — Edit Model | Admins | Full configuration access — not the Data Explorer audience |
+| 2 — Read Model configuration | Broader audience | View-only access to field mapping and model setup — not the Data Explorer audience |
+| 3 — Preview output | Broadest audience | Data Explorer grid |
+
+**Acceptance Criteria:**
+
+**AC-DP1-01 — Data loads when all pre-requisites are met**
+- **Given** a Model exists and at least one successful pipeline run has completed
+- **When** I navigate to Data Studio → Models → [Select a Model] → Data Explorer
+- **Then** the processed data from the most recent successful pipeline run is displayed in an AG-Grid
+
+**AC-DP1-02 — Grid shows all target columns from the Model**
+- **Given** data has loaded in the Data Explorer tab
+- **When** I view the grid
+- **Then** all processed target columns from the Model are displayed as column headers
+- **And** column display names use human-readable labels sourced from the field mapping configuration where available
+- **And** custom columns reflect the customer's field naming (not internal database column names)
+
+**AC-DP1-03 — Grid is read-only**
+- **Given** I am on the Data Explorer tab
+- **When** I click or interact with any cell in the grid
+- **Then** no editing is possible — cells are display-only
+
+**AC-DP1-04 — Draft version data is never accessible**
+- **Given** a version is in Draft state
+- **When** I navigate to the Data Explorer tab
+- **Then** data associated with Draft versions is never displayed under any circumstances
+
+**AC-DP1-05 — Dimension models also expose a Data Explorer tab**
+- **Given** I navigate to Data Studio → Dimensions → [Select a Dimension] → Data Explorer
+- **When** the tab loads and the dimension has data available
+- **Then** the dimension's member set data is displayed in the same grid as the Model Data Explorer
+- **And** the same filtering, sorting, and pagination behaviour applies
+- **And** dimension-specific additions (member status, data quality flags, contributing source indicator) are not present in Q3
+- **Note:** What "current data" means for a standalone dimension — and whether it should always reflect full current state rather than a last-run snapshot — is subject to engineering confirmation (see OQ-B)
+
+---
+
+### DP2-LC — Filter Data by Column Values
+
+**User Story:** As a Data Steward or Accountant, I want to filter the data grid by specific column values so that I can find the exact records I'm looking for without scrolling through the entire dataset.
+
+**Importance:** High
+
+**Details:** Each column in the grid has a filter control appropriate to its data type. An indicator shows the number of active filters and a "Clear all filters" action is available.
+
+**Acceptance Criteria:**
+
+**AC-DP2-01 — Text/string column filter options**
+- **Given** I am on the Data Explorer tab with data loaded
+- **When** I click the filter icon on a text or string column
+- **Then** I can filter by: Contains, Does not contain, Equals, Does not equal, Starts with, Ends with
+- **And** I can also multi-select from a list of distinct values present in that column
+
+**AC-DP2-02 — Date column filter with date range picker**
+- **Given** I am on the Data Explorer tab with data loaded
+- **When** I click the filter icon on a date column
+- **Then** I can filter by: a date range (from date / to date), specific date equals, before a date, after a date, or blank
+
+**AC-DP2-03 — Numeric column filter options**
+- **Given** I am on the Data Explorer tab with data loaded
+- **When** I click the filter icon on a numeric column
+- **Then** I can filter by: Equals, Does not equal, Greater than, Less than, Between (range), or Blank
+
+**AC-DP2-04 — Active filter indicator shown**
+- **Given** I have applied one or more column filters
+- **When** I look above the grid
+- **Then** I see an indicator showing how many filters are currently active
+- **And** a "Clear all filters" action is available
+
+**AC-DP2-05 — Filter state persists within session**
+- **Given** I have applied filters and navigate away from the Data Explorer tab
+- **When** I return to the Data Explorer tab in the same session
+- **Then** my previously applied filters are still active
+- **And** filter state does not persist across browser sessions, page refreshes, or users
+
+---
+
+### DP3-LC — Navigate Large Datasets (Pagination)
+
+**User Story:** As a Data Steward or Accountant, I want to navigate large datasets without the page becoming slow or unresponsive so that I can work with production-scale data comfortably.
+
+**Importance:** High
+
+**Details:** Data is loaded in pages with controls for navigating between them. How pagination is implemented is an engineering decision. For pagination to be meaningful, data must be returned in a stable default sort order — without this, successive pages may contain overlapping or skipped rows. Performance targets apply to all load operations.
+
+**Acceptance Criteria:**
+
+**AC-DP3-01 — Pagination controls allow navigation through large datasets**
+- **Given** the dataset has more rows than a single page
+- **When** I view the Data Explorer tab
+- **Then** rows are displayed in pages with navigation controls at the bottom of the grid
+- (Previous / Next / Page X of Y / total row count)
+
+**AC-DP3-02 — Initial data load performance**
+- **Given** the Data Explorer tab is accessed with a valid dataset
+- **When** the page loads
+- **Then** the first page of data is displayed within 3 seconds (P95)
+
+**AC-DP3-03 — Filter application performance**
+- **Given** I am on the Data Explorer tab with data loaded
+- **When** I apply a filter
+- **Then** the filtered results are displayed within 1 second
+
+**AC-DP3-04 — Default sort order ensures consistent pagination**
+- **Given** no column sort has been applied by the user
+- **When** I navigate between pages
+- **Then** rows are returned in a stable default sort order
+- **And** each page shows a distinct, non-overlapping set of rows
+- **And** the default sort field and direction are an engineering decision
+
+---
+
+### DP6-LC — Understand Empty States
+
+**User Story:** As a Data Steward, I want to understand why the Data Explorer tab is empty (if it is) so that I know exactly which step to take next.
+
+**Importance:** Medium
+
+**Details:** Each unfulfilled pre-requisite triggers a distinct empty state with a clear message and actionable next step. A generic "no data" message is not acceptable.
+
+**Acceptance Criteria:**
+
+**AC-DP6-01 — Contextual empty state for missing Connection**
+- **Given** no Connection has been configured, then no model exists
+- **Then** I am unable to navigate to the Data Explorer section of the models tab
+
+**AC-DP6-02 — Empty state for pipeline never run**
+- **Given** a Connection and a model exist, but no pipeline run has ever completed successfully
+- **When** I navigate to the Data Explorer tab
+- **Then** I see the message: "Data will appear here after your pipeline runs successfully for the first time."
+
+**AC-DP6-03 — Empty state when filters return no results**
+- **Given** I have applied one or more filters
+- **When** the filters return zero matching rows
+- **Then** the grid shows: "No rows match the current filters."
+- **And** a "Clear filters" inline link is available
+
+**AC-DP6-04 — Empty state for dimension with no data available**
+- **Given** I navigate to a Dimension's Data Explorer tab
+- **And** that dimension has no data available to display
+- **When** the tab loads
+- **Then** I see the message: "Data will appear here after your pipeline runs successfully for the first time."
+- **Note:** What triggers "data available" for a standalone dimension is subject to engineering confirmation (see OQ-B)
+
+---
+
+### DP-RUN-LC — Pipeline Run Awareness & Data Freshness
+
+**User Story:** As a Data Steward or Accountant, I want to know when a new pipeline run has completed while I'm viewing Data Explorer and be able to load the latest data on my own terms, so that my current exploration context isn't disrupted unexpectedly.
+
+**Importance:** High
+
+**Details:** The Data Explorer always shows data from the last completed pipeline run. Users may have the tab open for extended periods; new runs can complete while they are mid-exploration with filters applied. Auto-refreshing the grid on run completion would be disruptive — it would reset scroll position and potentially discard the user's current filter context. A "New data available" notification with a manual refresh action is the correct pattern. When a run is actively in progress at the time the tab is opened, the user should see the last completed run's data (not a blank state) alongside an in-progress indicator.
+
+**Acceptance Criteria:**
+
+**AC-DPRUN-01 — "New data available" notification when run completes while tab is open**
+- **Given** I have the Data Explorer tab open
+- **When** a new pipeline run completes successfully
+- **Then** a banner or indicator appears: "New data available — [Refresh]"
+- **And** my current filter state and scroll position are not changed until I choose to refresh
+- **And** if I dismiss the banner without refreshing, I continue viewing the previous run's data
+
+**AC-DPRUN-02 — Manual refresh preserves filter state**
+- **Given** I have filters applied and I click the refresh action from the "New data available" banner
+- **When** the grid reloads with the new run's data
+- **Then** my previously applied filters are re-applied to the new dataset
+- **And** the "last run" timestamp updates to reflect the new run
+
+**AC-DPRUN-03 — In-progress run indicator when tab is opened**
+- **Given** a pipeline run is actively in progress when I open the Data Explorer tab
+- **When** the tab loads
+- **Then** the last successfully completed run's data is displayed in the grid
+- **And** an indicator communicates that a pipeline run is currently in progress (e.g., "Pipeline run in progress...")
+- **And** when that run completes, the "New data available" banner appears (per AC-DPRUN-01)
+
+**AC-DPRUN-04 — First-ever run in progress (no prior successful run)**
+- **Given** a model has never had a successful pipeline run
+- **And** a pipeline run is currently in progress
+- **When** I navigate to the Data Explorer tab
+- **Then** I see the message: "Your pipeline is running for the first time — data will appear here when it completes."
+- **And** the tab does not show a grid or data
+
+**AC-DPRUN-05 — Users never see partial data from an in-progress run**
+- **Given** a pipeline run is in progress
+- **When** I view the Data Explorer tab
+- **Then** I only ever see data from fully completed runs
+- **And** partial or mid-run data is never displayed regardless of timing
+
+---
+
+## 🎨 User Interaction & Design
+
+_(To be completed by designer. Key questions to resolve:)_
+
+- How should we communicate data freshness — should we show a "last run at" timestamp above the grid?
+- How should the grid handle very high cardinality columns in the multi-select filter — cap the list at N values, add a search-within-filter, or fall back to a text input?
+
+**UI Changes**
+
+- "Data Explorer" tab added to the Model detail view tab bar (replaces "Data Preview")
+- "Last run" timestamp or indicator above the grid
+- AG-Grid with column filter icons, sort controls, column resizing/reordering, and pagination bar at bottom
+- Active filter indicator chip/bar above the grid showing filter count and "Clear all" action
+- Contextual empty state components (per DP6-LC)
+
+**Layout reference:**
+
+```
+[Last run: Jun 9, 2026 at 2:14 PM]   [Active Filters: 2  ✕ Clear all]
+┌────────────┬──────────────┬──────────┬──────────────┐
+│ Field A    │ Field B      │ Field C  │ Department   │
+├────────────┼──────────────┼──────────┼──────────────┤
+│ ...        │  ...         │ ...      │ Engineering  │
+│ ...        │  ...         │ ...      │ Finance      │
+└────────────┴──────────────┴──────────┴──────────────┘
+Showing rows 1–100 of 4,892    [< Prev]  Page 1 of 49  [Next >]
+```
+
+AG-Grid implementation must follow the platform standard (reference: [AG Grid Optionality — Report Builder Related Tables](https://floqast.atlassian.net/wiki/spaces/SYC/pages/4420763720)).
+
+---
+
+## 🔗 Dimensions — Data Explorer Variant (Q3 baseline + Q4 additions)
+
+Dimension models expose a Data Explorer tab in Q3 using the same core grid as standard Models. Q3 requirements are captured in AC-DP1-05 and AC-DP6-04. The Dimension detail view (Dimensions L1 tab → Dimension → Values subtab) shows the dimension's **member set** (the reference data catalog), not joined pipeline row output.
+
+The following dimension-specific additions are **Q4 scope**, documented in the Dimensions PRD:
+
+| Element | User-facing label | Description |
+|---|---|---|
+| Related Records | Related Records | Total distinct members in the dimension (e.g., "47 related records") |
+| Member status | _(label TBD — needs design decision)_ | Active vs Inactive per member — critical for understanding the effect of archived contributing lineages |
+| Field name column | Name | Human-readable display value alongside the key |
+| Data quality flags | Warning | Possible duplicate values and duplicate keys surfaced inline in the grid |
+| Contributing source indicator | Source | Which contributing lineage produced each member — relevant when multiple contributing lineages are active |
+
+Design note: the existing Dimensions prototype Values tab is the starting point for this surface — the work is largely incremental from what is already built.
+
+---
+
+## 😎 Future Considerations (Q4+)
+
+See [Data Explorer — Q4 2026](./prd-data-explorer-q4.md) for full requirements on deferred features. Summary:
+
+- **Version selector + archived version audit** — select which version's data to inspect; view data from archived versions for audit requirements
+- **Dimension-linked column resolution** — display human-readable field names instead of raw FK keys; flag FK orphan rows
+- **Sensitive column obfuscation + reveal logging** — mask PII columns by default; log reveal actions for audit trail; foundation for future REBAC break-glass pattern
+- **AI-assisted data exploration** — natural language query bar (V2)
+- **Data export / download** — separate permission gate from on-screen reveal; Q4+ consideration
+
+---
+
+## ❓ Open Questions
+
+| #    | Question                                                                                                                                                                                                                                                                                                                                                                                                          | Owner                      | Status     | Answer                                                                                                                                                     |
+| ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| OQ-B | For a standalone dimension, should the Data Explorer always show the full current member set rather than a "last run" snapshot? For model-driven dimensions, how does the dimension's update cadence interact with the linked dataset's run schedule — and would showing "last run" data result in a misleading mix of temporal states? Engineering to advise on the correct data freshness model for dimensions. | Engineering / PM           | Open       |                                                                                                                                                            |
+| OQ-A | What does "last successful pipeline run" mean when a Model has multiple source datasets running on different schedules? Options: (A) most recent execution where the model transformation completed and produced any output; (B) most recent execution where all sources had a successful run in the same window. Definition affects what data users see and how we communicate freshness.                        | Engineering / PM           | Open       |                                                                                                                                                            |
+| OQ-2 | Which pagination approach best meets the performance targets? Options: (A) page controls; (B) infinite scroll; (C) capped virtual scroll with a row limit. PM requirement is that large datasets load within the performance targets defined in DP3-LC; implementation approach is Engineering's call. | Engineering | Open | |
+| OQ-4 | What is the maximum expected dataset size (rows × columns) for a typical pipeline run? This directly informs the pagination strategy and whether a row cap is needed.                                                                                                                                                                                                                                             | Head of Data / Engineering | Open       |                                                                                                                                                            |
+| OQ-7 | What should happen when a new pipeline run completes while the user has the Data Explorer tab open — auto-refresh, or a "new data available — click to refresh" indicator?                                                                                                                                                                                                                                        | PM / UX / Engineering      | **Closed** | Show a "New data available — Refresh" banner; do not auto-refresh. User's filter state is preserved until they choose to load the new data. See DP-RUN-LC. |
+| OQ-8 | How should multi-select filters behave for very high cardinality columns (e.g., >1,000 distinct values)? Options: cap the list, add a search-within-filter UX, or fall back to a free-text input.                                                                                                                                                                                                                 | PM / UX / Engineering      | Open       |                                                                                                                                                            |
+
+---
+
+## 🚫 Gaps
+
+| # | Gap | Impact | Proposed Resolution |
+|---|---|---|---|
+| G1 | No data retention policy currently exists for pipeline run data. Engineering and Head of Data must define how long run data is retained. | Blocks any data availability SLA | Head of Data / Engineering to define policy |
+| G4 | No PRD currently covers the read-only Model configuration view. | Does not block Data Explorer Q3 | Needs a PRD owner and home before Q4 scope locks |
+
+---
+
+## 📚 References
+
+- [1 of 4: Model Creation & Source Configuration](https://floqast.atlassian.net/wiki/spaces/Data/pages/4450189505)
+- [2 of 4: Field Mapping](https://floqast.atlassian.net/wiki/spaces/Data/pages/4449927443)
+- [3 of 4: Testing & Publishing](https://floqast.atlassian.net/wiki/spaces/Data/pages/4449468593)
+- [4 of 4: Versioning & Lifecycle](https://floqast.atlassian.net/wiki/spaces/Data/pages/4443013309)
+- [AG Grid Optionality — Report Builder Related Tables](https://floqast.atlassian.net/wiki/spaces/SYC/pages/4420763720) — AG-Grid platform standard
+- Confluence: https://floqast.atlassian.net/wiki/spaces/Data/pages/4633067751/Data+Explorer+Q3+2026
+- Q3 brainstorm: `playspace/data-studio/q3/data-preview/brainstorm.md`
+- Original full-scope PRD: [prd-data-explorer.md](./prd-data-explorer.md)
+- Q4 follow-on: [prd-data-explorer-q4.md](./prd-data-explorer-q4.md)

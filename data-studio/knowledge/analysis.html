@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Studio — PRD Analysis Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1a1a1a; background: #f8f9fa; line-height: 1.5; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+    h1 { font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+    .subtitle { color: #666; font-size: 14px; margin-bottom: 32px; }
+    h2 { font-size: 20px; font-weight: 600; margin: 40px 0 16px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb; }
+    h3 { font-size: 16px; font-weight: 600; margin: 24px 0 8px; }
+    table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 24px; }
+    th { background: #f1f3f5; text-align: left; padding: 10px 14px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #555; border-bottom: 1px solid #e5e7eb; }
+    td { padding: 10px 14px; font-size: 14px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+    .badge-implemented { background: #d1fae5; color: #065f46; }
+    .badge-placeholder { background: #fef3c7; color: #92400e; }
+    .badge-not-started { background: #e5e7eb; color: #374151; }
+    .badge-out-of-scope { background: #f3f4f6; color: #9ca3af; }
+    .badge-resolved { background: #d1fae5; color: #065f46; }
+    .badge-open { background: #fef3c7; color: #92400e; }
+    .badge-high { background: #fee2e2; color: #991b1b; }
+    .badge-medium { background: #fef3c7; color: #92400e; }
+    .badge-low { background: #e5e7eb; color: #374151; }
+    .note { font-size: 13px; color: #666; font-style: italic; }
+    .card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 16px; }
+    .card h3 { margin-top: 0; }
+    ul { margin: 8px 0 8px 20px; font-size: 14px; }
+    li { margin-bottom: 4px; }
+    .summary-bar { display: flex; gap: 16px; margin-bottom: 24px; }
+    .summary-stat { background: white; border-radius: 8px; padding: 16px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); flex: 1; text-align: center; }
+    .summary-stat .num { font-size: 28px; font-weight: 700; }
+    .summary-stat .label { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Data Studio — PRD Analysis Dashboard</h1>
+    <p class="subtitle">Living tracker mapping prototype screens to PRD coverage. Updated as the prototype evolves.</p>
+
+    <!-- Summary -->
+    <div class="summary-bar">
+      <div class="summary-stat">
+        <div class="num">2</div>
+        <div class="label">Implemented</div>
+      </div>
+      <div class="summary-stat">
+        <div class="num">7</div>
+        <div class="label">Placeholder</div>
+      </div>
+      <div class="summary-stat">
+        <div class="num">3</div>
+        <div class="label">Discrepancies</div>
+      </div>
+      <div class="summary-stat">
+        <div class="num">6</div>
+        <div class="label">Open Questions</div>
+      </div>
+    </div>
+
+    <!-- Section 1: Coverage Matrix -->
+    <h2>1. Prototype Coverage Matrix</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Screen / Route</th>
+          <th>PRD Section</th>
+          <th>Status</th>
+          <th>Alignment Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>/data-studio/models</code><br>Models Table (L1)</td>
+          <td>PRD 1 — Model Creation §2.1</td>
+          <td><span class="badge badge-implemented">Implemented</span></td>
+          <td>Accordion by FQ Domain matches PRD grouping. Mock data matches Figma.</td>
+        </tr>
+        <tr>
+          <td><code>/data-studio/connectors</code><br>Connectors Table (L1)</td>
+          <td><span class="note">Not in PRDs</span></td>
+          <td><span class="badge badge-implemented">Implemented</span></td>
+          <td>Present in Figma design but not referenced in any PRD. Connectors may belong to a separate feature area.</td>
+        </tr>
+        <tr>
+          <td><code>/data-studio/model/:id/overview</code><br>Model Overview (L2)</td>
+          <td>PRD 1 — §2.2 Model Config</td>
+          <td><span class="badge badge-placeholder">Placeholder</span></td>
+          <td>PRD defines model metadata (name, description, FQ Domain, version). Need to build config form.</td>
+        </tr>
+        <tr>
+          <td><code>/data-studio/model/:id/data-preview</code><br>Data Preview (L2)</td>
+          <td>PRD 3 — §3.2 Preview</td>
+          <td><span class="badge badge-placeholder">Placeholder</span></td>
+          <td>PRD specifies date/entity selector + tabular preview. Complex AG Grid implementation.</td>
+        </tr>
+        <tr>
+          <td><code>/data-studio/model/:id/source-datasets</code><br>Source Datasets (L2)</td>
+          <td>PRD 1 — §3 Source Datasets</td>
+          <td><span class="badge badge-placeholder">Placeholder</span></td>
+          <td>PRD defines primary/secondary datasets, file linking, grouped datasets. Key pre-req for field mapping.</td>
+        </tr>
+        <tr>
+          <td><code>/data-studio/model/:id/field-mapping</code><br>Field Mapping (L2)</td>
+          <td>PRD 2 — Full document</td>
+          <td><span class="badge badge-placeholder">Placeholder</span></td>
+          <td><strong>Primary prototype focus.</strong> Two AI modes: Directed Inline vs Conversational Chat. This is the screen that needs the most design exploration.</td>
+        </tr>
+        <tr>
+          <td><code>/data-studio/model/:id/test</code><br>Test (L2)</td>
+          <td>PRD 3 — §2 Testing, §3 Preview</td>
+          <td><span class="badge badge-placeholder">Placeholder</span></td>
+          <td>Test = run mappings against source data. Preview = view results. PRD treats these as related but distinct.</td>
+        </tr>
+        <tr>
+          <td><code>/data-studio/model/:id/versions</code><br>Versions (L2)</td>
+          <td>PRD 4 — §2 Versioning</td>
+          <td><span class="badge badge-placeholder">Placeholder</span></td>
+          <td>PRD defines Draft/Active/Archived lifecycle + version numbering. Table of versions.</td>
+        </tr>
+        <tr>
+          <td><code>/data-studio/model/:id/logs</code><br>Logs (L2)</td>
+          <td>PRD 4 — §4 Pipeline Logs</td>
+          <td><span class="badge badge-placeholder">Placeholder</span></td>
+          <td>PRD defines run history, status tracking, error drill-down.</td>
+        </tr>
+        <tr>
+          <td>Settings tab<br>Admin Settings shell</td>
+          <td><span class="note">Contextual chrome</span></td>
+          <td><span class="badge badge-implemented">Implemented</span></td>
+          <td>Provides realistic Admin Settings context. Data Studio is one of many settings tabs.</td>
+        </tr>
+        <tr>
+          <td>Settings (model-level)</td>
+          <td><span class="note">Not in any PRD</span></td>
+          <td><span class="badge badge-out-of-scope">Out of Scope</span></td>
+          <td>Present in earlier Figma iterations. Omitted — no PRD backing.</td>
+        </tr>
+        <tr>
+          <td>Dimensions (model-level)</td>
+          <td><span class="note">Not in any PRD</span></td>
+          <td><span class="badge badge-out-of-scope">Out of Scope</span></td>
+          <td>Present in earlier Figma iterations. Omitted — no PRD backing.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Section 2: Discrepancy Log -->
+    <h2>2. Design-to-PRD Discrepancy Log</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Source</th>
+          <th>Discrepancy</th>
+          <th>Status</th>
+          <th>Resolution</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Sidebar structure</td>
+          <td>Figma vs User Flow</td>
+          <td>Figma nests Source Datasets and Field Mapping under "Lineage" group. User flow and PRDs treat them as top-level workflow steps.</td>
+          <td><span class="badge badge-resolved">Resolved</span></td>
+          <td>Flat sidebar per user flow. Source Datasets and Field Mapping are direct sidebar items.</td>
+        </tr>
+        <tr>
+          <td>Terminology: Source Files vs Source Datasets</td>
+          <td>PRD 1 vs Figma</td>
+          <td>PRD uses "Source Datasets" consistently. Some Figma screens reference "Source Files."</td>
+          <td><span class="badge badge-resolved">Resolved</span></td>
+          <td>Use "Source Datasets" per PRD. Flag for Figma cleanup.</td>
+        </tr>
+        <tr>
+          <td>Connectors tab</td>
+          <td>Figma only</td>
+          <td>Connectors appear in Figma L1 tabs but are not referenced in any PRD document.</td>
+          <td><span class="badge badge-open">Open</span></td>
+          <td>Built in prototype for design completeness. Needs PM clarification on scope.</td>
+        </tr>
+        <tr>
+          <td>Settings &amp; Dimensions tabs</td>
+          <td>Figma only</td>
+          <td>Present in Figma L2 sidebar but not backed by any PRD.</td>
+          <td><span class="badge badge-resolved">Resolved</span></td>
+          <td>Omitted from prototype. Will revisit if PRD scope expands.</td>
+        </tr>
+        <tr>
+          <td>Data Preview vs Test &amp; Preview</td>
+          <td>PRD 3 vs Figma</td>
+          <td>PRD 3 treats Test and Preview as distinct concepts (§2 vs §3). Figma combines them. Navigation separates Data Preview from Test.</td>
+          <td><span class="badge badge-open">Open</span></td>
+          <td>Prototype has both as separate sidebar items. Need to validate with PM whether Data Preview is distinct from Test Preview.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Section 3: Open Questions -->
+    <h2>3. Open Questions for Working Session</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Priority</th>
+          <th>Question</th>
+          <th>Source</th>
+          <th>Impact on Prototype</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-high">High</span></td>
+          <td>Which AI interaction model should field mapping use — Directed Inline or Conversational Chat?</td>
+          <td>PRD 2 §2.4</td>
+          <td>Primary prototype exploration. Both modes need to be testable.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-high">High</span></td>
+          <td>How do many-to-one field mappings work in the UI? PRD defines concatenation, conditional logic, and formula-based transformations.</td>
+          <td>PRD 2 §3</td>
+          <td>Drives field mapping grid complexity. Need to prototype inline transformation editor.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-medium">Medium</span></td>
+          <td>What is the relationship between "Source Datasets" and "Connectors"? Are connectors the source for datasets?</td>
+          <td>PRD 1 §3 + Figma</td>
+          <td>Affects L1 navigation model and whether Connectors tab belongs in Data Studio scope.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-medium">Medium</span></td>
+          <td>Should Data Preview be a separate tab or embedded in Test? PRD 3 separates them, Figma is ambiguous.</td>
+          <td>PRD 3 §2-3</td>
+          <td>Currently separate tabs. May consolidate if PM confirms they're the same view.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-medium">Medium</span></td>
+          <td>How does version publishing work with effective dates? PRD 4 mentions "effective date" but doesn't detail the UI.</td>
+          <td>PRD 4 §2.3</td>
+          <td>Affects Test and Versions screens. Need to design date picker + confirmation flow.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-low">Low</span></td>
+          <td>Should pipeline logs show individual record errors or just run-level summaries?</td>
+          <td>PRD 4 §4</td>
+          <td>Affects Logs screen detail level. Can defer to post-MVP.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Section 4: AI Interaction Model -->
+    <h2>4. AI Interaction Model Exploration</h2>
+
+    <div class="card">
+      <h3>Directed Inline</h3>
+      <p><strong>Concept:</strong> AI pre-fills mapping suggestions in the field mapping grid. User reviews each row, accepts/rejects/modifies inline.</p>
+      <ul>
+        <li><strong>Built:</strong> Placeholder with mode label (toggled via DevToolbar)</li>
+        <li><strong>To explore:</strong> Confidence indicators per suggestion, batch accept/reject, inline transformation editor</li>
+        <li><strong>Strengths:</strong> Keeps user in context, visible progress, easy to audit</li>
+        <li><strong>Risks:</strong> May feel tedious for large schemas, hard to express complex transformations</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Conversational Chat</h3>
+      <p><strong>Concept:</strong> AI Chat panel for natural language instructions ("Map all date fields to ISO format", "Concatenate first and last name").</p>
+      <ul>
+        <li><strong>Built:</strong> Placeholder with mode label (toggled via DevToolbar)</li>
+        <li><strong>To explore:</strong> Chat panel layout (floating vs side panel), mapping preview before apply, undo/history</li>
+        <li><strong>Strengths:</strong> Powerful for bulk operations, natural for complex transformations</li>
+        <li><strong>Risks:</strong> Less visible progress, harder to audit, may over-promise capability</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Next Steps</h3>
+      <ul>
+        <li>Build out Field Mapping grid with mock data for both modes</li>
+        <li>Prototype Directed Inline: AI suggestion chips in each mapping row</li>
+        <li>Prototype Conversational Chat: Floating panel with mapping preview</li>
+        <li>Prepare side-by-side comparison for working session (week of 2026-03-17)</li>
+      </ul>
+    </div>
+
+    <p class="note" style="margin-top: 40px; text-align: center;">
+      Last updated: 2026-03-13 · Maintained in playspace/data-studio/analysis.html
+    </p>
+  </div>
+</body>
+</html>

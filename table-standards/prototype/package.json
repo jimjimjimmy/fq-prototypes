@@ -1,0 +1,41 @@
+{
+  "name": "ag-grid-standardization-prototypes",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "comment": "Run `npm install` first (requires FloQast npm registry access via your ~/.npmrc — set up through the onboarding / figma-prototype-setup skill). Stack: React 18 + modular @ag-grid-*@32 Enterprise + FlowUI. node_modules is gitignored.",
+  "dependencies": {
+    "@ag-grid-community/client-side-row-model": "^32.3.9",
+    "@ag-grid-community/core": "^32.3.9",
+    "@ag-grid-community/react": "^32.3.9",
+    "@ag-grid-community/theming": "^32.3.9",
+    "@ag-grid-enterprise/column-tool-panel": "^32.3.9",
+    "@ag-grid-enterprise/core": "^32.3.9",
+    "@ag-grid-enterprise/master-detail": "^32.3.9",
+    "@ag-grid-enterprise/row-grouping": "^32.3.9",
+    "@ag-grid-enterprise/set-filter": "^32.3.9",
+    "@ag-grid-enterprise/side-bar": "^32.3.9",
+    "@floqastinc/flow-ui_core": "^3.120.5",
+    "@floqastinc/flow-ui_icons": "^0.41.0",
+    "@floqastinc/fq-intl": "^3.8.4",
+    "@floqastinc/fq-intl-react": "^2.0.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.2.1",
+    "@types/node": "^24.12.0",
+    "@types/react": "^18.3.28",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^6.0.0",
+    "tailwindcss": "^4.2.1",
+    "typescript": "~5.9.3",
+    "vite": "^8.0.0"
+  }
+}

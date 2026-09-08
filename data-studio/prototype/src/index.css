@@ -1,0 +1,46 @@
+/*
+ * Import Tailwind v4 without preflight to avoid conflicts with Flow UI
+ * global styles. Do NOT use layer() — Flow UI's Theme.apply() injects
+ * unlayered CSS, and layered styles always lose to unlayered ones.
+ * By keeping Tailwind utilities unlayered, they win by specificity
+ * (class selectors > element selectors) over Flow UI's global rules.
+ *
+ * This is a load-bearing pattern: changing to `@import "tailwindcss"
+ * layer(...)` will silently break every Tailwind utility class in the
+ * app. See projects/data-studio/CLAUDE.md and
+ * knowledge/design-system/flowui-reference.md for context.
+ */
+@import "tailwindcss/theme";
+@import "tailwindcss/utilities";
+
+/*
+ * Border-box for every element. Tailwind's preflight normally sets this,
+ * but we don't import preflight (FlowUI handles base resets). Without
+ * border-box, `h-screen` + any padding overflows the viewport by the
+ * padding amount — see the rail-height regression debugging session
+ * 2026-05-22. Keeping this rule keeps height utilities behaving the way
+ * Tailwind users expect.
+ */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Base font */
+html, body {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Minimal resets for interactive elements used outside Flow UI */
+button, [role="button"] {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* Native form controls don't inherit font-family by default in most browsers */
+select, input, textarea {
+  font: inherit;
+}

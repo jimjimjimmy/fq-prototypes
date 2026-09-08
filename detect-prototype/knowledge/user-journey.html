@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Detect — User Journey</title>
+<style>
+  :root {
+    --brand-50:  #ecfff8;
+    --brand-100: #d6f8ec;
+    --brand-600: #1fac76;
+    --brand-700: #1c895f;
+    --brand-800: #186749;
+    --purple-50:  #faf5ff;
+    --purple-100: #f3e8ff;
+    --purple-600: #7c3aed;
+    --purple-700: #6d28d9;
+    --blue-50:  #f0f5ff;
+    --blue-100: #dbeafe;
+    --blue-600: #3d7bf7;
+    --warning-50:  #fff8eb;
+    --warning-600: #db7712;
+    --neutral-50:  #f8fafc;
+    --neutral-100: #f1f3f9;
+    --neutral-200: #e1e6ef;
+    --neutral-300: #cbd2e1;
+    --neutral-500: #6b7280;
+    --neutral-700: #424867;
+    --neutral-900: #1d2433;
+    --shadow-card: 0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(13,18,30,0.04);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    color: var(--neutral-900);
+    background: var(--neutral-50);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 56px 32px 96px;
+  }
+  /* Hero */
+  .hero { margin-bottom: 48px; }
+  .eyebrow {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--brand-600);
+    background: var(--brand-50);
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+  }
+  h1 {
+    font-size: 40px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin: 0 0 12px;
+  }
+  .lede {
+    font-size: 16px;
+    color: var(--neutral-700);
+    max-width: 720px;
+    margin: 0;
+  }
+  /* Summary strip */
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 32px 0 56px;
+  }
+  .summary-card {
+    background: white;
+    border: 1px solid var(--neutral-200);
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: var(--shadow-card);
+  }
+  .summary-card .label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--neutral-500);
+    margin-bottom: 6px;
+  }
+  .summary-card .value {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--neutral-900);
+    line-height: 1.35;
+  }
+  /* Section */
+  .section { margin-bottom: 64px; }
+  h2 {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0 0 20px;
+  }
+  /* Persona grid */
+  .personas {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .persona {
+    background: white;
+    border: 1px solid var(--neutral-200);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--shadow-card);
+  }
+  .persona-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .persona-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    color: white;
+  }
+  .persona-dot.preparer { background: var(--brand-600); }
+  .persona-dot.reviewer { background: var(--purple-600); }
+  .persona-dot.admin    { background: var(--blue-600); }
+  .persona-title { font-weight: 700; font-size: 14px; }
+  .persona-sub { font-size: 11px; color: var(--neutral-500); margin-top: 2px; }
+  .persona-body { font-size: 13px; color: var(--neutral-700); }
+  /* Phase timeline */
+  .timeline {
+    position: relative;
+    margin-left: 16px;
+    padding-left: 32px;
+    border-left: 2px dashed var(--neutral-300);
+  }
+  .phase {
+    position: relative;
+    margin-bottom: 32px;
+    background: white;
+    border: 1px solid var(--neutral-200);
+    border-radius: 12px;
+    padding: 20px 24px;
+    box-shadow: var(--shadow-card);
+  }
+  .phase::before {
+    content: '';
+    position: absolute;
+    left: -41px;
+    top: 22px;
+    width: 18px;
+    height: 18px;
+    background: var(--brand-600);
+    border: 4px solid var(--neutral-50);
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px var(--brand-600);
+  }
+  .phase-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+  .phase-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    background: var(--brand-50);
+    color: var(--brand-700);
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .phase-title { font-size: 18px; font-weight: 700; }
+  .phase-personas {
+    display: inline-flex;
+    gap: 4px;
+    margin-left: auto;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.02em;
+  }
+  .chip.preparer { background: var(--brand-50); color: var(--brand-700); }
+  .chip.reviewer { background: var(--purple-50); color: var(--purple-700); }
+  .chip.admin    { background: var(--blue-50);   color: var(--blue-600); }
+  .phase-body {
+    font-size: 14px;
+    color: var(--neutral-700);
+    margin: 8px 0 0;
+  }
+  .phase-body p { margin: 0 0 10px; }
+  .phase-body p:last-child { margin-bottom: 0; }
+  .surface {
+    display: inline-block;
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 11px;
+    background: var(--neutral-100);
+    color: var(--neutral-700);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .quote {
+    border-left: 3px solid var(--purple-600);
+    background: var(--purple-50);
+    padding: 12px 14px;
+    border-radius: 0 6px 6px 0;
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--neutral-700);
+    font-style: italic;
+  }
+  .quote .src {
+    display: block;
+    margin-top: 6px;
+    font-size: 11px;
+    font-style: normal;
+    color: var(--neutral-500);
+  }
+  ul.tight { margin: 8px 0 0; padding-left: 20px; }
+  ul.tight li { margin-bottom: 4px; font-size: 14px; color: var(--neutral-700); }
+  ul.tight li strong { color: var(--neutral-900); font-weight: 600; }
+  /* Handoff cascade */
+  .cascade {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    position: relative;
+  }
+  .cascade-step {
+    background: white;
+    border: 1px solid var(--neutral-200);
+    border-radius: 8px;
+    padding: 16px;
+    position: relative;
+    box-shadow: var(--shadow-card);
+  }
+  .cascade-step .level {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--brand-700);
+    background: var(--brand-50);
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+  }
+  .cascade-step .name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .cascade-step .desc { font-size: 12px; color: var(--neutral-500); }
+  .cascade-step::after {
+    content: '→';
+    position: absolute;
+    top: 50%;
+    right: -14px;
+    transform: translateY(-50%);
+    color: var(--neutral-300);
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .cascade-step:last-child::after { display: none; }
+  /* Sources */
+  .sources {
+    background: white;
+    border: 1px solid var(--neutral-200);
+    border-radius: 12px;
+    padding: 20px 24px;
+    box-shadow: var(--shadow-card);
+  }
+  .sources h3 {
+    font-size: 14px;
+    font-weight: 700;
+    margin: 0 0 12px;
+    color: var(--neutral-900);
+  }
+  .sources ul { list-style: none; padding: 0; margin: 0; }
+  .sources li {
+    font-size: 13px;
+    color: var(--neutral-700);
+    padding: 6px 0;
+    border-bottom: 1px solid var(--neutral-100);
+  }
+  .sources li:last-child { border: none; }
+  .sources li strong { color: var(--neutral-900); }
+  /* Footer */
+  footer {
+    text-align: center;
+    color: var(--neutral-500);
+    font-size: 11px;
+    margin-top: 64px;
+  }
+  @media (max-width: 800px) {
+    .summary { grid-template-columns: repeat(2, 1fr); }
+    .personas { grid-template-columns: 1fr; }
+    .cascade { grid-template-columns: 1fr; }
+    .cascade-step::after { display: none; }
+    h1 { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="hero">
+    <div class="eyebrow">Detect prototype · User Journey</div>
+    <h1>How accountants use Detect</h1>
+    <p class="lede">An end-to-end view of how preparers, reviewers, and admins move through Detect — built from the prototype's existing surfaces and grounded in the most recent product context (PRD, 5.14 demo to FQ Accounting, 5.15 sync with Gaurav).</p>
+  </header>
+
+  <section class="summary">
+    <div class="summary-card">
+      <div class="label">Primary user</div>
+      <div class="value">Accountants — preparers, reviewers, admins</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">Trigger</div>
+      <div class="value">Continuous · notification-driven, mid-month</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">Detection sources</div>
+      <div class="value">AI baseline (24-mo fingerprint) + deterministic rules</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">Terminal states</div>
+      <div class="value">Correct · Accept · Dismiss → Reviewed</div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Personas</h2>
+    <div class="personas">
+      <div class="persona">
+        <div class="persona-header">
+          <span class="persona-dot preparer">P</span>
+          <div>
+            <div class="persona-title">Preparer</div>
+            <div class="persona-sub">Senior Accountant</div>
+          </div>
+        </div>
+        <div class="persona-body">Triages the assigned-to-me inbox, investigates anomalies, asks for context via comments, and applies the first sign-off.</div>
+      </div>
+      <div class="persona">
+        <div class="persona-header">
+          <span class="persona-dot reviewer">R</span>
+          <div>
+            <div class="persona-title">Reviewer</div>
+            <div class="persona-sub">Accounting Manager / Controller</div>
+          </div>
+        </div>
+        <div class="persona-body">Reviews preparer work, gives the final sign-off, monitors rule health and false-positive trends over time.</div>
+      </div>
+      <div class="persona">
+        <div class="persona-header">
+          <span class="persona-dot admin">A</span>
+          <div>
+            <div class="persona-title">Admin / Ultimate Owner</div>
+            <div class="persona-sub">Controller / Director</div>
+          </div>
+        </div>
+        <div class="persona-body">Configures global rules, fallback assignments, and serves as the catch-all for any anomaly that can't be routed.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Journey phases</h2>
+    <div class="timeline">
+
+      <div class="phase">
+        <div class="phase-header">
+          <span class="phase-num">01</span>
+          <span class="phase-title">First-time setup</span>
+          <span class="phase-personas"><span class="chip admin">Admin</span></span>
+        </div>
+        <div class="phase-body">
+          <p>First load gates behind a <strong>COSO acknowledgment</strong> — explicit opt-in to AI evaluating the GL — followed by a 3-step <strong>onboarding wizard</strong>:</p>
+          <ul class="tight">
+            <li><strong>Ultimate Owner</strong> — fallback assignee of last resort</li>
+            <li><strong>Anomaly Assignment</strong> (optional) — per entity-account combination</li>
+            <li><strong>ERP Field Mapping</strong> (optional) — Vendor / Reversal / etc.</li>
+          </ul>
+          <p style="margin-top:10px"><span class="surface">COSOAcknowledgmentModal.tsx</span> &nbsp; <span class="surface">OnboardingWizard.tsx</span></p>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-header">
+          <span class="phase-num">02</span>
+          <span class="phase-title">Trigger — continuous, not periodic</span>
+          <span class="phase-personas"><span class="chip preparer">Preparer</span></span>
+        </div>
+        <div class="phase-body">
+          <p>The PRD's atomic truth: <strong>Prevention is more valuable than detection.</strong> Users come in mid-month, driven by notifications (cadence configured in Settings).</p>
+          <div class="quote">"Teresa just posted something that triggered my rule. Detect flashes something and tells me, hey, do you want to look at this?"<span class="src">— 5.14.2026 demo to FQ Accounting</span></div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-header">
+          <span class="phase-num">03</span>
+          <span class="phase-title">Triage — Transactions inbox</span>
+          <span class="phase-personas"><span class="chip preparer">Preparer</span></span>
+        </div>
+        <div class="phase-body">
+          <p>Lands in the inbox filtered to <strong>Assigned to Me</strong>. Cards are prioritized by <strong>severity score</strong> (0–100, banded as Low / Medium / High) and <strong>materiality</strong>. Two flag sources:</p>
+          <ul class="tight">
+            <li><strong>AI Detected</strong> — purple sparkle badge, anomaly model</li>
+            <li><strong>Rule Detected</strong> — blue circle badge, references the rule and its version</li>
+          </ul>
+          <p style="margin-top:10px"><span class="surface">InboxPanel.tsx</span> &nbsp; <span class="surface">FilterSortModal.tsx</span></p>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-header">
+          <span class="phase-num">04</span>
+          <span class="phase-title">Investigation — Detail panel</span>
+          <span class="phase-personas"><span class="chip preparer">Preparer</span><span class="chip reviewer">Reviewer</span></span>
+        </div>
+        <div class="phase-body">
+          <p>Opens the detail panel with transaction details, GL impact, and one anomaly card per flag — naming the rule (with <span class="surface">v{n}</span> version) or the AI category, plus model reasoning. Right rail carries Assignees, Comments (line-level threads), and the Activity Log.</p>
+          <p style="margin-top:10px"><span class="surface">DetailPanel.tsx</span></p>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-header">
+          <span class="phase-num">05</span>
+          <span class="phase-title">Resolution — every anomaly reaches a terminal state</span>
+          <span class="phase-personas"><span class="chip preparer">Preparer</span></span>
+        </div>
+        <div class="phase-body">
+          <ul class="tight">
+            <li><strong>Create Journal Entry</strong> — correcting JE drafted <span class="surface">JournalEntryModal</span></li>
+            <li><strong>Add to Close Checklist</strong> — routes work into Close <span class="surface">CloseTaskModal</span></li>
+            <li><strong>Dismiss</strong> — with reason; trains the model on false positives <span class="surface">DismissModal</span></li>
+          </ul>
+          <div class="quote">"A signal without a clear next step is noise. Every alert must map to a decision, an owner, and a remediation path."<span class="src">— Detect PRD, Atomic Truths</span></div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-header">
+          <span class="phase-num">06</span>
+          <span class="phase-title">Insights — the unknown unknowns</span>
+          <span class="phase-personas"><span class="chip preparer">Preparer</span></span>
+        </div>
+        <div class="phase-body">
+          <p>The <strong>Insights tab</strong> catches expected-but-missing activity at the account level. For each insight the user sees missing transactions across <strong>Current Period · Prior Month · Prior Quarter Same Month · Prior Year Same Month</strong>. Per-row <em>Why this suggestion?</em> disclosures call out the cadence pattern Detect found (monthly cadence, recurring contract, ingestion delay, recently active vendor, materiality framing) and surface 3 next-step CTAs.</p>
+          <div class="quote">"We think you missed $128,000 of accruals — which should be broken up as 20K to Amazon, 45K to Google…"<span class="src">— 5.14.2026 demo to FQ Accounting</span></div>
+          <p style="margin-top:10px"><span class="surface">InsightsView.tsx</span></p>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-header">
+          <span class="phase-num">07</span>
+          <span class="phase-title">Sign-off &amp; handoff</span>
+          <span class="phase-personas"><span class="chip preparer">Preparer</span><span class="chip reviewer">Reviewer</span></span>
+        </div>
+        <div class="phase-body">
+          <ul class="tight">
+            <li><strong>Preparer</strong> applies their sign-off in the Assignees card (Transactions or Insights)</li>
+            <li><strong>Reviewer</strong> examines the work, signs off → status flips to <strong>Resolved</strong></li>
+            <li>New finding after sign-off → insight enters the <strong>Redo</strong> state with amber alert + stale-sign-off indicator</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-header">
+          <span class="phase-num">08</span>
+          <span class="phase-title">Rules maintenance — long-running loop</span>
+          <span class="phase-personas"><span class="chip reviewer">Reviewer</span><span class="chip admin">Admin</span></span>
+        </div>
+        <div class="phase-body">
+          <p>Reviewers and admins return to the Rules workspace to tune coverage as the business changes. Each rule carries a <span class="surface">v{n}</span> tag; edits create a new version with a full history. Deactivation requires confirmation with historical-impact framing.</p>
+          <p style="margin-top:10px"><span class="surface">RulesPage.tsx</span> &nbsp; <span class="surface">RuleDetailModal.tsx</span> &nbsp; <span class="surface">DeactivateRuleDialog.tsx</span></p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Auto-assignment cascade</h2>
+    <p style="color:var(--neutral-700); font-size:14px; max-width:720px;">When an anomaly fires, Detect walks down a four-step cascade until it finds an owner. Last stop is the Ultimate Owner so nothing falls into the void.</p>
+    <div class="cascade" style="margin-top:20px">
+      <div class="cascade-step">
+        <div class="level">Level 1</div>
+        <div class="name">Dynamic Assignment</div>
+        <div class="desc">Match the account's existing Preparer / Reviewer from Reconciliations</div>
+      </div>
+      <div class="cascade-step">
+        <div class="level">Level 2</div>
+        <div class="name">Fallback Assignees</div>
+        <div class="desc">Per-account list uploaded during onboarding</div>
+      </div>
+      <div class="cascade-step">
+        <div class="level">Level 3</div>
+        <div class="name">Rule Owner</div>
+        <div class="desc">For rule-detected anomalies, the rule's author</div>
+      </div>
+      <div class="cascade-step">
+        <div class="level">Level 4</div>
+        <div class="name">Ultimate Owner</div>
+        <div class="desc">Global catch-all configured in onboarding</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="sources">
+      <h3>Sources</h3>
+      <ul>
+        <li><strong>Detect PRD</strong> — atomic truths ("prevention &gt; detection", "action is the unit of value"), persona definitions, resolution modes</li>
+        <li><strong>5.14.2026 demo to FQ Accounting team</strong> — real-time trigger praise, account-fingerprint mechanics, mid-month vs. close-day behavior</li>
+        <li><strong>5.15.2026 sync with Gaurav</strong> — Insights table column structure, missing-transactions framing</li>
+        <li><strong>Prototype</strong> — <span class="surface">projects/detect-prototype/</span> on <span class="surface">main</span> (PR #144 merged)</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    Detect user journey · Generated <span id="today"></span>
+  </footer>
+</div>
+<script>
+  document.getElementById('today').textContent =
+    new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+</script>
+</body>
+</html>

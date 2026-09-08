@@ -1,0 +1,214 @@
+# PRD: Support Transform Integration
+
+| Field | Value |
+|---|---|
+| **Owner** | Alex Kearns |
+| **Status** | Draft |
+| **Epic / Jira** | IDEA-2628 |
+| **Last Updated** | 2026-06-23 |
+| **Target Release** | 2026-09-30 |
+| **Dependencies** | Core Data Query API v2, FDM notification mechanism |
+| **Engineering** | Data Platform (TBD) + Sachin (Transform) |
+
+---
+
+## Objective
+
+Today, FloQast Transform does not query Data Platform. Transform currently operates against the legacy stack, and as FloQast moves to Data Platform as the source of truth for financial data, Transform needs a supported path to consume that data going forward.
+
+This PRD defines two capabilities that together enable Transform to be a first-class consumer of Data Platform data for the first time:
+
+1. **Data readiness notification** — When a model run completes, Data Platform pushes a notification to Transform using the same mechanism already in place for FDM, signaling that fresh data is available to query.
+2. **Transform query access** — Transform is granted authenticated access to the Core Data Query API v2, with the ability to query silver-layer datasets (and bronze where needed), enabling it to pull the data it needs on demand following a readiness notification.
+
+When this ships, Transform can reliably consume Data Platform data — including Custom Data Models and extended CDC tables — through a purpose-built integration rather than the legacy stack.
+
+---
+
+## Definitions & Terms
+
+See the canonical [Definitions & Terms](https://floqast.atlassian.net/wiki/spaces/Data/pages/4464869409) page.
+
+**Additional terms for this PRD:**
+
+| Term | Definition |
+|---|---|
+| **Core Data Query API v2** | Data Platform's JSON-based query interface. Accepts structured query objects and translates them to SQL against the data warehouse. Base endpoint: `POST /v2/tenant/{tlc_id}/schema/{schema}/query` |
+| **Data readiness notification** | A push event sent by Data Platform to a registered consumer (Transform, FDM) when a model run completes and new data is available to query |
+| **Schema layer** | A medallion tier within Data Platform: `bronze` (raw ingested data), `silver` (cleaned, CDC-merged data), `gold` (canonical business-ready models) |
+| **Transform** | FloQast's financial computation engine. Performs allocation logic, cross-dataset joins, and financial computations on top of source data. Currently operates against the legacy stack; this PRD defines its first integration with Data Platform |
+| **Notification mechanism** | The existing push-based integration used by FDM to receive data readiness signals from Data Platform. Transform will use the same mechanism — implementation details TBD with engineering |
+
+---
+
+## Why This Is Important
+
+FloQast Transform is a critical foundation for FloQast's AI revenue and ability to differentiate in the market. The computations Transform performs — allocation logic, cross-dataset joins, financial calculations — depend on normalized, reliable source data. Today that data comes from the legacy stack, which creates two compounding problems: the legacy stack is harder to maintain as FloQast consolidates its data infrastructure, and it cannot provide the level of normalization that enables Transform to work repeatably across customers.
+
+Data Platform changes both of those things. By mapping source data to FloQast's canonical model, Data Platform gives Transform a normalized, consistent foundation for the first time. That normalization is what enables repeatability in agent creation and out-of-the-box support — the same computation logic can work across customers because the underlying data follows the same structure. And because Data Platform is designed to onboard new data sources faster, Transform customers gain access to new connectors and Custom Data Models without waiting for legacy stack changes.
+
+Moving Transform onto Data Platform is the architectural step that makes Transform more scalable: better out-of-the-box coverage for customers, and a more maintainable foundation for the team.
+
+---
+
+## Key Benefits
+
+| Beneficiary | Benefit |
+|---|---|
+| **Transform customers** | Access to normalized, canonical-model data for the first time — enables more reliable and repeatable financial computations |
+| **Transform (product)** | Agent logic and out-of-the-box configurations can be built once and reused across customers, rather than rebuilt per-customer against raw source formats |
+| **Data Studio admins** | Data surfaced in Data Platform — including Custom Data Models and extended CDC tables — is immediately available to Transform without additional configuration |
+| **Engineering** | Transform moves off the legacy stack, reducing the maintenance surface and aligning with the broader Data Platform consolidation |
+| **Onboarding** | New data sources added to Data Platform are available to Transform faster, reducing time-to-value for new connectors and customer setups |
+
+---
+
+## Use Cases
+
+1. **Transform queries canonical model data** — A customer's Data Platform run completes. Data Platform pushes a data readiness notification to Transform. Transform can use this event as an optional trigger to automatically kick off a Transform agent run, then calls the Core Data Query API v2 against the silver layer to retrieve the normalized data it needs for allocation logic and financial computations.
+
+2. **Transform queries a Custom Data Model** — A Transform customer needs data from a table outside FloQast's standard model set (e.g., a billing or headcount table surfaced via an extended CDC connector). The Data Studio admin has already created a Custom Data Model in Data Platform. Transform receives a readiness notification when that model's run completes and queries it via the same API.
+
+3. **New customer onboarding** — A new Transform customer connects their ERP via Data Platform. Because the source data is normalized to FloQast's canonical model on ingestion, Transform can apply existing agent logic out of the box — no per-customer reconfiguration required.
+
+4. **Browsing available Data Platform data in Transform** — A Transform user wants to build a new computation against Data Platform data. Transform uses the discovery endpoints (`GET /v2/schemas`, `GET /v2/schemas/{schema}/datasets`, `GET /v2/datasets/{dataset}`) to surface available datasets, columns, and schema information directly in the Transform experience — so users can see what Data Platform data is available without any manual API interaction.
+
+---
+
+## Assumptions — Established
+
+1. Data Platform already has a push-based notification mechanism in place for FDM. Transform will use the same mechanism — the specific implementation details are TBD with engineering.
+2. Transform will query against the silver schema layer primarily. Bronze access may be needed in specific cases — this is an open item to confirm with engineering.
+3. The Core Data Query API v2 is the query interface Transform will use. No new query API is required for this integration.
+4. Authentication and tenancy for Transform's API access follows the existing `{tlc_id}` pattern in the Core Data Query API — Transform queries are scoped to a specific tenant.
+5. This PRD covers the integration contract between Data Platform and Transform. The Transform-side implementation (how Transform handles the notification, how it presents available datasets to users) is owned by Sachin and the Transform team.
+6. Data readiness notifications are sent at the model run level — Transform receives a notification per completed run, not per individual field or dataset change.
+7. Custom Data Models and extended CDC tables surfaced in Data Platform are queryable by Transform via the same API as canonical models — no special handling required on the query side.
+8. The discovery endpoints are read-only and do not require the same auth scope as query execution — TBD with engineering.
+9. The Core Data Query API v2 is the starting point for Transform's query access, but extensions to the API may be required to fully support Transform's use cases. Any required extensions will be identified during engineering design and tracked as open items.
+
+---
+
+## Open Items to Confirm
+
+| # | Item | Owner | Status |
+|---|---|---|---|
+| OI-1 | Does Transform need bronze-layer access, or is silver sufficient for all planned use cases? | Data Platform / Transform | Open |
+| OI-2 | What is the exact notification payload shape — what fields does Transform need beyond `tlc_id`, model name, schema layer, and run completion timestamp? | Data Platform / Transform | Open |
+| OI-3 | What extensions to the Core Data Query API v2 are required to support Transform's use cases? | Data Platform / Transform | Open |
+
+---
+
+## Scope
+
+**In Scope**
+
+- Data readiness notification from Data Platform to Transform when a model run completes, using the same push mechanism as FDM
+- Transform access to the Core Data Query API v2 for querying silver-layer datasets (and bronze where confirmed necessary)
+- Transform access to discovery endpoints to surface available datasets, columns, and schema information
+- Support for querying canonical models, Custom Data Models, and extended CDC tables via the same API
+- Authentication and tenancy scoping for Transform's API access
+- Any extensions to the Core Data Query API v2 required to support Transform's use cases (to be identified during engineering design)
+
+**Out of Scope**
+
+- Transform-side implementation — how Transform handles notifications, triggers agent runs, and presents available datasets to users is owned by the Transform team
+- Legacy stack migration mechanics — moving existing Transform customer configurations off the legacy stack is a separate effort
+- Gold-layer access — Transform queries silver (and bronze where needed); gold is out of scope for this integration
+- Real-time streaming or sub-run-level notifications — notifications are at the model run level
+
+---
+
+## Requirements
+
+### Story 1: Data readiness notification
+
+**As a** Transform agent, **I want to** receive a notification when a Data Platform model run completes **so that** I can optionally trigger a Transform agent run against fresh data.
+
+**Acceptance Criteria:**
+- AC1: When a model run completes in Data Platform, a push notification is sent to Transform using the same mechanism used for FDM
+- AC2: The notification payload includes at minimum: the tenant identifier (`tlc_id`), the model name, the schema layer, and the run completion timestamp
+- AC3: The notification is sent once per completed run — not per field or dataset change within a run
+- AC4: Transform may use the notification as an optional trigger for an agent run — the notification does not mandate any action on the Transform side
+- AC5: Failed runs do not trigger a data readiness notification
+
+---
+
+### Story 2: Transform query access
+
+**As a** Transform agent, **I want to** query Data Platform datasets via the Core Data Query API v2 **so that** I can retrieve normalized data for financial computations.
+
+**Acceptance Criteria:**
+- AC1: Transform is granted authenticated access to the Core Data Query API v2, scoped to a specific tenant via `{tlc_id}`
+- AC2: Transform can query silver-layer datasets, including canonical models, Custom Data Models, and extended CDC tables
+- AC3: Transform can query bronze-layer datasets where confirmed necessary (open item — see OI-1)
+- AC4: Any extensions to the Core Data Query API v2 required to support Transform's use cases are identified during engineering design and implemented before launch
+- AC5: Transform query access is isolated by tenant — a Transform query for one `tlc_id` cannot access data for another tenant
+
+---
+
+### Story 3: Dataset discovery for Transform users
+
+**As a** Transform user, **I want to** see what Data Platform datasets and fields are available **so that** I can build computations against the right data without manual API interaction.
+
+**Acceptance Criteria:**
+- AC1: Transform surfaces available Data Platform datasets to users using the discovery endpoints (`GET /v2/schemas`, `GET /v2/schemas/{schema}/datasets`, `GET /v2/datasets/{dataset}`)
+- AC2: Users can see dataset names, column names, data types, and descriptions where available
+- AC3: Discovery is scoped to the tenant — users only see datasets available for their `tlc_id`
+- AC4: Discovery results reflect the current state of Data Platform — newly added datasets and Custom Data Models appear without manual refresh
+
+---
+
+## UX Requirements
+
+This PRD defines an integration contract between Data Platform and Transform — the primary UX surface is owned by the Transform team. Data Platform's responsibilities are the notification payload and API behavior; how Transform presents these to users is out of scope here.
+
+**Data readiness notification payload**
+- Minimum fields: `tlc_id`, model name, schema layer, run completion timestamp
+- Payload shape to be finalized with engineering during design
+
+**Discovery endpoint behavior**
+- Results are tenant-scoped — no cross-tenant data exposure
+- Dataset metadata includes at minimum: name, schema layer, column names, data types, and descriptions where available
+- Newly added datasets (including Custom Data Models) appear in discovery results without requiring a manual refresh on the Transform side
+
+**Open UX questions:**
+- How does Transform present available Data Platform datasets in its UI — a browsable catalog, a dropdown at computation-build time, or something else?
+- How does Transform surface the data readiness notification to users — as a trigger option within the agent configuration flow?
+
+---
+
+## Open Questions
+
+| # | Question | Owner |
+|---|---|---|
+| OQ-1 | Does Transform need bronze-layer access, or is silver sufficient for all planned use cases? | Data Platform / Transform |
+| OQ-2 | What is the exact notification payload shape — what fields does Transform need beyond `tlc_id`, model name, schema layer, and run completion timestamp? | Data Platform / Transform |
+| OQ-3 | What extensions to the Core Data Query API v2 are required to support Transform's use cases? Are there query patterns Transform needs that the current API cannot express? | Data Platform / Transform |
+| OQ-4 | What authentication mechanism will Transform use to call the Core Data Query API — service account, API key, or something else? | Data Platform Engineering |
+| OQ-5 | Should notifications be sent for all model types (canonical, Custom Data Models, extended CDC tables) or only a subset? | Data Platform / Transform |
+| OQ-6 | What happens if Transform is unavailable when a notification is sent — is there a retry mechanism, or does the notification get dropped? | Data Platform Engineering |
+
+---
+
+## Gaps
+
+1. **Notification reliability** — The retry and delivery guarantee behavior for data readiness notifications is undefined in this PRD. If Transform is unavailable when a notification is sent, there is no specified fallback. This needs to be resolved during engineering design — a dropped notification could cause a Transform agent to miss a data update silently.
+
+2. **API extension scope** — It is acknowledged that the Core Data Query API v2 may need to be extended for Transform's use cases, but those extensions are not yet identified. Until engineering design begins, the full scope of this PRD is incomplete — any extensions could add meaningful complexity.
+
+3. **Legacy stack coexistence** — Transform migration to Data Platform is expected in Q4. During the transition period, some tenants will remain on the legacy stack while others move to Data Platform. The Transform team expects to manage this via a feature flag on the Transform side — toggling per-`tlc_id` between legacy and Data Platform. The specifics of that flag and the cutover process are owned by the Transform team and are out of scope for this PRD.
+
+4. **Notification granularity** — Notifications are defined at the model run level. If Transform needs finer-grained signals — e.g., only notify when specific datasets change — the current notification design does not support that. This may become a gap as Transform's use cases are better understood.
+
+---
+
+## References
+
+| Resource | Link |
+|---|---|
+| Definitions & Terms | [Confluence](https://floqast.atlassian.net/wiki/spaces/Data/pages/4464869409) |
+| Core Data Query API v2 | [dp.fq12.floqast.engineering/v1/data/docs](https://dp.fq12.floqast.engineering/v1/data/docs) |
+| Custom Data Models PRD | [prd-custom-data-model.md](../custom-data-modeling/prd-custom-data-model.md) · [Confluence](https://floqast.atlassian.net/wiki/spaces/Data/pages/4640407556/Custom+Data+Models+Q3+2026) |
+| Extend Tables in CDC Connectors PRD | [prd-adding-cdc-tables.md](../transform-cdc-extra-tables/prd-adding-cdc-tables.md) · [Confluence](https://floqast.atlassian.net/wiki/spaces/Data/pages/4642865771/Extend+Tables+in+CDC+Connectors+Q3+2026) |
+| IDEA-2628 — Transform Application Integration | [Jira](https://floqast.atlassian.net/jira/polaris/projects/IDEA/ideas/view/11291632?selectedIssue=IDEA-2628) |

@@ -1,0 +1,8 @@
+# Deploy note: run deploys from /tmp to avoid Netlify framework detection
+# firing on node_modules in the parent monorepo. Copy this folder to /tmp
+# and run: CI=true netlify deploy --dir . --prod --site <site-id>
+# Site ID: ea4754c1-5a7c-4458-98f0-a0d01625ac8b
+
+[build]
+  publish = "."
+  command = ""

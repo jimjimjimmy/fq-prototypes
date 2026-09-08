@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Defender: AI-Assisted Prototype Development — Session Report</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --brand-deep: #013A30;
+    --brand-accent: #C0E8D7;
+    --brand-success: #1fac76;
+    --brand-light: #f0faf5;
+    --text-primary: #1d2433;
+    --text-secondary: #424867;
+    --text-tertiary: #6b7280;
+    --border: #e1e6ef;
+    --surface: #f8fafc;
+    --danger: #d24747;
+    --warning: #db7712;
+    --info: #3d7bf7;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text-primary);
+    line-height: 1.6;
+    background: #fff;
+  }
+
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  @media print {
+    .page-break { page-break-before: always; }
+    .no-break { page-break-inside: avoid; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+
+  /* Cover Page */
+  .cover {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--brand-deep) 0%, #014a3d 100%);
+    color: white;
+    padding: 80px;
+    position: relative;
+  }
+  .cover::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: var(--brand-accent);
+  }
+  .cover-label {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--brand-accent);
+    margin-bottom: 24px;
+  }
+  .cover h1 {
+    font-family: 'Museo Sans', 'Inter', sans-serif;
+    font-size: 44px;
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 20px;
+    max-width: 700px;
+  }
+  .cover-subtitle {
+    font-size: 18px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.85);
+    max-width: 600px;
+    margin-bottom: 48px;
+  }
+  .cover-meta {
+    display: flex;
+    gap: 40px;
+    font-size: 14px;
+    color: rgba(255,255,255,0.7);
+  }
+  .cover-meta strong { color: white; font-weight: 600; }
+
+  /* Section Styles */
+  .section {
+    padding: 60px 80px;
+  }
+  .section-alt {
+    background: var(--surface);
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .section-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--brand-deep);
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  h2 {
+    font-family: 'Museo Sans', 'Inter', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--brand-deep);
+    line-height: 1.3;
+  }
+  h3 {
+    font-family: 'Museo Sans', 'Inter', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 32px 0 16px;
+  }
+  h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 24px 0 8px;
+  }
+  p {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    max-width: 720px;
+  }
+
+  /* Green accent bar */
+  .accent-bar {
+    width: 48px;
+    height: 4px;
+    background: var(--brand-accent);
+    border-radius: 2px;
+    margin-bottom: 24px;
+  }
+
+  /* Callout boxes */
+  .callout {
+    background: var(--brand-light);
+    border-left: 4px solid var(--brand-success);
+    border-radius: 0 8px 8px 0;
+    padding: 20px 24px;
+    margin: 24px 0;
+  }
+  .callout p { color: var(--brand-deep); margin: 0; }
+  .callout-title {
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--brand-success);
+    margin-bottom: 8px;
+  }
+
+  .callout-warning {
+    background: #fff8eb;
+    border-left-color: var(--warning);
+  }
+  .callout-warning .callout-title { color: var(--warning); }
+  .callout-warning p { color: #92400e; }
+
+  .callout-info {
+    background: #f0f5ff;
+    border-left-color: var(--info);
+  }
+  .callout-info .callout-title { color: var(--info); }
+  .callout-info p { color: #1e40af; }
+
+  /* Metrics strip */
+  .metrics-strip {
+    display: flex;
+    gap: 16px;
+    margin: 24px 0;
+    flex-wrap: wrap;
+  }
+  .metric-card {
+    flex: 1;
+    min-width: 120px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    text-align: center;
+  }
+  .metric-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--brand-deep);
+    line-height: 1.2;
+  }
+  .metric-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    margin-top: 4px;
+  }
+  .metric-card.success .metric-value { color: var(--brand-success); }
+  .metric-card.danger .metric-value { color: var(--danger); }
+
+  /* Image figure */
+  .figure {
+    margin: 28px 0;
+    page-break-inside: avoid;
+  }
+  .figure img {
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .figure-caption {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-tertiary);
+    margin-top: 10px;
+    padding-left: 4px;
+    border-left: 3px solid var(--brand-accent);
+    padding: 4px 0 4px 12px;
+  }
+  .figure-row {
+    display: flex;
+    gap: 16px;
+    margin: 28px 0;
+  }
+  .figure-row .figure {
+    flex: 1;
+    margin: 0;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 13px;
+  }
+  thead th {
+    background: var(--brand-deep);
+    color: white;
+    font-weight: 600;
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  thead th:first-child { border-radius: 6px 0 0 0; }
+  thead th:last-child { border-radius: 0 6px 0 0; }
+  tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-secondary);
+    vertical-align: top;
+  }
+  tbody tr:hover { background: var(--surface); }
+
+  /* Tags/badges */
+  .tag {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 18px;
+  }
+  .tag-success { background: #ecfff8; color: var(--brand-success); }
+  .tag-danger { background: #fef2f2; color: var(--danger); }
+  .tag-warning { background: #fff8eb; color: var(--warning); }
+  .tag-info { background: #f0f5ff; color: var(--info); }
+  .tag-neutral { background: #f1f3f9; color: var(--text-tertiary); }
+
+  /* Timeline */
+  .timeline {
+    position: relative;
+    padding-left: 32px;
+    margin: 24px 0;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: var(--brand-accent);
+  }
+  .timeline-item {
+    position: relative;
+    margin-bottom: 32px;
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -29px;
+    top: 6px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--brand-success);
+    border: 2px solid white;
+    box-shadow: 0 0 0 2px var(--brand-accent);
+  }
+  .timeline-time {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--brand-success);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .timeline-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+  .timeline-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  /* Lists */
+  ul, ol { padding-left: 20px; margin: 12px 0; }
+  li {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+  li strong { color: var(--text-primary); }
+
+  /* Divider */
+  hr {
+    border: none;
+    height: 1px;
+    background: var(--border);
+    margin: 40px 0;
+  }
+
+  /* Footer */
+  .footer {
+    background: var(--brand-deep);
+    color: rgba(255,255,255,0.7);
+    padding: 32px 80px;
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footer strong { color: white; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════ COVER ═══════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-label">FloQast Product & Design</div>
+  <h1>Data Defender: AI-Assisted Prototype Development</h1>
+  <p class="cover-subtitle">
+    How we used Claude Code, Figma MCP, and Design Bar research to build a fully functional anomaly detection prototype in a single session — and what we learned about the process along the way.
+  </p>
+  <div class="cover-meta">
+    <div><strong>Author</strong><br>Benjamin Ellis, Product Design Manager</div>
+    <div><strong>Date</strong><br>April 2, 2026</div>
+    <div><strong>Branch</strong><br>defender/figma-full-pass</div>
+    <div><strong>PR</strong><br>#47 to main</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ EXECUTIVE SUMMARY ═══════════════════════════ -->
+<div class="section page-break">
+  <div class="section-header">
+    <span class="section-number">1</span>
+    <h2>Executive Summary</h2>
+  </div>
+  <div class="accent-bar"></div>
+
+  <p>This report documents a single extended Claude Code session that took the Data Defender prototype from a Bolt-generated scaffold to a fully functional, design-system-compliant product experience. The session used four integrated sources — Figma MCP tools, Design Bar NotebookLM transcripts, FlowUI component library, and Catalyst persona research — to build, validate, and refine the prototype against real design intent.</p>
+
+  <div class="metrics-strip">
+    <div class="metric-card"><div class="metric-value">38</div><div class="metric-label">Files Changed</div></div>
+    <div class="metric-card"><div class="metric-value">5,442</div><div class="metric-label">Lines Added</div></div>
+    <div class="metric-card"><div class="metric-value">52</div><div class="metric-label">Figma Sections Mapped</div></div>
+    <div class="metric-card success"><div class="metric-value">85%</div><div class="metric-label">Workflow Coverage</div></div>
+    <div class="metric-card"><div class="metric-value">10</div><div class="metric-label">Dead Ends Fixed</div></div>
+    <div class="metric-card danger"><div class="metric-value">80+</div><div class="metric-label">Hardcoded Colors Replaced</div></div>
+  </div>
+
+  <div class="callout">
+    <div class="callout-title">Key Insight</div>
+    <p>The most important lesson from this session: treat Figma designs and Design Bar decisions as the source of truth, not the prototype's existing architecture. The Bolt scaffold was a starting point, not a constraint. When we inverted our approach and reshaped the code to match the design intent rather than the other way around, the prototype quality improved dramatically.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ WHAT WE BUILT ══════════════════════════════ -->
+<div class="section section-alt page-break">
+  <div class="section-header">
+    <span class="section-number">2</span>
+    <h2>What We Built</h2>
+  </div>
+  <div class="accent-bar"></div>
+
+  <h3>New Views (from Figma design artifacts)</h3>
+  <ul>
+    <li><strong>MetricCards</strong> — Horizontal card strip with Metrics / Insight Cards tab switcher, trend arrows, clickable status counts that filter the transaction grid</li>
+    <li><strong>Insights Grid</strong> — Full AG Grid table with 10 AI-generated insights across three types (Standard Check, Algorithm, Account Fingerprint)</li>
+    <li><strong>Suggested Rules</strong> — Categorized page with Transaction Analysis Rules and Common Accounting Anomalies sections, anomaly count badges, info banner, Load More</li>
+  </ul>
+
+  <h3>Rule Editing (10 dead-end interactions fixed)</h3>
+  <ul>
+    <li>In-place editing with GroupBuilder for condition logic (AND/OR groups)</li>
+    <li>AI natural language input that generates rule conditions</li>
+    <li>Interactive severity slider, role selectors, avatar-leading dropdowns</li>
+    <li>Save modal with version tracking and period scope selection</li>
+    <li>Version dropdown, old version read-only mode, deactivation workflow</li>
+  </ul>
+
+  <h3>FlowUI Design System Compliance</h3>
+  <ul>
+    <li>~80 hardcoded hex colors replaced with CSS variables across all components</li>
+    <li>AI color standardized from purple to green per Tyler Davis's DS decision</li>
+    <li>FlowUI Input, TextArea, Avatar, Button replacing raw HTML elements</li>
+    <li>Three broken layout modals fixed (Manage Panels, Edit Layout, Save Layout)</li>
+  </ul>
+
+  <div class="figure">
+    <img src="report-images/28-rule-details-cleanup.png" alt="Rule Details view and edit mode after FlowUI cleanup">
+    <div class="figure-caption">Rule Details view mode and edit mode after the FlowUI cleanup pass. The preview tool verified each view while Claude identified visual issues (raw inputs, overlapping elements) and fixed them in real time.</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ HOW IT WORKED ══════════════════════════════ -->
+<div class="section page-break">
+  <div class="section-header">
+    <span class="section-number">3</span>
+    <h2>How It Worked</h2>
+  </div>
+  <div class="accent-bar"></div>
+
+  <p>The session progressed through three distinct phases. Each phase built on discoveries from the previous one, and each required a different combination of tools and sources.</p>
+
+  <h3>Phase 1: Figma Discovery and Workflow Mapping</h3>
+  <p>The session began by pulling design context from Figma. An early discovery reshaped the entire approach: the Figma files contain dedicated workflow pages (032726-Rules with 20 sections, 031626-Transactions with 32 sections) that tell the story of complete user journeys, not just individual component designs.</p>
+
+  <div class="figure">
+    <img src="report-images/01-figma-discovery.png" alt="Claude Code discovering Figma workflow pages">
+    <div class="figure-caption">Claude Code navigating the Figma file structure, discovering the Rules and Transactions workflow pages and querying Design Bar via NotebookLM for context on the specific workflows shown in each page.</div>
+  </div>
+
+  <div class="figure-row">
+    <div class="figure">
+      <img src="report-images/02-rules-workflow-map.png" alt="Rules page workflow map — 20 sections">
+      <div class="figure-caption">The Rules workflow map: 20 sections including Empty State, Rule Builder, Edit Rule, Deactivation, Version Viewing, and Dynamic Assignment — each with prototype status and gap assessment.</div>
+    </div>
+    <div class="figure">
+      <img src="report-images/03-transactions-workflow-map.png" alt="Transactions page workflow map — 32 sections">
+      <div class="figure-caption">The Transactions workflow map: 32 sections covering the full investigation flow from empty state through sign-off, comment threading, and deleted ERP handling.</div>
+    </div>
+  </div>
+
+  <div class="figure">
+    <img src="report-images/04-priority-tiers.png" alt="Prioritized implementation tiers">
+    <div class="figure-caption">The 52 sections were organized into three implementation tiers: Tier 1 (core workflows), Tier 2 (workflow enhancements), and Tier 3 (visual polish). This prioritization drove the session's build order.</div>
+  </div>
+
+  <h3>Phase 2: Architecture Correction and Functional Prototype</h3>
+  <p>This is where the session's most important correction happened. I noticed that we'd been treating the Bolt prototype's architecture as the source of truth and trying to match Figma into it. The Figma designs showed rule editing as an in-place transformation of the Rule Details panel. The Bolt scaffold had implemented it as a completely separate form component. We inverted the approach.</p>
+
+  <div class="callout callout-warning">
+    <div class="callout-title">Architecture Mismatch</div>
+    <p>The Bolt prototype separated "viewing" and "editing" into different components and tabs. Figma treats them as two states of the same panel — view-only fields become editable inputs without navigating away. This mismatch affected 10 interactive elements that looked functional but did nothing when clicked.</p>
+  </div>
+
+  <div class="figure">
+    <img src="report-images/27-dead-end-audit.png" alt="10 dead-end interactions found in edit mode">
+    <div class="figure-caption">The automated audit revealed 10 interactive elements in edit mode that did absolutely nothing when clicked — dropdowns, buttons, sliders, and inputs that were rendered as visual elements only. The Rule Creator had all of these working; the edit mode did not.</div>
+  </div>
+
+  <div class="figure">
+    <img src="report-images/08-persona-mapping.png" alt="Catalyst persona mapping to Defender roles">
+    <div class="figure-caption">Cross-project insight: Catalyst personas (Sarah Chen, David Park, Maria Gonzalez) mapped directly to Defender roles (Preparer, Reviewer, Controller). Sarah's "5-second rule" — she should identify her next action within 5 seconds of opening any view — directly informed empty state design and severity indicator placement.</div>
+  </div>
+
+  <div class="figure">
+    <img src="report-images/06-checkpoint-commit.png" alt="Mid-session checkpoint with progress checklist">
+    <div class="figure-caption">Frequent checkpointing: each batch of changes was committed and verified before moving on. The session produced 20+ commits with descriptive messages, creating a reviewable history of decisions.</div>
+  </div>
+
+  <h3>Phase 3: UI Cleanup, New Views, and Verification</h3>
+  <p>The final phase focused on design system compliance and implementing three new Figma designs that arrived mid-session. A 38-item FlowUI audit drove the cleanup work, replacing hardcoded values with CSS variables and raw HTML with FlowUI components.</p>
+
+  <div class="figure-row">
+    <div class="figure">
+      <img src="report-images/29-transaction-rules-verify.png" alt="Transaction details and Rules Grid verification">
+      <div class="figure-caption">Multi-view verification: Transaction Details with 5 anomaly cards, Rules Grid with 19 rules showing version badges and status colors, and Design Bar findings surfaced via NotebookLM — all cross-referenced in one pass.</div>
+    </div>
+    <div class="figure">
+      <img src="report-images/30-design-bar-findings.png" alt="Design Bar findings from NotebookLM">
+      <div class="figure-caption">Six cross-product design system findings from Design Bar: AI color transition, floating windows, sign-off simplification, AI component standardization, AG Grid patterns, and designer constraints. These inform the broader DS roadmap beyond Defender.</div>
+    </div>
+  </div>
+
+  <div class="figure">
+    <img src="report-images/26-test-results-preview.png" alt="Automated test results with preview screenshots">
+    <div class="figure-caption">The window.__test harness enabled programmatic verification: each test called a harness function, took a screenshot, and assessed the result. This caught issues that visual inspection alone would miss (like the checkbox onChange vs onCheckedChange bug).</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ COVERAGE ═══════════════════════════════════ -->
+<div class="section section-alt page-break">
+  <div class="section-header">
+    <span class="section-number">4</span>
+    <h2>Figma Workflow Coverage</h2>
+  </div>
+  <div class="accent-bar"></div>
+
+  <p>By the end of the session, ~85% of Figma workflow sections were functional in the prototype. The coverage maps below show every section from both Figma files with its implementation status.</p>
+
+  <div class="figure">
+    <img src="report-images/14-rules-coverage-green.png" alt="Rules page — all sections covered">
+    <div class="figure-caption">Rules file coverage: 16 of 20 sections fully implemented (green), including Rule Builder, Edit Rule, Deactivation, Version Viewing, and Dynamic Assignment. Remaining gaps are error modals and risk score progress bars.</div>
+  </div>
+
+  <div class="figure">
+    <img src="report-images/15-transactions-coverage-green.png" alt="Transactions page — coverage status">
+    <div class="figure-caption">Transactions file coverage: 20+ sections implemented. The remaining gaps are error/validation modals (11 variants in Figma) and full column inventory for all transaction types.</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ WHAT WE LEARNED ════════════════════════════ -->
+<div class="section page-break">
+  <div class="section-header">
+    <span class="section-number">5</span>
+    <h2>What We Learned</h2>
+  </div>
+  <div class="accent-bar"></div>
+
+  <h3>Figma MCP Tools</h3>
+  <p><code>get_design_context</code> silently returns empty for large component instances (>1500px) with no error message. This was the session's biggest technical blocker. We built a Deep Instance Probe — a Figma Plugin API script that traverses inside opaque instances — and added it to the figma-fq skill as a permanent capability.</p>
+  <p><code>get_screenshot</code> was the most reliable tool across all node sizes. Combined with <code>get_metadata</code> for structural navigation and the new probe for deep data, the three-tool combination (Probe + Token + Screenshot) became the standard pattern for component matching.</p>
+
+  <h3>Design Bar and NotebookLM</h3>
+  <p>The most valuable insights came from querying Design Bar transcripts before implementation, not during debugging. Knowing that Gaurav described insights as "unknown unknowns / process drift" before building the Insights Grid meant we got the conceptual model right on the first pass.</p>
+  <p>The gap: text/chat communications aren't captured. Only Gong audio transcripts are in NotebookLM. Slack threads where decisions happen between sessions are missing entirely.</p>
+
+  <h3>FlowUI Design System</h3>
+  <p>CSS variables with hex fallbacks (<code>var(--flo-sem-color-*, #hex)</code>) are a clean pattern — the prototype works with or without the FlowUI theme loaded. The session surfaced one significant API gotcha: FlowUI Checkbox uses <code>onCheckedChange</code>, not <code>onChange</code>. This cost ~30 minutes of debugging on the Manage Panels feature.</p>
+
+  <h3>Process</h3>
+  <p>The most impactful process insight: audit existing code before building new features. ~40% of the features we identified as "gaps" in the Figma analysis already existed in the prototype. We also learned that <code>window.__test</code> harnesses are essential for verifying flexlayout-react interactions programmatically — without them, each test requires navigating the full UI visually.</p>
+
+  <div class="figure">
+    <img src="report-images/16-deeper-dive-request.png" alt="Benjamin requesting deeper analysis before continuing">
+    <div class="figure-caption">Mid-session course correction: Benjamin asked Claude to pause implementation and produce a comprehensive status report with gap analysis before continuing. This check prevented building features that already existed and surfaced the architecture mismatch early enough to fix it.</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ APPENDIX A ═════════════════════════════════ -->
+<div class="section section-alt page-break">
+  <div class="section-header">
+    <span class="section-number">A</span>
+    <h2>Appendix A: Figma MCP Tool Assessment</h2>
+  </div>
+  <div class="accent-bar"></div>
+
+  <table>
+    <thead>
+      <tr><th>Tool</th><th>Reliability</th><th>Best Use</th><th>Limitation</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>get_screenshot</strong></td><td><span class="tag tag-success">High</span></td><td>Visual reference for any node</td><td>Can't extract structured data</td></tr>
+      <tr><td><strong>get_design_context</strong></td><td><span class="tag tag-warning">Medium</span></td><td>Code generation for small-medium nodes</td><td>Silently empty for nodes >~1500px</td></tr>
+      <tr><td><strong>get_metadata</strong></td><td><span class="tag tag-success">High</span></td><td>Structural navigation, node discovery</td><td>Can't see inside component instances</td></tr>
+      <tr><td><strong>use_figma (Plugin API)</strong></td><td><span class="tag tag-success">High</span></td><td>Deep traversal, variable extraction</td><td>Requires editable file</td></tr>
+      <tr><td><strong>search_design_system</strong></td><td><span class="tag tag-warning">Medium</span></td><td>Finding component matches</td><td>Underutilized in this session</td></tr>
+      <tr><td><strong>get_variable_defs</strong></td><td><span class="tag tag-success">High</span></td><td>Design token extraction</td><td>No issues observed</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Recommendations</h3>
+  <ol>
+    <li><strong>Auto-detect large node failures</strong> — if get_design_context returns fewer than 5 elements for a node with area >1500x1500, automatically trigger Deep Instance Probe</li>
+    <li><strong>Log warnings on sparse returns</strong> — warn when get_design_context returns fewer elements than get_metadata shows for the same node</li>
+    <li><strong>Cache probe results per session</strong> — avoid redundant Plugin API calls for already-probed nodes</li>
+  </ol>
+</div>
+
+<!-- ═══════════════════════════════════════ APPENDIX B ═════════════════════════════════ -->
+<div class="section page-break">
+  <div class="section-header">
+    <span class="section-number">B</span>
+    <h2>Appendix B: Design Bar and NotebookLM</h2>
+  </div>
+  <div class="accent-bar"></div>
+
+  <h3>Design Principles Derived from Design Bar Sessions</h3>
+  <table>
+    <thead>
+      <tr><th>#</th><th>Principle</th><th>Source</th><th>Impact on Prototype</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>Floating modals over screen-locking modals</td><td>Steve Raeder, Tyler Davis</td><td>Flagged as DS gap; current Modal acceptable for prototype</td></tr>
+      <tr><td>2</td><td>No accordion inception</td><td>Multiple sessions</td><td>Flat sections with clear headers in Rule Details</td></tr>
+      <tr><td>3</td><td>Action buttons in content, not headers</td><td>Design Bar</td><td>Moved Configure Fields from accordion trigger to content</td></tr>
+      <tr><td>4</td><td>Strong visual breadcrumbs</td><td>Design Bar</td><td>Green selected row border, persistent transaction details</td></tr>
+      <tr><td>5</td><td>Binary AI distinction</td><td>Tyler Davis</td><td>Distinct container for Dynamic Assignment (green bg)</td></tr>
+      <tr><td>6</td><td>AI color: purple to green</td><td>Tyler Davis</td><td>All AI sparkle icons and containers updated</td></tr>
+      <tr><td>7</td><td>Consolidated layout actions</td><td>Design Bar</td><td>Views, filters, columns in one dropdown config panel</td></tr>
+    </tbody>
+  </table>
+
+  <h3>NotebookLM Effectiveness</h3>
+  <p>18 queries across the session. Most valuable: pre-implementation conceptual queries ("What are insights in Data Defender?", "What fundamental UX patterns were established?"). Least valuable: broad queries that timed out ("Tell me all about user workflows") — breaking into focused questions worked better.</p>
+
+  <h3>Recommendations</h3>
+  <ol>
+    <li><strong>Capture chat logs</strong> — export Gong chat alongside audio transcript</li>
+    <li><strong>Post-session decision summary</strong> — one-pager capturing what was decided, what needs testing</li>
+    <li><strong>Cross-product findings index</strong> — DS gaps should be tracked centrally, not buried in product sessions</li>
+    <li><strong>Design-to-prototype handoff brief</strong> — key interaction patterns, state transitions, which Design Bar decisions informed the design</li>
+  </ol>
+</div>
+
+<!-- ═══════════════════════════════════════ APPENDIX C ═════════════════════════════════ -->
+<div class="section section-alt page-break">
+  <div class="section-header">
+    <span class="section-number">C</span>
+    <h2>Appendix C: FlowUI Design System</h2>
+  </div>
+  <div class="accent-bar"></div>
+
+  <h3>Compliance Metrics</h3>
+  <div class="metrics-strip">
+    <div class="metric-card"><div class="metric-value">38</div><div class="metric-label">Audit Items Found</div></div>
+    <div class="metric-card success"><div class="metric-value">~80</div><div class="metric-label">Hex Colors Replaced</div></div>
+    <div class="metric-card"><div class="metric-value">16</div><div class="metric-label">FlowUI Components Used</div></div>
+    <div class="metric-card danger"><div class="metric-value">5</div><div class="metric-label">Components Needed (Missing)</div></div>
+  </div>
+
+  <h3>Components Used Successfully</h3>
+  <p>Button, Modal, SideDrawer, Toggle, Checkbox, Avatar, AvatarGroup, Tooltip, Accordion, Input, TextArea, Divider, Toast, CloseButton, DropdownButton, StatusBadge</p>
+
+  <h3>Components Needed but Not Available</h3>
+  <table>
+    <thead>
+      <tr><th>Missing Component</th><th>Current Workaround</th><th>Impact</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Radio</td><td>Raw &lt;input type="radio"&gt; with accent-color</td><td><span class="tag tag-neutral">Low</span></td></tr>
+      <tr><td>Select / Styled Dropdown</td><td>&lt;select&gt; with appearance:none + SVG chevron</td><td><span class="tag tag-warning">Medium</span></td></tr>
+      <tr><td>Condition Builder</td><td>Custom GroupBuilder / ConditionBuilder</td><td><span class="tag tag-info">Reusable</span></td></tr>
+      <tr><td>Severity Slider</td><td>Custom implementation</td><td><span class="tag tag-neutral">Low</span></td></tr>
+      <tr><td>Metric Card</td><td>Custom MetricCards component</td><td><span class="tag tag-neutral">Low</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>API Gotchas Discovered</h3>
+  <div class="callout callout-warning">
+    <div class="callout-title">Checkbox: onCheckedChange vs onChange</div>
+    <p>FlowUI Checkbox uses <code>onCheckedChange</code> as its callback prop. The standard React <code>onChange</code> is silently ignored — the checkbox renders and toggles visually but never fires the callback. This cost ~30 minutes of debugging on the Manage Panels modal. The FieldSettingsPanel component already used the correct prop, but there was no documentation flagging this inconsistency.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ APPENDIX D ═════════════════════════════════ -->
+<div class="section page-break">
+  <div class="section-header">
+    <span class="section-number">D</span>
+    <h2>Appendix D: Process Improvements</h2>
+  </div>
+  <div class="accent-bar"></div>
+
+  <h3>Pre-Session Checklist (proposed)</h3>
+  <ol>
+    <li>Pull ALL screenshots from relevant Figma pages first — don't drill into nodes until you have the full picture</li>
+    <li>Query Design Bar for the product area before writing any code</li>
+    <li>Audit existing prototype code for what already exists (~40% was pre-built in this session)</li>
+    <li>Identify architecture mismatches between Figma's interaction model and the prototype's component structure</li>
+    <li>Build data layer and types first — catches structural issues before JSX work begins</li>
+  </ol>
+
+  <h3>What Worked Well</h3>
+  <ul>
+    <li><strong>Git worktree isolation</strong> — no merge conflicts, clean branch history</li>
+    <li><strong>Frequent commits</strong> — 20+ commits created natural checkpoints</li>
+    <li><strong>Plan mode workflow</strong> — explore, plan, approve, execute caught the architecture mismatch early</li>
+    <li><strong>Multi-source triangulation</strong> — Figma + Design Bar + FlowUI + personas converging on the same feature</li>
+    <li><strong>window.__test harness</strong> — programmatic verification without manual clicking</li>
+    <li><strong>Mid-session status checks</strong> — Benjamin's request to "pause and audit before continuing" was the session's most valuable intervention</li>
+  </ul>
+
+  <h3>What Didn't Work</h3>
+  <ul>
+    <li><strong>Architecture-first thinking</strong> — treating the Bolt scaffold as a constraint instead of a suggestion</li>
+    <li><strong>Broad NotebookLM queries</strong> — timed out; focused questions worked better</li>
+    <li><strong>Screenshot-only verification</strong> — misses state bugs; need richer assertions</li>
+    <li><strong>get_design_context silent failures</strong> — wasted time before discovering the size limitation</li>
+  </ul>
+
+  <h3>Opportunities</h3>
+  <table>
+    <thead>
+      <tr><th>Surface</th><th>Opportunity</th><th>Impact</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>figma-fq skill</td><td>Auto-detect large node failures and trigger Deep Instance Probe</td><td><span class="tag tag-danger">High</span></td></tr>
+      <tr><td>figma-fq skill</td><td>FlowUI component compliance check in diff plans</td><td><span class="tag tag-warning">Medium</span></td></tr>
+      <tr><td>Design Bar</td><td>Capture Gong chat logs alongside audio transcripts</td><td><span class="tag tag-danger">High</span></td></tr>
+      <tr><td>Design Bar</td><td>Post-session decision summary document</td><td><span class="tag tag-warning">Medium</span></td></tr>
+      <tr><td>FlowUI</td><td>Expand MCP to include callback prop names and types</td><td><span class="tag tag-warning">Medium</span></td></tr>
+      <tr><td>FlowUI</td><td>Add non-modal/floating window component</td><td><span class="tag tag-danger">High</span></td></tr>
+      <tr><td>FlowUI</td><td>Shared component gap tracker across teams</td><td><span class="tag tag-warning">Medium</span></td></tr>
+      <tr><td>Process</td><td>Pre-session Figma overview before drilling into nodes</td><td><span class="tag tag-danger">High</span></td></tr>
+      <tr><td>Process</td><td>Richer test assertions in window.__test harness</td><td><span class="tag tag-warning">Medium</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="figure">
+    <img src="report-images/17-full-status-report.png" alt="Complete prototype status report">
+    <div class="figure-caption">The comprehensive status report generated mid-session, showing what was fully implemented, design sources used, and what remains for future sessions. This level of transparency — about both progress and gaps — is what makes the process reproducible.</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ FOOTER ═════════════════════════════════════ -->
+<div class="footer">
+  <div><strong>FloQast</strong> Product & Design</div>
+  <div>Generated from Claude Code session on April 2, 2026 | PR #47 to product-and-design repository</div>
+</div>
+
+</body>
+</html>

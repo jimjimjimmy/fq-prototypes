@@ -1,0 +1,18 @@
+@import "tailwindcss/theme";
+@import "tailwindcss/utilities";
+
+html, body, #root {
+  background: #fff;
+  margin: 0;
+  height: 100%;
+}
+
+#root {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Prototype-only: hide the AG Grid Enterprise no-license watermark so it does
+   not interfere with Figma matching. This is a design prototype, not production. */
+.ag-watermark {
+  display: none !important;
+}

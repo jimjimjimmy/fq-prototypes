@@ -1,0 +1,28 @@
+{
+    "vendor_name": {
+        "required": true,
+        "type": "string",
+        "description": "The name of the vendor"
+    },
+    "statement_date": {
+        "required": true,
+        "type": "string",
+        "description": "The date of the statement"
+    },
+    "statement_amount": {
+        "required": true,
+        "type": "float",
+        "description": "The amount of the statement"
+    },
+    "open_invoices": {
+        "type": "array",
+        "items": {
+            "invoice_number": {"type": "string", "description": "The unique identifier for the invoice.", "required": true},
+            "invoice_date": {"type": "date", "description": "The date on which the invoice was issued.", "required": true},
+            "invoice_due_date": {"type": "date", "description": "The date on which the invoice is due.", "required": true},
+            "original_amount": {"type": "float", "description": "The amount outstanding at the time of issuance;", "required": true},
+            "amount_outstanding": {"type": "float", "description": "The amount due at the time the statement was issued.", "required": true},
+            "aging_bucket": {"type": "string", "description": "The aging bucket of the invoice.", "required": true}
+        }
+    }
+}

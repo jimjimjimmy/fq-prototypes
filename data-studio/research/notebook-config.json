@@ -1,0 +1,54 @@
+{
+  "notebook": {
+    "id": "503f457f-015c-4004-bbad-93d0ef8090fe",
+    "title": "Data Studio User Research Sessions",
+    "url": "https://notebooklm.google.com/notebook/503f457f-015c-4004-bbad-93d0ef8090fe"
+  },
+  "sessions": [
+    {
+      "session_id": "001",
+      "study_folder": "api-setup-may-2026",
+      "session_folder": "session-001-lilith-chrakian",
+      "date": "2026-05-07",
+      "participant": "Lilith Chrakian",
+      "study": "Connector Setup — API Connection Flow",
+      "notebooklm_source_id": "15852e2e-df7b-4fad-9fca-5018f96e19f8"
+    },
+    {
+      "session_id": "002",
+      "study_folder": "api-setup-may-2026",
+      "session_folder": "session-002-victor-estrada",
+      "date": "2026-05-08",
+      "participant": "Victor Estrada",
+      "study": "Connector Setup — API Connection Flow",
+      "notebooklm_source_id": "46b0481f-560c-4856-9f39-2fb430893700"
+    },
+    {
+      "session_id": "003",
+      "study_folder": "api-setup-may-2026",
+      "session_folder": "session-003-kiera-armintrout",
+      "date": "2026-05-08",
+      "participant": "Kiera Armintrout",
+      "study": "Connector Setup — API Connection Flow",
+      "notebooklm_source_id": "3749a0f5-b90e-4bf0-a1ad-422344a96b08"
+    },
+    {
+      "session_id": "004",
+      "study_folder": "cdc-setup-may-2026",
+      "session_folder": "session-004-jake-hickey",
+      "date": "2026-05-15",
+      "participant": "Jake Hickey",
+      "study": "Connector Setup — CDC Connection Flow",
+      "notebooklm_source_id": "96b29d8b-70d4-412d-aada-70a7d5e5acea"
+    },
+    {
+      "session_id": "005",
+      "study_folder": "cdc-setup-may-2026",
+      "session_folder": "session-005-mallory-turrubiartes",
+      "date": "2026-05-15",
+      "participant": "Mallory Turrubiartes",
+      "study": "Connector Setup — CDC Connection Flow",
+      "notebooklm_source_id": "ebc5b705-5021-44a2-b9e1-186e6af3167a"
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:wght@300;400&display=swap');
+@import 'tailwindcss';
+
+:root {
+  --font-display: 'Playfair Display', serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-body: 'Newsreader', serif;
+  --background: #ffffff;
+  --foreground: #1d2433;
+  --border: #e1e6ef;
+  --muted: #f5f6f8;
+  --muted-fg: #6b7280;
+  --brand: #1fac76;
+  --brand-hover: #1c895f;
+  --brand-bg: #ecfff8;
+  --warning: #db7712;
+  --warning-bg: #fff8eb;
+  --danger: #d4183d;
+  --danger-bg: #fff1f4;
+  --ai-purple: #7c3aed;
+  --ai-purple-bg: #f5f0ff;
+}
+
+html, body {
+  font-family: var(--font-body);
+  color: var(--foreground);
+  background: var(--background);
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+.font-mono {
+  font-family: var(--font-mono) !important;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd2e1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #adb2bb;
+}

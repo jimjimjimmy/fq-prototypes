@@ -1,0 +1,33 @@
+{
+  "name": "recs-multicurrency",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@floqastinc/flow-ui_core": "^3.120.5",
+    "@floqastinc/flow-ui_icons": "^0.41.0",
+    "@floqastinc/fq-intl": "^3.8.4",
+    "@floqastinc/fq-intl-react": "^2.0.1",
+    "i18next": "^25.8.18",
+    "prop-types": "^15.8.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-i18next": "^16.5.8",
+    "styled-components": "^6.3.11"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.2.1",
+    "@types/node": "^24.12.0",
+    "@types/react": "^18.3.28",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^6.0.0",
+    "tailwindcss": "^4.2.1",
+    "typescript": "~5.9.3",
+    "vite": "^8.0.0"
+  }
+}

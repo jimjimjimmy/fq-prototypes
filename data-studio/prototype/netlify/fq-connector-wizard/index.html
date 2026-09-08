@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add Connector</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f4f5f7;
+  --surface: #fff;
+  --doc-bg: #faf9f7;
+  --doc-text: #2a2926;
+  --doc-dim: #8a8880;
+  --doc-border: rgba(0,0,0,0.08);
+  --border: rgba(0,0,0,0.09);
+  --border-md: rgba(0,0,0,0.14);
+  --text: #1a1917;
+  --text-2: #6b6a64;
+  --text-3: #a8a59c;
+  --accent: #2d7a5f;
+  --accent-light: #e8f5ef;
+  --accent-border: #a8d8c0;
+  --accent-dark: #1f5c46;
+  --amber-bg: #fff8ed;
+  --amber-border: #e8c96a;
+  --amber-text: #7a4f00;
+  --low-bg: #fff4f0;
+  --low-border: #f5b89a;
+  --low-text: #8a3000;
+  --gap-bg: #f5f2ff;
+  --gap-border: #c4b8f5;
+  --gap-text: #3d2f8f;
+  --readonly-bg: #f9f9f8;
+  --hl: rgba(234,179,8,0.18);
+  --mono: 'SF Mono','Cascadia Code','Fira Code',monospace;
+  --radius: 8px;
+}
+html, body { min-height: 100%; background: var(--bg); }
+body {
+  font-family: -apple-system,'Helvetica Neue',Arial,sans-serif;
+  color: var(--text); font-size: 14px; line-height: 1.5;
+  display: flex; flex-direction: column; min-height: 100vh;
+}
+
+/* ── Global topbar ── */
+.global-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px; height: 52px;
+  background: var(--surface); border-bottom: 0.5px solid var(--border-md);
+  flex-shrink: 0; position: sticky; top: 0; z-index: 100;
+}
+.global-bar-title { font-size: 15px; font-weight: 600; }
+.btn-ghost {
+  background: none; border: none; cursor: pointer; font-family: inherit;
+  font-size: 13px; color: var(--text-2); padding: 6px 12px; border-radius: 6px;
+  transition: all .15s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-ghost:hover { background: var(--bg); color: var(--text); }
+.btn-outline {
+  background: none; border: 1px solid var(--border-md); cursor: pointer;
+  font-family: inherit; font-size: 13px; color: var(--text-2);
+  padding: 7px 16px; border-radius: var(--radius);
+  transition: all .15s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-outline:hover { background: var(--bg); color: var(--text); }
+.btn-primary {
+  background: var(--accent); color: #fff; border: none; cursor: pointer;
+  font-family: inherit; font-size: 13px; font-weight: 500;
+  padding: 8px 20px; border-radius: var(--radius);
+  transition: all .15s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-primary:hover { background: var(--accent-dark); }
+.btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+.btn-secondary {
+  background: var(--accent-light); color: var(--accent);
+  border: 1px solid var(--accent-border); cursor: pointer;
+  font-family: inherit; font-size: 13px; font-weight: 500;
+  padding: 8px 20px; border-radius: var(--radius);
+  transition: all .15s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-secondary:hover { background: #d4eddf; }
+
+/* ── Wizard steps ── */
+.wizard-bar {
+  background: var(--surface); border-bottom: 0.5px solid var(--border-md);
+  padding: 20px 0 0; flex-shrink: 0;
+}
+.wizard-steps {
+  display: flex; align-items: flex-start; justify-content: center;
+  gap: 0; max-width: 700px; margin: 0 auto; padding: 0 20px;
+}
+.wizard-step {
+  display: flex; flex-direction: column; align-items: center;
+  flex: 1; position: relative; cursor: default;
+}
+.wizard-step::before {
+  content: ''; position: absolute; top: 13px; left: calc(-50% + 14px);
+  width: calc(100% - 28px); height: 1.5px;
+  background: var(--border-md); z-index: 0;
+}
+.wizard-step:first-child::before { display: none; }
+.step-dot {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 2px solid var(--border-md); background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600; color: var(--text-3);
+  position: relative; z-index: 1; transition: all .2s;
+  flex-shrink: 0;
+}
+.step-label {
+  font-size: 12px; color: var(--text-3); margin-top: 7px;
+  text-align: center; font-weight: 400; white-space: nowrap;
+  padding-bottom: 14px;
+}
+/* States */
+.wizard-step.done .step-dot { background: var(--accent); border-color: var(--accent); color: #fff; }
+.wizard-step.done .step-dot::after { content: '✓'; font-size: 12px; }
+.wizard-step.done .step-dot span { display: none; }
+.wizard-step.done::before { background: var(--accent); }
+.wizard-step.done .step-label { color: var(--accent); }
+.wizard-step.active .step-dot { background: var(--surface); border-color: var(--accent); color: var(--accent); border-width: 2.5px; }
+.wizard-step.active .step-label { color: var(--text); font-weight: 600; }
+.wizard-step.active + .wizard-step::before { background: var(--border-md); }
+
+/* ── Page body ── */
+.page-body {
+  flex: 1; display: flex; align-items: flex-start; justify-content: center;
+  padding: 36px 60px 80px;
+}
+
+/* ── Card ── */
+.card {
+  background: var(--surface); border: 0.5px solid var(--border-md);
+  border-radius: 12px; padding: 32px 36px; width: 100%; max-width: 680px;
+}
+.card-title { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+.card-desc { font-size: 13px; color: var(--text-2); margin-bottom: 28px; line-height: 1.6; }
+
+/* ── Form elements ── */
+.field { margin-bottom: 20px; }
+.field:last-child { margin-bottom: 0; }
+.field-label {
+  font-size: 12px; font-weight: 500; color: var(--text-2);
+  margin-bottom: 6px; display: flex; align-items: center; gap: 5px;
+}
+.field-label .req { color: var(--accent); font-size: 13px; }
+.field-input {
+  width: 100%; padding: 9px 12px; border-radius: var(--radius);
+  border: 1px solid var(--border-md); background: var(--surface);
+  font-size: 13px; color: var(--text); font-family: inherit; outline: none;
+  transition: border-color .15s;
+}
+.field-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(45,122,95,.1); }
+.field-input::placeholder { color: var(--text-3); }
+.field-input.readonly {
+  background: var(--readonly-bg); color: var(--text-2);
+  border-color: var(--border); cursor: default;
+}
+.field-hint { font-size: 11px; color: var(--text-3); margin-top: 5px; }
+.field-hint.extracted {
+  display: flex; align-items: center; gap: 5px; color: var(--accent);
+}
+.field-hint.extracted i { font-size: 12px; }
+
+/* Toggle group */
+.toggle-group { display: flex; gap: 0; border: 1px solid var(--border-md); border-radius: var(--radius); overflow: hidden; width: fit-content; }
+.toggle-btn {
+  padding: 7px 18px; background: none; border: none; cursor: pointer;
+  font-family: inherit; font-size: 13px; color: var(--text-2);
+  transition: all .15s; border-right: 0.5px solid var(--border-md);
+}
+.toggle-btn:last-child { border-right: none; }
+.toggle-btn:hover { background: var(--bg); color: var(--text); }
+.toggle-btn.active { background: var(--accent-light); color: var(--accent); font-weight: 500; }
+
+/* Field row */
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+/* Section divider */
+.section-div {
+  border: none; border-top: 0.5px solid var(--border-md);
+  margin: 24px 0;
+}
+
+/* ── Upload control ── */
+.upload-zone {
+  border: 2px dashed var(--border-md); border-radius: var(--radius);
+  padding: 32px 24px; text-align: center; cursor: pointer;
+  transition: all .15s; background: var(--bg);
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+.upload-zone:hover, .upload-zone.drag { border-color: var(--accent); background: var(--accent-light); }
+.upload-zone.has-file { border-color: var(--accent); background: var(--accent-light); border-style: solid; }
+.upload-icon { font-size: 32px; color: var(--text-3); transition: color .15s; }
+.upload-zone:hover .upload-icon, .upload-zone.has-file .upload-icon { color: var(--accent); }
+.upload-title { font-size: 14px; font-weight: 500; color: var(--text); }
+.upload-sub { font-size: 12px; color: var(--text-3); }
+.upload-types { font-size: 11px; color: var(--text-3); margin-top: 4px; }
+.file-chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 6px 12px; border-radius: 20px;
+  background: var(--surface); border: 0.5px solid var(--accent-border);
+  font-size: 12px; color: var(--accent);
+}
+.file-chip-remove {
+  background: none; border: none; cursor: pointer; color: var(--accent);
+  padding: 0; font-size: 14px; display: flex; align-items: center;
+}
+
+.or-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 20px 0; color: var(--text-3); font-size: 12px;
+}
+.or-divider::before, .or-divider::after {
+  content: ''; flex: 1; height: 0.5px; background: var(--border-md);
+}
+
+.paste-area {
+  width: 100%; min-height: 110px; padding: 10px 12px;
+  border: 1px solid var(--border-md); border-radius: var(--radius);
+  font-size: 12px; font-family: var(--mono); color: var(--text-2);
+  resize: vertical; outline: none; background: var(--surface);
+  transition: border-color .15s;
+}
+.paste-area:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(45,122,95,.1); }
+.paste-area::placeholder { color: var(--text-3); font-family: inherit; }
+
+/* Parsing indicator */
+.parsing-bar {
+  display: none; align-items: center; gap: 10px;
+  padding: 12px 14px; border-radius: var(--radius);
+  background: var(--accent-light); border: 0.5px solid var(--accent-border);
+  font-size: 13px; color: var(--accent); margin-top: 16px;
+}
+.parsing-bar.visible { display: flex; }
+.parse-done {
+  display: none; align-items: center; gap: 10px;
+  padding: 12px 14px; border-radius: var(--radius);
+  background: var(--accent-light); border: 0.5px solid var(--accent-border);
+  font-size: 13px; color: var(--accent); margin-top: 16px;
+}
+.parse-done.visible { display: flex; }
+
+/* ── Step 3: Endpoint selection ── */
+.step3-layout { max-width: 860px; }
+
+.endpoint-toolbar {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.search-wrap {
+  display: flex; align-items: center; gap: 8px; flex: 1; min-width: 200px;
+  padding: 8px 12px; border-radius: var(--radius);
+  border: 1px solid var(--border-md); background: var(--surface);
+  transition: border-color .15s;
+}
+.search-wrap:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(45,122,95,.1); }
+.search-wrap i { font-size: 15px; color: var(--text-3); flex-shrink: 0; }
+.search-wrap input {
+  border: none; outline: none; background: transparent;
+  font-size: 13px; color: var(--text); font-family: inherit; flex: 1;
+}
+.search-wrap input::placeholder { color: var(--text-3); }
+
+.endpoint-count {
+  font-size: 12px; color: var(--text-3); padding: 7px 14px;
+  background: var(--bg); border-radius: var(--radius);
+  border: 0.5px solid var(--border); white-space: nowrap;
+}
+
+/* Recommended banner */
+.rec-banner {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 14px 16px; border-radius: var(--radius);
+  background: var(--accent-light); border: 0.5px solid var(--accent-border);
+  margin-bottom: 20px;
+}
+.rec-banner-title { font-size: 13px; font-weight: 500; color: var(--accent); margin-bottom: 8px; }
+.rec-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.rec-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 20px;
+  background: var(--surface); border: 1px solid var(--accent-border);
+  font-size: 12px; color: var(--accent); cursor: pointer; transition: all .15s;
+}
+.rec-chip:hover { background: var(--accent-light); }
+.rec-chip.selected { background: var(--accent); color: #fff; border-color: var(--accent); }
+.rec-chip i { font-size: 13px; }
+
+/* Endpoint group */
+.ep-group { margin-bottom: 20px; }
+.ep-group-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; background: var(--bg);
+  border: 0.5px solid var(--border-md); border-radius: var(--radius) var(--radius) 0 0;
+  cursor: pointer; user-select: none;
+}
+.ep-group-header:hover { background: #eeede9; }
+.ep-group-title { font-size: 12px; font-weight: 600; color: var(--text); flex: 1; }
+.ep-group-count {
+  font-size: 11px; color: var(--text-3); background: var(--surface);
+  border: 0.5px solid var(--border); border-radius: 10px; padding: 1px 8px;
+}
+.ep-group-selected {
+  font-size: 11px; color: var(--accent); background: var(--accent-light);
+  border: 0.5px solid var(--accent-border); border-radius: 10px; padding: 1px 8px;
+  display: none;
+}
+.ep-group-selected.visible { display: inline-block; }
+.ep-group-chevron { font-size: 14px; color: var(--text-3); transition: transform .2s; }
+.ep-group-chevron.open { transform: rotate(180deg); }
+.ep-group-body {
+  border: 0.5px solid var(--border-md); border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius); overflow: hidden;
+}
+
+.ep-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 14px; border-bottom: 0.5px solid var(--border);
+  cursor: pointer; transition: background .12s; user-select: none;
+}
+.ep-row:last-child { border-bottom: none; }
+.ep-row:hover { background: var(--bg); }
+.ep-row.selected { background: var(--accent-light); }
+.ep-info { flex: 1; }
+.ep-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+.ep-plain { font-size: 12px; color: var(--text-3); line-height: 1.4; }
+.ep-checkbox {
+  width: 16px; height: 16px; border-radius: 4px; flex-shrink: 0;
+  border: 1.5px solid var(--border-md); background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  transition: all .12s;
+}
+.ep-row.selected .ep-checkbox { background: var(--accent); border-color: var(--accent); }
+.ep-row.selected .ep-checkbox::after { content:'✓'; font-size:10px; color:#fff; font-weight:700; }
+.ep-tag {
+  font-size:10px; padding:2px 7px; border-radius:3px; flex-shrink:0;
+  background:var(--bg); border:0.5px solid var(--border); color:var(--text-3);
+}
+
+/* ── Step 4: Split screen ── */
+.step4-layout { max-width:100%; width:100%; padding:0; }
+
+/* Step 4 full-height layout */
+.split-view { display:none; flex-direction:column; height:calc(100vh - 52px - 57px); overflow:hidden; }
+.split-view.active { display:flex; }
+
+/* Equal two-column split */
+.split {
+  display: grid; grid-template-columns: 1fr 1fr;
+  flex: 1; overflow: hidden; min-height: 0;
+}
+
+/* Doc panel */
+.doc-panel {
+  background: var(--doc-bg); overflow-y: auto;
+  padding: 24px 28px; border-right: 1px solid var(--border-md);
+}
+.doc-panel::-webkit-scrollbar { width: 3px; }
+.doc-panel::-webkit-scrollbar-thumb { background: var(--border-md); }
+
+/* Right panel wrapper */
+.right-wrap { display:flex; flex-direction:column; overflow:hidden; }
+.doc-eyebrow { font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--doc-dim); margin-bottom:12px; }
+.doc-title { font-size:15px; font-weight:500; color:var(--doc-text); margin-bottom:2px; }
+.doc-prepared { font-size:11px; color:var(--doc-dim); margin-bottom:18px; }
+.doc-h2 { font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--doc-dim); margin:16px 0 8px; padding-bottom:4px; border-bottom:0.5px solid var(--doc-border); }
+.doc-kv { display:grid; grid-template-columns:130px 1fr; margin-bottom:4px; padding:2px 4px; border-radius:3px; transition:background .18s; }
+.doc-kv-label { font-size:11px; color:var(--doc-dim); }
+.doc-kv-val { font-size:11px; color:var(--doc-text); font-family:var(--mono); }
+.doc-kv.lit { background:var(--hl); }
+.doc-ep { margin-bottom:16px; }
+.doc-ep-row { display:flex; align-items:center; gap:7px; margin-bottom:4px; padding:2px 4px; border-radius:3px; transition:background .18s; }
+.doc-ep-row.lit { background:var(--hl); }
+.doc-ep-path { font-family:var(--mono); font-size:11px; color:var(--doc-text); }
+.doc-ep-desc { font-size:11px; color:var(--doc-dim); margin-bottom:6px; line-height:1.5; padding:2px 4px; border-radius:3px; transition:background .18s; }
+.doc-ep-desc.lit { background:var(--hl); }
+.doc-ptable { width:100%; border-collapse:collapse; }
+.doc-ptable th { font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--doc-dim); padding:4px 7px; text-align:left; border-bottom:0.5px solid var(--doc-border); }
+.doc-ptable td { padding:5px 7px; font-size:11px; color:var(--doc-text); border-bottom:0.5px solid var(--doc-border); font-family:var(--mono); transition:background .18s; }
+.doc-ptable tr:last-child td { border-bottom:none; }
+.doc-ptable td.plain { font-family:inherit; color:var(--doc-dim); }
+.doc-ptable tr.lit td { background:var(--hl) !important; }
+
+/* Right panel */
+.right-wrap { display:flex; flex-direction:column; overflow:hidden; flex:1; }
+.summary-bar {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:8px 20px; background:var(--bg); border-bottom:0.5px solid var(--border-md); flex-shrink:0;
+}
+.sum-stat { font-size:11px; color:var(--text-2); display:flex; align-items:center; gap:5px; margin-right:14px; }
+.sum-stat i { font-size:12px; }
+.sum-stat.ok i { color:var(--accent); }
+.sum-stat.warn i { color:#b89200; }
+.right-panel { overflow-y:auto; padding:0 28px 20px; }
+.right-panel::-webkit-scrollbar { width:3px; }
+.right-panel::-webkit-scrollbar-thumb { background:var(--border-md); }
+.r-section { padding:20px 0 0; border-bottom:0.5px solid var(--border); }
+.r-section:last-child { border-bottom:none; }
+.r-eyebrow {
+  font-size:13px; font-weight:600; letter-spacing:0;
+  color:var(--text); margin-bottom:10px; text-transform:none;
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  padding-bottom:8px; border-bottom:1.5px solid var(--border-md);
+}
+.r-eyebrow::after { display:none; }
+.r-eyebrow i { font-size:14px; color:var(--accent); }
+.r-prose { font-size:13px; line-height:1.9; color:var(--text-2); font-weight:400; }
+.ev {
+  font-size:13px; font-weight:600; color:var(--accent);
+  border-bottom:1px solid var(--accent-border);
+  padding:0 2px; cursor:default; transition:background .15s; border-radius:2px;
+}
+.ev:hover { background:var(--accent-light); border-bottom-color:var(--accent); }
+.ev.lit { background:#fffbe0; border-bottom-color:#c0990a; color:#5a3d00; }
+.ev-verb { font-size:inherit !important; font-weight:600 !important; font-family:inherit !important; padding:0 1px; border-radius:2px; border-bottom-width:1px !important; }
+.ev-input {
+  display:inline-flex; align-items:center; gap:4px;
+  background:transparent; border-bottom:2px solid var(--border-md);
+  padding:1px 4px; vertical-align:baseline; transition:all .15s; cursor:text;
+}
+.ev-input:focus-within { border-bottom-color:var(--accent); box-shadow:0 1px 0 0 var(--accent); }
+.ev-input.filled { border-bottom-color:var(--accent); }
+.ev-input i { font-size:11px; color:var(--text-3); flex-shrink:0; }
+.ev-input.filled i { color:var(--accent); }
+.ev-input input { border:none; outline:none; background:transparent; font-size:13px; font-weight:500; color:var(--text-2); font-family:inherit; width:100px; min-width:60px; }
+.ev-input.filled input { color:var(--text); }
+.ev-input input::placeholder { color:var(--text-3); font-weight:400; font-style:italic; }
+.lookup-chip {
+  display:none; align-items:center; gap:6px;
+  background:var(--accent-light); border:1px solid var(--accent-border);
+  border-radius:6px; padding:3px 10px;
+  font-size:12px; color:var(--accent); vertical-align:middle; cursor:default;
+}
+.lookup-chip.visible { display:inline-flex; }
+.gap-flag { display:inline-flex; align-items:center; gap:5px; font-size:11px; color:var(--gap-text); background:var(--gap-bg); border:0.5px solid var(--gap-border); border-radius:4px; padding:2px 8px; }
+.opt { font-size:11px; color:var(--text-3); font-style:italic; }
+
+/* Lookup panel */
+.lookup-panel {
+  margin-top:12px; padding:14px 16px; border-radius:9px;
+  background:#f0f9ff; border:1px solid #90cdf4; font-size:13px;
+}
+.lookup-panel-label { font-size:10px; text-transform:uppercase; letter-spacing:.09em; color:#4a8ab8; margin-bottom:12px; display:flex; align-items:center; gap:6px; }
+.lookup-step-box { background:var(--surface); border:0.5px solid var(--border-md); border-radius:7px; padding:9px 12px; font-size:13px; color:var(--text); margin-bottom:8px; }
+.lookup-mid { font-size:11px; color:var(--text-3); text-align:center; margin:4px 0; }
+.lookup-preview-box { padding:9px 12px; border-radius:6px; background:rgba(26,90,138,.06); border:0.5px solid #90cdf4; font-size:11px; color:#1a5a8a; line-height:1.7; margin-top:10px; }
+.lookup-preview-label { font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:#4a8ab8; margin-bottom:3px; }
+.btn-confirm-lookup { display:inline-flex; align-items:center; gap:5px; padding:6px 14px; border-radius:6px; background:var(--accent); color:#fff; border:none; font-size:12px; cursor:pointer; font-family:inherit; margin-top:12px; }
+
+/* Action bar step 4 */
+.action-bar {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 20px; background:var(--surface);
+  border-top:0.5px solid var(--border-md); flex-shrink:0;
+}
+.action-bar-left { font-size:12px; color:var(--text-3); display:flex; align-items:center; gap:7px; }
+
+/* Step footer */
+/* ── Step 2 two-pane styles ── */
+.s2-kv {
+  display: grid; grid-template-columns: 110px 1fr;
+  margin-bottom: 7px; padding: 3px 5px; border-radius: 3px;
+  align-items: baseline; transition: background .18s;
+}
+.s2-kv.lit { background: var(--hl); }
+.s2-kv-label { font-size: 11px; color: var(--doc-dim); }
+.s2-kv-val { font-size: 11px; color: var(--doc-text); font-family: var(--mono); }
+.s2-ev {
+  font-size: 13px; font-weight: 600; color: var(--accent);
+  border-bottom: 1px solid var(--accent-border);
+  padding: 0 2px; cursor: default; border-radius: 2px;
+  transition: background .15s;
+}
+.s2-ev:hover { background: var(--accent-light); border-bottom-color: var(--accent); }
+.s2-ev.lit { background: #fffbe0; border-bottom-color: #c0990a; }
+
+.step-footer {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 32px; background: var(--surface);
+  border-top: 0.5px solid var(--border-md); z-index: 50;
+}
+
+/* hidden */
+.view { display: none; }
+.view.active { display: block; }
+/* split-view defined above in step 4 layout section */
+
+/* Retry */
+.retry-wrap {
+  display:inline-flex; align-items:center; gap:7px;
+  border-bottom:1.5px dashed var(--amber-border);
+  padding:2px 8px 2px 6px; border-radius:3px 3px 0 0;
+  background:var(--amber-bg); vertical-align:baseline; cursor:default;
+}
+.retry-placeholder { font-size:14px; font-weight:600; color:var(--amber-text); font-style:italic; }
+.retry-btn {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:2px 9px; border-radius:4px;
+  background:var(--amber-text); color:#fff;
+  border:none; font-size:11px; cursor:pointer;
+  font-family:inherit; font-weight:500; transition:opacity .15s; white-space:nowrap;
+}
+.retry-btn:hover { opacity:.87; }
+.retry-btn.loading { opacity:.55; pointer-events:none; }
+.retry-resolved { display:none; align-items:center; gap:3px; background:var(--accent-light); border-bottom:1.5px solid var(--accent-border); padding:0 5px 0 3px; border-radius:2px 2px 0 0; cursor:pointer; transition:all .15s; vertical-align:baseline; }
+.retry-resolved.visible { display:inline-flex; }
+.retry-resolved:hover { border-bottom-color:var(--accent); background:#d4eddf; }
+.retry-resolved select { border:none; outline:none; background:transparent; font-size:14px; font-weight:600; color:var(--accent); font-family:inherit; cursor:pointer; appearance:none; padding:0; }
+.section-note { margin-top:10px; font-size:12px; color:var(--text-3); line-height:1.6; display:flex; align-items:flex-start; gap:6px; }
+.section-note.warn { color:var(--amber-text); }
+.section-note i { font-size:13px; flex-shrink:0; margin-top:1px; }
+
+/* Test result bar */
+.test-result-bar { display:none; align-items:center; gap:10px; padding:9px 20px; font-size:12px; background:var(--accent-light); border-bottom:0.5px solid var(--accent-border); color:var(--accent); flex-shrink:0; }
+.test-result-bar.visible { display:flex; }
+</style>
+</head>
+<body>
+
+<!-- Global topbar -->
+<div class="global-bar">
+  <button class="btn-ghost" onclick="goBack()"><i class="ti ti-x" style="font-size:14px;"></i> Cancel</button>
+  <div class="global-bar-title">Add Connector</div>
+  <button class="btn-outline" onclick="alert('Saved as draft.')"><i class="ti ti-device-floppy" style="font-size:13px;"></i> Save as Draft</button>
+</div>
+
+<!-- Wizard bar -->
+<div class="wizard-bar">
+  <div class="wizard-steps">
+    <div class="wizard-step" id="ws-1">
+      <div class="step-dot"><span>1</span></div>
+      <div class="step-label">Upload Docs</div>
+    </div>
+    <div class="wizard-step" id="ws-2">
+      <div class="step-dot"><span>2</span></div>
+      <div class="step-label">Authentication</div>
+    </div>
+    <div class="wizard-step" id="ws-3">
+      <div class="step-dot"><span>3</span></div>
+      <div class="step-label">Select Endpoints</div>
+    </div>
+    <div class="wizard-step" id="ws-4">
+      <div class="step-dot"><span>4</span></div>
+      <div class="step-label">Configure</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ STEP 1 ══════════════ -->
+<div class="view active" id="view-1">
+  <div class="page-body">
+    <div class="card">
+      <div class="card-title">Upload API documentation</div>
+      <div class="card-desc">Upload your API documentation file or paste the content below. We'll parse it automatically and pre-fill your connection details.</div>
+
+      <!-- Upload zone -->
+      <div class="upload-zone" id="upload-zone" onclick="triggerUpload()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
+        <i class="ti ti-file-upload upload-icon" id="upload-icon"></i>
+        <div class="upload-title" id="upload-title">Drag and drop your file here</div>
+        <div class="upload-sub" id="upload-sub">or click to browse</div>
+        <div class="upload-types">Supports .docx, .pdf, .txt, .json, .yaml — or paste a URL below</div>
+        <div id="file-chip-wrap" style="display:none;">
+          <div class="file-chip">
+            <i class="ti ti-file-text" style="font-size:13px;"></i>
+            <span id="file-name">api_connection_details.docx</span>
+            <button class="file-chip-remove" onclick="event.stopPropagation();removeFile()"><i class="ti ti-x"></i></button>
+          </div>
+        </div>
+      </div>
+      <input type="file" id="file-input" style="display:none;" accept=".docx,.pdf,.txt,.json,.yaml,.yml" onchange="handleFile(this)">
+
+      <div class="or-divider">or paste a URL or documentation content</div>
+
+      <div class="field">
+        <div class="field-label">API documentation URL or content</div>
+        <textarea class="paste-area" id="paste-area" placeholder="Paste a URL (https://api.example.com/docs) or paste the full text of your API documentation here…" oninput="checkStep1()"></textarea>
+        <div class="field-hint">Works with Swagger/OpenAPI URLs, documentation pages, or plain text copied from an email or PDF.</div>
+      </div>
+
+      <div class="parsing-bar" id="parsing-bar">
+        <i class="ti ti-loader" style="font-size:16px;flex-shrink:0;"></i>
+        <span id="parsing-text">Parsing your documentation…</span>
+      </div>
+      <div class="parse-done" id="parse-done">
+        <i class="ti ti-check" style="font-size:16px;flex-shrink:0;"></i>
+        <span>Documentation parsed — found <strong>4 endpoints</strong> and <strong>auth details</strong>. Review on the next step.</span>
+      </div>
+    </div>
+  </div>
+  <div class="step-footer">
+    <button class="btn-ghost" onclick="goBack()">Cancel</button>
+    <button class="btn-primary" id="next-1" onclick="goToStep(2)">
+      Next <i class="ti ti-arrow-right" style="font-size:13px;"></i>
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════ STEP 2 ══════════════ -->
+<div class="view" id="view-2" style="flex:1;display:none;flex-direction:column;">
+  <!-- Two-pane layout matching step 4 -->
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;overflow:hidden;min-height:0;max-width:1200px;margin:0 auto;width:100%;padding:0 40px;gap:0;align-self:stretch;">
+
+    <!-- LEFT: extracted connection settings -->
+    <div style="overflow-y:auto;padding:32px 32px 32px 0;border-right:1px solid var(--border-md);">
+      <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--doc-dim);margin-bottom:14px;">Connection Settings We Extracted</div>
+      <div style="font-size:16px;font-weight:500;color:var(--doc-text);margin-bottom:2px;">API Connection Details</div>
+      <div style="font-size:11px;color:var(--doc-dim);margin-bottom:22px;">Prepared by IT · Acme ERP</div>
+
+      <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--doc-dim);margin:0 0 8px;padding-bottom:5px;border-bottom:0.5px solid var(--doc-border);">General</div>
+      <div class="s2-kv" data-src2="s2-url"><span class="s2-kv-label">Base URL</span><span class="s2-kv-val">https://api.acme-erp.com</span></div>
+      <div class="s2-kv" data-src2="s2-env"><span class="s2-kv-label">Environment</span><span class="s2-kv-val">Production</span></div>
+      <div class="s2-kv" data-src2="s2-rate"><span class="s2-kv-label">Rate limit</span><span class="s2-kv-val">300 requests / minute</span></div>
+      <div class="s2-kv" data-src2="s2-version"><span class="s2-kv-label">API version</span><span class="s2-kv-val">v1</span></div>
+
+      <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--doc-dim);margin:18px 0 8px;padding-bottom:5px;border-bottom:0.5px solid var(--doc-border);">Authentication</div>
+      <div class="s2-kv" data-src2="s2-auth"><span class="s2-kv-label">Auth type</span><span class="s2-kv-val">API Key</span></div>
+      <div class="s2-kv" data-src2="s2-delivery"><span class="s2-kv-label">Delivery method</span><span class="s2-kv-val">Header</span></div>
+      <div class="s2-kv" data-src2="s2-header"><span class="s2-kv-label">Header name</span><span class="s2-kv-val">X-API-Key</span></div>
+      <div class="s2-kv" data-src2="s2-key" style="align-items:flex-start;">
+        <span class="s2-kv-label">API key</span>
+        <div>
+          <div style="font-size:11px;font-family:var(--mono);color:var(--doc-text);">sk-prod-4f8a21c0…bc56d81</div>
+          <div style="font-size:10px;color:var(--amber-text);margin-top:3px;display:flex;align-items:center;gap:3px;"><i class="ti ti-alert-triangle" style="font-size:11px;"></i> Confirm this hasn't been rotated</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: narrative + input fields -->
+    <div style="overflow-y:auto;padding:32px 0 100px 32px;">
+      <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin-bottom:20px;padding-bottom:8px;border-bottom:1.5px solid var(--border-md);">What We'll Configure</div>
+
+      <!-- Connection name -->
+      <div style="margin-bottom:28px;">
+        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;">Give this connection a name</div>
+        <div style="font-size:13px;color:var(--text-2);margin-bottom:10px;line-height:1.6;">So you can find it easily in your workspace later.</div>
+        <div class="field">
+          <div class="field-label"><span class="req">*</span> Connection name</div>
+          <input type="text" class="field-input" placeholder="e.g. Acme ERP — Production" id="conn-name" oninput="checkStep2()">
+        </div>
+      </div>
+
+      <!-- Base URL + env -->
+      <div style="margin-bottom:28px;">
+        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;">Where we're connecting</div>
+        <div style="font-size:13px;color:var(--text-2);line-height:1.7;">
+          This connection will reach <span class="s2-ev" data-src2="s2-url">api.acme-erp.com</span>
+          in the <span class="s2-ev" data-src2="s2-env">Production</span> environment,
+          limited to <span class="s2-ev" data-src2="s2-rate">300 requests per minute</span>.
+        </div>
+      </div>
+
+      <!-- Auth -->
+      <div style="margin-bottom:28px;">
+        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;">How we authenticate</div>
+        <div style="font-size:13px;color:var(--text-2);line-height:1.7;margin-bottom:14px;">
+          Your API uses <span class="s2-ev" data-src2="s2-auth">API Key authentication</span>,
+          sent as a <span class="s2-ev" data-src2="s2-delivery">header</span>
+          named <span class="s2-ev" data-src2="s2-header">X-API-Key</span>.
+        </div>
+        <div class="field">
+          <div class="field-label"><span class="req">*</span> Your API key</div>
+          <input type="password" class="field-input" placeholder="Paste your API key here" id="api-key-val">
+          <div class="field-hint" style="color:var(--amber-text);display:flex;align-items:center;gap:4px;margin-top:5px;">
+            <i class="ti ti-alert-triangle" style="font-size:11px;"></i>
+            A key was found in your documentation — confirm it hasn't been rotated before pasting it here.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="step-footer">
+    <button class="btn-ghost" onclick="goToStep(1)"><i class="ti ti-arrow-left" style="font-size:13px;"></i> Back</button>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <button class="btn-secondary" id="test-conn-btn" onclick="testConnection()"><i class="ti ti-player-play" style="font-size:13px;"></i> Test connection</button>
+      <button class="btn-primary" id="next-2" onclick="goToStep(3)">
+        Next <i class="ti ti-arrow-right" style="font-size:13px;"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ STEP 3 ══════════════ -->
+<div class="view" id="view-3">
+  <div class="page-body" style="padding-bottom:80px;">
+    <div class="card step3-layout" style="max-width:860px;">
+      <div class="card-title">Select endpoints</div>
+      <div class="card-desc">Choose the endpoints you want to include in this connection. We've suggested common defaults based on your documentation.</div>
+
+      <!-- Recommended -->
+      <div class="rec-banner">
+        <i class="ti ti-sparkles" style="font-size:18px;color:var(--accent);flex-shrink:0;margin-top:2px;"></i>
+        <div style="flex:1;">
+          <div class="rec-banner-title">Suggested defaults for accounting connectors</div>
+          <div class="rec-chips" id="rec-chips">
+            <div class="rec-chip selected" onclick="toggleRec(this,'gl-entries')"><i class="ti ti-check"></i> Journal Entries</div>
+            <div class="rec-chip selected" onclick="toggleRec(this,'ap-invoices')"><i class="ti ti-check"></i> Vendor Invoices</div>
+            <div class="rec-chip selected" onclick="toggleRec(this,'expense-reports')"><i class="ti ti-check"></i> Expense Reports</div>
+            <div class="rec-chip" onclick="toggleRec(this,'payment-status')"><i class="ti ti-plus"></i> Payment Status</div>
+            <div class="rec-chip" onclick="toggleRec(this,'vendor-list')"><i class="ti ti-plus"></i> Vendor Directory</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="endpoint-toolbar">
+        <div class="search-wrap">
+          <i class="ti ti-search"></i>
+          <input type="text" placeholder="Filter endpoints…" oninput="filterEndpoints(this.value)" id="ep-search">
+        </div>
+        <div class="endpoint-count" id="ep-count">4 of 12 data types selected</div>
+      </div>
+
+      <!-- Groups -->
+      <div id="ep-groups">
+
+        <!-- General Ledger -->
+        <div class="ep-group" data-group="General Ledger">
+          <div class="ep-group-header" onclick="toggleGroup(this)">
+            <i class="ti ti-report-analytics" style="font-size:15px;color:var(--text-3);"></i>
+            <span class="ep-group-title">General Ledger</span>
+            <span class="ep-group-count">3 data types</span>
+            <span class="ep-group-selected visible" id="grp-sel-gl">1 selected</span>
+            <i class="ti ti-chevron-down ep-group-chevron open"></i>
+          </div>
+          <div class="ep-group-body">
+            <div class="ep-row selected" onclick="toggleEp(this)" data-id="gl-entries" data-name="Journal Entries">
+              <div class="ep-checkbox"></div>
+              <div class="ep-info">
+                <div class="ep-name">Journal Entries</div>
+                <div class="ep-plain">Posted debits and credits within a date range</div>
+              </div>
+              <span class="ep-tag">Recommended</span>
+            </div>
+            <div class="ep-row" onclick="toggleEp(this)" data-id="gl-accounts" data-name="Chart of Accounts">
+              <div class="ep-checkbox"></div>
+              <div class="ep-info">
+                <div class="ep-name">Chart of Accounts</div>
+                <div class="ep-plain">All GL account codes and their descriptions</div>
+              </div>
+            </div>
+            <div class="ep-row" onclick="toggleEp(this)" data-id="gl-periods" data-name="Fiscal Periods">
+              <div class="ep-checkbox"></div>
+              <div class="ep-info">
+                <div class="ep-name">Fiscal Periods</div>
+                <div class="ep-plain">Available accounting periods for this instance</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Accounts Payable -->
+        <div class="ep-group" data-group="Accounts Payable">
+          <div class="ep-group-header" onclick="toggleGroup(this)">
+            <i class="ti ti-file-invoice" style="font-size:15px;color:var(--text-3);"></i>
+            <span class="ep-group-title">Accounts Payable</span>
+            <span class="ep-group-count">4 data types</span>
+            <span class="ep-group-selected visible" id="grp-sel-ap">1 selected</span>
+            <i class="ti ti-chevron-down ep-group-chevron open"></i>
+          </div>
+          <div class="ep-group-body">
+            <div class="ep-row selected" onclick="toggleEp(this)" data-id="ap-invoices" data-name="Vendor Invoices">
+              <div class="ep-checkbox"></div>
+              <div class="ep-info">
+                <div class="ep-name">Vendor Invoices</div>
+                <div class="ep-plain">Invoices from suppliers, filterable by status</div>
+              </div>
+              <span class="ep-tag">Recommended</span>
+            </div>
+            <div class="ep-row" onclick="toggleEp(this)" data-id="payment-status" data-name="Payment Status Updates">
+              <div class="ep-checkbox"></div>
+              <div class="ep-info">
+                <div class="ep-name">Payment Status Updates</div>
+                <div class="ep-plain">Mark invoices as paid with a date and reference</div>
+              </div>
+            </div>
+            <div class="ep-row" onclick="toggleEp(this)" data-id="vendor-list" data-name="Vendor Directory">
+              <div class="ep-checkbox"></div>
+              <div class="ep-info">
+                <div class="ep-name">Vendor Directory</div>
+                <div class="ep-plain">All vendors registered in the system</div>
+              </div>
+            </div>
+            <div class="ep-row" onclick="toggleEp(this)" data-id="ap-aging" data-name="AP Aging Report">
+              <div class="ep-checkbox"></div>
+              <div class="ep-info">
+                <div class="ep-name">AP Aging Report</div>
+                <div class="ep-plain">Outstanding balances grouped by how overdue they are</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Expenses -->
+        <div class="ep-group" data-group="Expenses">
+          <div class="ep-group-header" onclick="toggleGroup(this)">
+            <i class="ti ti-receipt" style="font-size:15px;color:var(--text-3);"></i>
+            <span class="ep-group-title">Expenses</span>
+            <span class="ep-group-count">2 data types</span>
+            <span class="ep-group-selected visible" id="grp-sel-exp">1 selected</span>
+            <i class="ti ti-chevron-down ep-group-chevron open"></i>
+          </div>
+          <div class="ep-group-body">
+            <div class="ep-row selected" onclick="toggleEp(this)" data-id="expense-reports" data-name="Expense Reports">
+              <div class="ep-checkbox"></div>
+              <div class="ep-info">
+                <div class="ep-name">Expense Reports</div>
+                <div class="ep-plain">Submit employee expense reports against a cost center</div>
+              </div>
+              <span class="ep-tag">Recommended</span>
+            </div>
+            <div class="ep-row" onclick="toggleEp(this)" data-id="expense-categories" data-name="Expense Categories">
+              <div class="ep-checkbox"></div>
+              <div class="ep-info">
+                <div class="ep-name">Expense Categories</div>
+                <div class="ep-plain">Available categories for classifying expenses</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Finance -->
+        <div class="ep-group" data-group="Finance">
+          <div class="ep-group-header" onclick="toggleGroup(this)">
+            <i class="ti ti-chart-bar" style="font-size:15px;color:var(--text-3);"></i>
+            <span class="ep-group-title">Finance &amp; Reporting</span>
+            <span class="ep-group-count">3 data types</span>
+            <span class="ep-group-selected" id="grp-sel-fin"></span>
+            <i class="ti ti-chevron-down ep-group-chevron open"></i>
+          </div>
+          <div class="ep-group-body">
+            <div class="ep-row" onclick="toggleEp(this)" data-id="forecast" data-name="Budget Forecast">
+              <div class="ep-checkbox"></div>
+              <div class="ep-info">
+                <div class="ep-name">Budget Forecast</div>
+                <div class="ep-plain">Projected figures by department and fiscal period</div>
+              </div>
+            </div>
+            <div class="ep-row" onclick="toggleEp(this)" data-id="vendor-payments" data-name="Vendor Payment History">
+              <div class="ep-checkbox"></div>
+              <div class="ep-info">
+                <div class="ep-name">Vendor Payment History</div>
+                <div class="ep-plain">All payments made to a specific vendor over time</div>
+              </div>
+            </div>
+            <div class="ep-row" onclick="toggleEp(this)" data-id="trial-balance" data-name="Trial Balance">
+              <div class="ep-checkbox"></div>
+              <div class="ep-info">
+                <div class="ep-name">Trial Balance</div>
+                <div class="ep-plain">Summary of all GL account balances at a point in time</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <div class="step-footer">
+    <button class="btn-ghost" onclick="goToStep(2)"><i class="ti ti-arrow-left" style="font-size:13px;"></i> Back</button>
+    <button class="btn-primary" onclick="goToStep(4)">
+      Next <i class="ti ti-arrow-right" style="font-size:13px;"></i>
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════ STEP 4 ══════════════ -->
+<div class="split-view" id="view-4">
+
+  <!-- Test result bar — full width -->
+  <div class="test-result-bar" id="test-result-bar">
+    <i class="ti ti-check" style="font-size:14px;flex-shrink:0;"></i>
+    <span>All endpoints tested successfully — real data returned. Ready to activate.</span>
+    <button class="btn-ghost" style="margin-left:auto;font-size:11px;padding:4px 10px;" onclick="this.closest('.test-result-bar').classList.remove('visible')">Dismiss</button>
+  </div>
+
+  <!-- Constrained split — gutters + max-width -->
+  <div style="flex:1;overflow:hidden;min-height:0;display:flex;justify-content:center;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;width:100%;max-width:1200px;margin:0;padding:0 40px;overflow:hidden;gap:0;min-height:0;flex:1;">
+
+      <!-- LEFT: endpoint data extracted -->
+      <div id="doc-panel" style="overflow-y:auto;padding:28px 28px 28px 0;border-right:1px solid var(--border-md);">
+        <div class="doc-eyebrow">Endpoint Data We Extracted</div>
+
+        <div class="doc-h2">1. Journal Entries</div>
+        <div class="doc-ep">
+          <div class="doc-ep-row" data-src="ep-gl"><span class="mpill get-p">GET</span><span class="doc-ep-path">/v1/gl/entries</span></div>
+          <div class="doc-ep-desc" data-src="ep-gl-desc">Retrieve posted journal entries within a date range for a specified ledger.</div>
+          <table class="doc-ptable">
+            <thead><tr><th>Parameter</th><th>Req.</th><th>Type</th><th>Example</th></tr></thead>
+            <tbody>
+              <tr data-src="gl-from"><td>date_from</td><td class="plain">Yes</td><td class="plain">date</td><td>2024-01-01</td></tr>
+              <tr data-src="gl-to"><td>date_to</td><td class="plain">Yes</td><td class="plain">date</td><td>2024-03-31</td></tr>
+              <tr data-src="gl-ledger"><td>ledger_id</td><td class="plain">No</td><td class="plain">string</td><td>GL-001</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="doc-h2">2. Vendor Invoices</div>
+        <div class="doc-ep">
+          <div class="doc-ep-row" data-src="ep-ap"><span class="mpill get-p">GET</span><span class="doc-ep-path">/v1/ap/invoices</span></div>
+          <div class="doc-ep-desc" data-src="ep-ap-desc">Returns vendor invoices. Supports filtering by status and vendor.</div>
+          <table class="doc-ptable">
+            <thead><tr><th>Parameter</th><th>Req.</th><th>Type</th><th>Example</th></tr></thead>
+            <tbody>
+              <tr data-src="ap-status"><td>status</td><td class="plain">Yes</td><td class="plain">string</td><td>open, paid, overdue</td></tr>
+              <tr data-src="ap-currency"><td>currency</td><td class="plain">No</td><td class="plain">string</td><td>USD</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="doc-h2">3. Expense Reports</div>
+        <div class="doc-ep">
+          <div class="doc-ep-row" data-src="ep-exp"><span class="mpill post-p">POST</span><span class="doc-ep-path">/v1/expenses/reports</span></div>
+          <div class="doc-ep-desc" data-src="ep-exp-desc">Submits a new expense report on behalf of an employee. Request body: JSON.</div>
+          <table class="doc-ptable">
+            <thead><tr><th>Parameter</th><th>Req.</th><th>Type</th><th>Example</th></tr></thead>
+            <tbody>
+              <tr data-src="exp-emp"><td>employee_id</td><td class="plain">Yes</td><td class="plain">string</td><td>EMP-0042</td></tr>
+              <tr data-src="exp-cc"><td>cost_center</td><td class="plain">Yes</td><td class="plain">string</td><td>CC-MKTG</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="doc-h2">4. Payment Status</div>
+        <div class="doc-ep">
+          <div class="doc-ep-row" data-src="ep-pay"><span class="mpill patch-p">PATCH</span><span class="doc-ep-path">/v1/ap/invoices/{id}/payment</span></div>
+          <div class="doc-ep-desc" data-src="ep-pay-desc">Updates payment status of an existing AP invoice. JSON body.</div>
+        </div>
+      </div>
+
+      <!-- RIGHT: narrative + configuration -->
+      <div class="right-wrap">
+        <div class="summary-bar">
+          <div style="display:flex;flex-direction:column;gap:6px;width:100%;">
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);">Endpoints We Will Configure</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div style="display:flex;align-items:center;">
+                <span class="sum-stat ok"><i class="ti ti-check"></i> 4 endpoints confirmed</span>
+                <span class="sum-stat ok"><i class="ti ti-lock"></i> Auth configured</span>
+                <span class="sum-stat warn"><i class="ti ti-pencil"></i> <span id="fill-count">1</span> field to configure</span>
+              </div>
+              <span style="font-size:11px;color:var(--text-3);">Hover bold values to see source</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="right-panel">
+
+          <div class="r-section">
+            <div class="r-eyebrow"><i class="ti ti-report-analytics"></i> Journal Entries</div>
+            <div class="r-prose">
+              <span class="ev ev-verb" data-src="ep-gl">Pull</span>
+              <span class="ev ev-verb" data-src="ep-gl-desc">posted</span>
+              journal <span class="ev ev-verb" data-src="ep-gl">entries</span>.
+              The date range is set each time your data syncs.
+              Optionally restrict to a specific ledger — leave blank for all.
+            </div>
+            <div style="margin-top:12px;">
+              <div style="font-size:12px;color:var(--text-2);margin-bottom:6px;">Limit to ledger <span class="opt">— optional, permanent</span></div>
+              <span class="ev-input" id="wi-gl-ledger"><i class="ti ti-filter"></i><input id="gl-ledger" type="text" placeholder="e.g. GL-001" data-src="gl-ledger" autocomplete="off"></span>
+            </div>
+          </div>
+
+          <div class="r-section">
+            <div class="r-eyebrow"><i class="ti ti-file-invoice"></i> Vendor Invoices</div>
+            <div class="r-prose">
+              <span class="ev ev-verb" data-src="ep-ap">Return</span> vendor
+              <span class="ev ev-verb" data-src="ep-ap">invoices</span>
+              with status <span class="ev" data-src="ap-status">open</span>,
+              in <span class="ev" data-src="ap-currency">USD</span>.
+            </div>
+          </div>
+
+          <div class="r-section">
+            <div class="r-eyebrow">
+              <i class="ti ti-receipt"></i> Expense Reports
+              <span class="gap-flag"><i class="ti ti-link-off" style="font-size:11px;"></i> Needs configuration</span>
+            </div>
+            <div class="r-prose">
+              <span class="ev ev-verb" data-src="ep-exp">Submit</span> expense reports for employee
+              <span id="emp-field-wrap">
+                <span class="ev-input" id="wi-exp-emp"><i class="ti ti-user"></i><input id="exp-emp" type="text" placeholder="e.g. EMP-0042" data-src="exp-emp" autocomplete="off"></span>
+                <span class="lookup-chip" id="emp-lookup-chip"><i class="ti ti-arrows-exchange"></i> Lookup configured</span>
+                <button id="lookup-trigger" onclick="toggleLookupPanel()" style="display:inline-flex;align-items:center;gap:4px;margin-left:6px;padding:2px 9px;border-radius:4px;background:var(--gap-bg);color:var(--gap-text);border:0.5px solid var(--gap-border);font-size:11px;cursor:pointer;font-family:inherit;vertical-align:middle;">
+                  <i class="ti ti-settings" style="font-size:11px;"></i> Set up
+                </button>
+              </span>
+              charged to cost center <span class="ev" data-src="exp-cc">CC-MKTG</span>.
+              Fiscal period automatically uses the current quarter each time your data syncs.
+            </div>
+
+            <!-- Lookup panel — hidden by default -->
+            <div class="lookup-panel" id="lookup-panel" style="display:none;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                <div class="lookup-panel-label" style="margin-bottom:0;"><i class="ti ti-arrows-exchange" style="font-size:12px;"></i> We need to find each employee's ID</div>
+                <button onclick="toggleLookupPanel()" style="background:none;border:none;cursor:pointer;color:var(--text-3);padding:2px;display:flex;align-items:center;font-size:16px;"><i class="ti ti-x"></i></button>
+              </div>
+              <div style="font-size:13px;color:var(--text-2);line-height:1.7;margin-bottom:14px;">
+                Your data has employee <strong style="color:var(--text);">names</strong> but this system needs employee <strong style="color:var(--text);">IDs</strong>.
+                We can look them up automatically — confirm this looks right.
+              </div>
+              <div class="lookup-step-box">The employee's <strong>name</strong> — e.g. "Sarah Chen"</div>
+              <div class="lookup-mid">↓ look up in your employee directory</div>
+              <div class="lookup-step-box">The employee's <strong>ID</strong> — e.g. "EMP-0042"</div>
+              <div class="lookup-preview-box">
+                <div class="lookup-preview-label">What this means</div>
+                Each time your data syncs, we'll look up each employee by name and retrieve their ID automatically.
+              </div>
+              <div style="display:flex;gap:8px;margin-top:12px;">
+                <button class="btn-confirm-lookup" onclick="confirmLookup()"><i class="ti ti-check" style="font-size:12px;"></i> This looks right</button>
+                <button onclick="toggleLookupPanel()" style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:6px;background:transparent;color:var(--text-3);border:0.5px solid var(--border-md);font-size:12px;cursor:pointer;font-family:inherit;">Cancel</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="r-section" style="border-bottom:none;">
+            <div class="r-eyebrow"><i class="ti ti-credit-card"></i> Payment Status</div>
+            <div class="r-prose">
+              <span class="ev ev-verb" data-src="ep-pay">Mark</span> an invoice as paid.
+              Payment date and reference number come from each individual transaction when your data syncs — nothing to set up here.
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Action bar — full width, pinned -->
+  <div class="action-bar">
+    <div class="action-bar-left">
+      <i class="ti ti-shield-check" style="font-size:14px;color:var(--accent);"></i>
+      <span id="action-label">Configure the fields above, then test and activate</span>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-ghost" onclick="goToStep(3)"><i class="ti ti-arrow-left" style="font-size:12px;"></i> Back</button>
+      <button class="btn-secondary" onclick="runTest()"><i class="ti ti-player-play" style="font-size:12px;"></i> Test endpoints</button>
+      <button class="btn-primary" onclick="checkActivate()"><i class="ti ti-plug" style="font-size:12px;"></i> Activate</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let currentStep = 1;
+let fileUploaded = false;
+let selectedEps = new Set(['gl-entries','ap-invoices','expense-reports']);
+
+// ── Navigation ──
+function goToStep(n) {
+  document.querySelectorAll('.view,.split-view').forEach(v => {
+    v.classList.remove('active');
+    v.style.display = 'none';
+  });
+  const target = document.getElementById(n === 4 ? 'view-4' : 'view-'+n);
+  if (target) {
+    if (n === 4) { target.classList.add('active'); target.style.display = 'flex'; }
+    else if (n === 2) { target.style.display = 'flex'; target.classList.add('active'); }
+    else { target.classList.add('active'); target.style.display = 'block'; }
+  }
+  currentStep = n;
+  updateWizard();
+  window.scrollTo(0,0);
+}
+function goBack() {
+  if (currentStep > 1) goToStep(currentStep - 1);
+  else if (confirm('Cancel and discard this connection?')) alert('Cancelled.');
+}
+function updateWizard() {
+  for (let i = 1; i <= 4; i++) {
+    const ws = document.getElementById('ws-'+i);
+    ws.className = 'wizard-step';
+    if (i < currentStep) ws.classList.add('done');
+    else if (i === currentStep) ws.classList.add('active');
+  }
+}
+
+// ── Step 1 ──
+function triggerUpload() {
+  if (!fileUploaded) document.getElementById('file-input').click();
+}
+function handleFile(input) {
+  if (!input.files.length) return;
+  const file = input.files[0];
+  showFile(file.name);
+}
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file) showFile(file.name);
+}
+function showFile(name) {
+  fileUploaded = true;
+  const zone = document.getElementById('upload-zone');
+  zone.classList.add('has-file');
+  document.getElementById('upload-icon').className = 'ti ti-file-check upload-icon';
+  document.getElementById('upload-title').textContent = 'File ready to parse';
+  document.getElementById('upload-sub').textContent = '';
+  document.getElementById('file-name').textContent = name;
+  document.getElementById('file-chip-wrap').style.display = 'block';
+  startParse();
+}
+function removeFile() {
+  fileUploaded = false;
+  const zone = document.getElementById('upload-zone');
+  zone.classList.remove('has-file');
+  document.getElementById('upload-icon').className = 'ti ti-file-upload upload-icon';
+  document.getElementById('upload-title').textContent = 'Drag and drop your file here';
+  document.getElementById('upload-sub').textContent = 'or click to browse';
+  document.getElementById('file-chip-wrap').style.display = 'none';
+  document.getElementById('parsing-bar').classList.remove('visible');
+  document.getElementById('parse-done').classList.remove('visible');
+  document.getElementById('next-1').disabled = true;
+}
+function startParse() {
+  document.getElementById('parsing-bar').classList.add('visible');
+  document.getElementById('parse-done').classList.remove('visible');
+  const msgs = ['Parsing your documentation…','Extracting endpoints…','Identifying auth details…','Almost done…'];
+  let i = 0;
+  const iv = setInterval(() => {
+    document.getElementById('parsing-text').textContent = msgs[i % msgs.length];
+    i++;
+  }, 700);
+  setTimeout(() => {
+    clearInterval(iv);
+    document.getElementById('parsing-bar').classList.remove('visible');
+    document.getElementById('parse-done').classList.add('visible');
+    document.getElementById('next-1').disabled = false;
+  }, 3000);
+}
+function checkStep1() {
+  const hasContent = document.getElementById('paste-area').value.trim().length > 20;
+  if (hasContent && !fileUploaded) {
+    document.getElementById('next-1').disabled = false;
+  }
+}
+
+// ── Step 2 ──
+function checkStep2() { }
+function setEnv(val, btn) {
+  btn.closest('.toggle-group').querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function setDelivery(val, btn) {
+  btn.closest('.toggle-group').querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function testConnection() {
+  const btn = document.getElementById('test-conn-btn');
+  btn.innerHTML = '<i class="ti ti-loader" style="font-size:13px;"></i> Testing…';
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.innerHTML = '<i class="ti ti-check" style="font-size:13px;"></i> Connected';
+    btn.style.background = 'var(--accent-light)';
+    btn.style.color = 'var(--accent)';
+    btn.style.borderColor = 'var(--accent-border)';
+  }, 1800);
+}
+
+// ── Step 3 ──
+function toggleEp(row) {
+  const id = row.dataset.id;
+  row.classList.toggle('selected');
+  if (row.classList.contains('selected')) selectedEps.add(id);
+  else selectedEps.delete(id);
+  updateEpCount();
+  // Sync rec chips
+  document.querySelectorAll('.rec-chip').forEach(chip => {
+    const cid = chip.onclick?.toString().match(/'([^']+)'/)?.[1];
+  });
+}
+function toggleGroup(header) {
+  const body = header.nextElementSibling;
+  const chev = header.querySelector('.ep-group-chevron');
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : '';
+  chev.classList.toggle('open', !open);
+}
+function toggleRec(chip, id) {
+  chip.classList.toggle('selected');
+  const sel = chip.classList.contains('selected');
+  chip.innerHTML = sel ? `<i class="ti ti-check"></i> ${chip.textContent.trim().replace(/^\+\s*/,'').replace(/^✓\s*/,'')}` : `<i class="ti ti-plus"></i> ${chip.textContent.trim().replace(/^\+\s*/,'').replace(/^✓\s*/,'')}`;
+  const row = document.querySelector(`.ep-row[data-id="${id}"]`);
+  if (row) {
+    row.classList.toggle('selected', sel);
+    if (sel) selectedEps.add(id); else selectedEps.delete(id);
+  }
+  updateEpCount();
+}
+function updateEpCount() {
+  document.getElementById('ep-count').textContent = `${selectedEps.size} of 12 data types selected`;
+}
+function filterEndpoints(q) {
+  const ql = q.toLowerCase();
+  document.querySelectorAll('.ep-row').forEach(row => {
+    const text = row.textContent.toLowerCase();
+    row.style.display = !q || text.includes(ql) ? '' : 'none';
+  });
+}
+
+// ── Step 4 ──
+function toggleLookupPanel() {
+  const panel   = document.getElementById('lookup-panel');
+  const trigger = document.getElementById('lookup-trigger');
+  const isOpen  = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+  if (trigger) {
+    trigger.innerHTML = isOpen
+      ? '<i class="ti ti-settings" style="font-size:11px;"></i> Set up'
+      : '<i class="ti ti-x" style="font-size:11px;"></i> Close';
+  }
+}
+function confirmLookup() {
+  document.getElementById('lookup-panel').style.display = 'none';
+  document.getElementById('wi-exp-emp').style.display = 'none';
+  document.getElementById('emp-lookup-chip').classList.add('visible');
+  const trigger = document.getElementById('lookup-trigger');
+  if (trigger) trigger.style.display = 'none';
+  updateFillCount();
+}
+function updateFillCount() {
+  const empDone = document.getElementById('emp-lookup-chip').classList.contains('visible') || document.getElementById('exp-emp')?.value.trim().length > 0;
+  document.getElementById('fill-count').textContent = empDone ? 0 : 1;
+}
+function runTest() {
+  setTimeout(() => {
+    document.getElementById('test-result-bar').classList.add('visible');
+    document.getElementById('action-label').textContent = 'Endpoints tested — ready to activate';
+  }, 1800);
+}
+function checkActivate() {
+  const empDone = document.getElementById('emp-lookup-chip').classList.contains('visible') || document.getElementById('exp-emp')?.value.trim().length > 0;
+  if (!empDone) { alert('Please configure the employee lookup before activating.'); return; }
+  alert('Connection activated! "Acme ERP" is now live in your workspace.');
+}
+
+// ── Step 2 hover highlights ──
+document.querySelectorAll('.s2-ev[data-src2]').forEach(el => {
+  el.addEventListener('mouseenter', () => { hlS2(el.dataset.src2, true);  el.classList.add('lit'); });
+  el.addEventListener('mouseleave', () => { hlS2(el.dataset.src2, false); el.classList.remove('lit'); });
+});
+function hlS2(key, on) {
+  const kv = document.querySelector(`.s2-kv[data-src2="${key}"]`);
+  if (kv) {
+    kv.classList.toggle('lit', on);
+    if (on) {
+      const panel = kv.closest('[style*="overflow-y:auto"]');
+      if (panel) {
+        const off = kv.getBoundingClientRect().top - panel.getBoundingClientRect().top + panel.scrollTop - 60;
+        panel.scrollTo({ top: Math.max(0, off), behavior: 'smooth' });
+      }
+    }
+  }
+}
+
+// ── Step 4 hover highlights ──
+document.querySelectorAll('.ev[data-src], .ev-verb[data-src]').forEach(el => {
+  el.addEventListener('mouseenter', () => { hlDoc(el.dataset.src,true); el.classList.add('lit'); });
+  el.addEventListener('mouseleave', () => { hlDoc(el.dataset.src,false); el.classList.remove('lit'); });
+});
+document.querySelectorAll('input[data-src]').forEach(el => {
+  el.addEventListener('focus', () => hlDoc(el.dataset.src,true));
+  el.addEventListener('blur',  () => hlDoc(el.dataset.src,false));
+});
+function hlDoc(key,on) {
+  [['tr',null],['div.doc-kv',null],['div.doc-ep-row',null],['div.doc-ep-desc',null]].forEach(([sel]) => {
+    const el = document.querySelector(`${sel}[data-src="${key}"]`);
+    if (el) { el.classList.toggle('lit',on); if(on) scrollDoc(el); }
+  });
+}
+function scrollDoc(el) {
+  const p = document.getElementById('doc-panel');
+  if (!p) return;
+  const off = el.getBoundingClientRect().top - p.getBoundingClientRect().top + p.scrollTop - 80;
+  p.scrollTo({top:Math.max(0,off),behavior:'smooth'});
+}
+document.querySelectorAll('.ev-input input').forEach(el => {
+  el.addEventListener('input', () => {
+    el.closest('.ev-input').classList.toggle('filled', el.value.trim().length > 0);
+    updateFillCount();
+  });
+});
+
+// ── Init ──
+updateWizard();
+// Demo: pre-load step 1 as if file already selected
+</script>
+</body>
+</html>

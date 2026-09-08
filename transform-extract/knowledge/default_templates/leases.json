@@ -1,0 +1,65 @@
+{
+    "lease_contract_number": {
+        "type": "string",
+        "description": "The specific reference number assigned to the legal document.",
+        "required": true
+    },
+    "lessor_legal_name": {
+        "type": "string",
+        "description": "The legal entity name of the landlord/owner.",
+        "required": true
+    },
+    "lessee_legal_name": {
+        "type": "string",
+        "description": "The legal entity name of the tenant/user.",
+        "required": true
+    },
+    "commencement_date": {
+        "type": "date",
+        "description": "The date the asset is made available (Look for 'Commencement' or 'Possession').",
+        "required": true
+    },
+    "expiration_date": {
+        "type": "date",
+        "description": "The scheduled end date of the initial term.",
+        "required": true
+    },
+    "renewal_options": {
+        "type": "array",
+        "items": {
+        "option_type": { "type": "string", "description": "e.g., Extension, Purchase, Termination", "required": true},
+        "notice_period_days": { "type": "int", "description": "Days required to notify lessor of intent to renew.", "required": true },
+        "option_term_months": { "type": "int", "description": "Length of the extension period.", "required": true}
+        }
+    },
+    "payment_schedule": {
+        "type": "array",
+        "description": "Step-up or step-down rent schedules found in the Rent table.",
+        "items": {
+        "start_date": { "type": "date", "description": "The date on which you're required to start making payments", "required": true },
+        "end_date": { "type": "date", "description": "The date of last payment", "required": true},
+        "base_rent_amount": { "type": "float", "description": "The base rent amount due each period excluding any additional, non-recurring fees.", "required": true},
+        "currency": { "type": "string", "description": "The currency in which the rent is paid (e.g. 'USD')", "required": true}
+        }
+    },
+    "payment_timing": {
+        "type": "string",
+        "description": "Specifies if rent is due at the 'Start' (Advance) or 'End' (Arrears) of the period.",
+        "required": true
+    },
+    "rent_free_period_months": {
+        "type": "float",
+        "description": "Number of months at the beginning of the lease with $0.00 rent.",
+        "required": false
+    },
+    "tenant_improvement_allowance": {
+        "type": "float",
+        "description": "Cash or credit provided by the lessor for leasehold improvements.",
+        "required": false
+    },
+    "security_deposit": {
+        "type": "float",
+        "description": "Refundable amount paid to the lessor.",
+        "required": false
+    }
+  }

@@ -1,0 +1,31 @@
+{
+    "invoice_number": {
+        "required": true,
+        "type": "string",
+        "description": "The unique identifier for the invoice."
+    },
+    "invoice_date": {
+        "required": true,
+        "type": "string",
+        "description": "The date the invoice was issued."
+    },
+    "invoice_due_date": {
+        "required": true,
+        "type": "string",
+        "description": "The due date of the invoice."
+    },
+    "invoice_amount": {
+        "required": true,
+        "type": "number",
+        "description": "The total amount due per the invoice."
+    },
+    "line_items": {
+        "type": "array",
+        "items": {
+            "description": {"type": "string", "description": "The description of the line item.", "required": true},
+            "quantity": {"type": "int", "description": "The number of units purchased.", "required": true},
+            "unit_of_measure": {"type": "string", "description": "The type of units purchased (e.g. 'Subscriptions', 'Licenses', 'Widgets')", "required": false}, 
+            "unit_price": {"type": "float", "description": "The cost per unit of each line item.", "required": true}
+        }
+    }
+}

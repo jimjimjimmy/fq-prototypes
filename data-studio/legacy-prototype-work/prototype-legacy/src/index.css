@@ -1,0 +1,29 @@
+/*
+ * Import Tailwind v4 without preflight to avoid conflicts with Flow UI
+ * global styles. Do NOT use layer() — Flow UI's Theme.apply() injects
+ * unlayered CSS, and layered styles always lose to unlayered ones.
+ * By keeping Tailwind utilities unlayered, they win by specificity
+ * (class selectors > element selectors) over Flow UI's global rules.
+ */
+@import "tailwindcss/theme";
+@import "tailwindcss/utilities";
+
+/* Base font */
+html, body {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Minimal resets for interactive elements used outside Flow UI */
+button, [role="button"] {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* Native form controls don't inherit font-family by default in most browsers */
+select, input, textarea {
+  font: inherit;
+}

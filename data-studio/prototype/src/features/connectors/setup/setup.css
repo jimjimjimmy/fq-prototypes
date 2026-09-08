@@ -1,0 +1,127 @@
+/*
+ * Connector setup — feature-local CSS variables + animations.
+ *
+ * Carried forward from the standalone netlify connector-setup-prototype's
+ * `index.css`. The picker + wizard components use these tokens via
+ * inline `var(--fq-*)` styles; without them, all borders, brand greens,
+ * shadows, and animations are missing.
+ *
+ * What we ported:
+ *   - The `--fq-*` CSS variable system (colors, radii, shadows)
+ *   - Animation keyframes used by the picker (modal-in, reveal-in,
+ *     flash-amber)
+ *
+ * What we DID NOT port from the original index.css:
+ *   - The `* { margin: 0; padding: 0; box-sizing: border-box }` reset —
+ *     would conflict with v2's existing box-sizing rule + FlowUI's
+ *     reset baseline.
+ *   - `body { font-family: ..., color: ..., background: ... }` —
+ *     would override v2's typography globally.
+ *   - Scrollbar styling — global side-effect we don't want.
+ *
+ * If FlowUI's tokens cover the same colors later, a follow-up branch
+ * could replace `var(--fq-*)` in the inline styles with FlowUI tokens
+ * and delete this file. For now, this is the lightest-touch port that
+ * makes the connector setup look right.
+ *
+ * Variables intentionally declared on :root so they're available to
+ * every node inside the picker + wizard subtree without needing a
+ * wrapper class.
+ */
+
+:root {
+  /* Variable names preserved from the netlify prototype. Values match
+     the lowfi V2 picker palette (FloQast brand greens). */
+  --fq-color-primary: #13362A;
+  --fq-color-primary-dark: #0F2A21;
+  --fq-color-primary-light: #E6F7E9;
+  --fq-color-primary-hover: #1A4636;
+
+  --fq-color-text-primary: #11201A;
+  --fq-color-text-secondary: #4B5854;
+  --fq-color-text-muted: #6B7672;
+  --fq-color-text-inverse: #ffffff;
+
+  --fq-color-bg-page: #F7F8F7;
+  --fq-color-bg-card: #ffffff;
+  --fq-color-bg-hover: #F0F2F0;
+  --fq-color-bg-active: #E6F7E9;
+  --fq-color-bg-muted: #F9FAF9;
+
+  --fq-color-border: #E4E7E5;
+  --fq-color-border-light: #EFF1EF;
+
+  --fq-color-amber: #ff991f;
+  --fq-color-amber-light: #fff7e6;
+  --fq-color-amber-bg: #fffae6;
+
+  --fq-color-green: #13362A;
+  --fq-color-green-light: #E6F7E9;
+
+  --fq-color-gray-50: #FAFBFA;
+  --fq-color-gray-100: #F4F5F4;
+  --fq-color-gray-200: #EBEDEB;
+  --fq-color-gray-300: #DFE2DF;
+  --fq-color-gray-400: #C1C7C2;
+  --fq-color-gray-500: #97A09B;
+  --fq-color-gray-600: #6B7672;
+  --fq-color-gray-700: #505A53;
+  --fq-color-gray-800: #344039;
+  --fq-color-gray-900: #11201A;
+
+  /* Lowfi picker accents — used by V2 picker components only. */
+  --fq-brand: #13362A;
+  --fq-accent: #90E39A;
+  --fq-accent-soft: #E6F7E9;
+  --fq-ok: #2E7D52;
+
+  --fq-radius-sm: 4px;
+  --fq-radius-md: 6px;
+  --fq-radius-lg: 8px;
+  --fq-radius-xl: 12px;
+  --fq-radius-full: 9999px;
+
+  --fq-shadow-xs: 0 1px 2px rgba(17, 32, 26, 0.04);
+  --fq-shadow-sm: 0 1px 3px rgba(17, 32, 26, 0.06), 0 1px 2px rgba(17, 32, 26, 0.04);
+  --fq-shadow-md: 0 4px 12px rgba(17, 32, 26, 0.08), 0 2px 4px rgba(17, 32, 26, 0.04);
+  --fq-shadow-lg: 0 12px 32px rgba(17, 32, 26, 0.12), 0 4px 12px rgba(17, 32, 26, 0.06);
+}
+
+/* Flash animation for field highlighting (Kristin's wizard) */
+@keyframes flash-amber {
+  0% { background-color: var(--fq-color-amber-light); }
+  100% { background-color: transparent; }
+}
+.flash-amber {
+  animation: flash-amber 1.8s ease-out;
+}
+
+/* Modal entrance animation (V2 picker) */
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+.modal-in {
+  animation: modalIn 180ms ease-out;
+}
+
+/* Question reveal animation (V2 picker) */
+@keyframes revealIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.reveal-in {
+  animation: revealIn 160ms ease-out;
+}

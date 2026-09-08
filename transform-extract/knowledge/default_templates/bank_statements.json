@@ -1,0 +1,36 @@
+{
+    "account_number_suffix":{
+        "type": "string", 
+        "description": "The last 4 digits of the bank account.",
+        "required": true 
+    }, 
+    "statement_period_start": {
+        "type": "date", 
+        "description": "The start date of the reporting period." 
+    },
+    "statement_period_end": {
+        "type": "date", 
+        "description": "The end date of the reporting period.",
+        "required": true
+    },
+    "opening_balance": { 
+        "type": "decimal", 
+        "description": "The balance at the very start of the period.",
+        "required": true
+    },
+    "closing_balance": {
+        "type": "decimal", 
+        "description": "The balance at the very end of the period.",
+        "required": true
+    },
+    "transactions": {
+        "type": "array",
+        "items": {
+            "transaction_date": { "type": "date", "description": "The date the transaction cleared the bank.", "required": true },
+            "description": { "type": "string", "description": "The bank memo, payee name, or transaction details.", "required": true },
+            "amount": { "type": "float", "description": "The value of the transaction (Positive for deposits, Negative for withdrawals).", "required": true },
+            "reference_number": { "type": "string", "description": "Check number, wire ID, or transaction sequence number.", "required": true },
+            "transaction_type": { "type": "string", "description": "Classification provided by the bank (e.g., ACH, DEBIT, FEE, INTEREST).", "required": true }
+        }
+    }
+}

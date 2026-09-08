@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Museo Sans — FloQast's licensed brand font, used on FlowUI buttons and
+ * headers. Sourced from the team's licensed webfont files (the same ones
+ * shipped with the recs-multicurrency prototype in /docs). */
+@font-face {
+  font-family: 'Museo Sans';
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/MuseoSans-300.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Museo Sans';
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/MuseoSans-500.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Museo Sans';
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/MuseoSans-700.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Museo Sans';
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/MuseoSans-900.woff2') format('woff2');
+}
+
+:root {
+  --font-display: 'Playfair Display', serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  /* FlowUI's "body" font — Inter. Used everywhere body text, labels, data,
+   * and UI chrome appears, per the FlowUI dual-font system. Default for
+   * html/body. Pair with the .font-body utility class for explicit opt-in. */
+  --font-body: 'Inter', sans-serif;
+  /* FlowUI's "header" font — Museo Sans. Used on buttons and section headers
+   * per the FlowUI dual-font system. Pair with .font-header utility class. */
+  --font-header: 'Museo Sans', sans-serif;
+}

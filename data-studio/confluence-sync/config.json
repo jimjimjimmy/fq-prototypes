@@ -1,0 +1,542 @@
+{
+  "confluence": {
+    "site": "floqast",
+    "site_url": "https://floqast.atlassian.net"
+  },
+  "notebooks": {
+    "data_studio_prds": {
+      "id": "ae917453-c037-4d8b-adb5-cb59deaf5242",
+      "title": "Data Studio PRDs",
+      "url": "https://notebooklm.google.com/notebook/ae917453-c037-4d8b-adb5-cb59deaf5242",
+      "pages": [
+        {
+          "page_id": "4462575617",
+          "title": "Data Studio CDC Connection Setup"
+        },
+        {
+          "page_id": "4491247636",
+          "title": "Source Data File Endpoint Table Lifecycle Management"
+        },
+        {
+          "page_id": "4491214908",
+          "title": "Auth Type Support"
+        },
+        {
+          "page_id": "4491214866",
+          "title": "Pull API Support"
+        },
+        {
+          "page_id": "4447568254",
+          "title": "Endpoint Library"
+        },
+        {
+          "page_id": "4491247622",
+          "title": "Push API Support"
+        },
+        {
+          "page_id": "4491214894",
+          "title": "Endpoint Nesting for Query Params"
+        },
+        {
+          "page_id": "4504322079",
+          "title": "Connection Lifecycle Management"
+        },
+        {
+          "page_id": "4503732346",
+          "title": "Endpoint visibility for lineage definitions"
+        },
+        {
+          "page_id": "4512907314",
+          "title": "Static and Dynamic Params for Endpoint Configuration"
+        },
+        {
+          "page_id": "4449337387",
+          "title": "Data Studio Manual Upload Connector"
+        },
+        {
+          "page_id": "4501078174",
+          "title": "Auth and API Key Management"
+        },
+        {
+          "page_id": "4502683696",
+          "title": "Connection setup"
+        },
+        {
+          "page_id": "4502716448",
+          "title": "Auto-configure"
+        },
+        {
+          "page_id": "4484530409",
+          "title": "QBO Transformation Functions"
+        },
+        {
+          "page_id": "4430200905",
+          "title": "QBO Data Ingestion and Transformation"
+        },
+        {
+          "page_id": "4490166414",
+          "title": "QBO Endpoint Handling"
+        },
+        {
+          "page_id": "4465296047",
+          "title": "QBO Standard Mapping"
+        },
+        {
+          "page_id": "4442718323",
+          "title": "QBO Connection"
+        },
+        {
+          "page_id": "4490330192",
+          "title": "Direct API Data Platform 2.0 Data Ingestion"
+        },
+        {
+          "page_id": "4501078152",
+          "title": "Balances endpoint"
+        },
+        {
+          "page_id": "4501078159",
+          "title": "Accounts endpoint"
+        },
+        {
+          "page_id": "4500652124",
+          "title": "FX Rates endpoint"
+        },
+        {
+          "page_id": "4500947063",
+          "title": "Companies endpoint"
+        },
+        {
+          "page_id": "4500652131",
+          "title": "GL Transactions endpoint"
+        },
+        {
+          "page_id": "4500717796",
+          "title": "SL Transactions endpoint"
+        },
+        {
+          "page_id": "4500717803",
+          "title": "High Volume Data Ingestion"
+        },
+        {
+          "page_id": "4501504090",
+          "title": "Entity endpoint"
+        },
+        {
+          "page_id": "4500947056",
+          "title": "FQ APIs"
+        },
+        {
+          "page_id": "4500947136",
+          "title": "SFTP Multi File Handling Global Dimension"
+        },
+        {
+          "page_id": "4535714119",
+          "title": "Data Studio: Multi-Dataset Handling (DRAFT)"
+        },
+        {
+          "page_id": "4564516868",
+          "title": "Retry Logic"
+        },
+        {
+          "page_id": "4564287500",
+          "title": "Connector Status Reference"
+        },
+        {
+          "page_id": "4491214880",
+          "title": "AI Assistant Setup"
+        },
+        {
+          "page_id": "4491214922",
+          "title": "Testing Output Data"
+        },
+        {
+          "page_id": "4491214936",
+          "title": "On Demand Data"
+        },
+        {
+          "page_id": "4476535512",
+          "title": "Entity Mapping"
+        },
+        {
+          "page_id": "4507173269",
+          "title": "Data Studio Platform Features Error Patterns Handling"
+        },
+        {
+          "page_id": "4489740624",
+          "title": "Q2 Data Platform Foundational Elements"
+        },
+        {
+          "page_id": "4504551492",
+          "title": "Data Studio Notifications"
+        },
+        {
+          "page_id": "4504485941",
+          "title": "Data Studio Scheduling"
+        },
+        {
+          "page_id": "4508450824",
+          "title": "Data Studio Platform Features On-demand Refresh"
+        },
+        {
+          "page_id": "4508057789",
+          "title": "Data Studio Platform Features Eventing"
+        },
+        {
+          "page_id": "4503797887",
+          "title": "Data Studio Logging Audit"
+        },
+        {
+          "page_id": "4501012546",
+          "title": "Logging"
+        },
+        {
+          "page_id": "4500947070",
+          "title": "Data Handling"
+        },
+        {
+          "page_id": "4500914307",
+          "title": "Data Studio Dataset Linking"
+        },
+        {
+          "page_id": "4450189505",
+          "title": "Model Creation 1 of 4 Model Creation Source Configuration"
+        },
+        {
+          "page_id": "4513169493",
+          "title": "Data Studio File Naming Pattern Dataset Definition"
+        },
+        {
+          "page_id": "4449632496",
+          "title": "Model Creation Data Preview Tab"
+        },
+        {
+          "page_id": "4443013309",
+          "title": "Model Creation 4 of 4 Versioning Lifecycle"
+        },
+        {
+          "page_id": "4449468593",
+          "title": "Model Creation 3 of 4 Testing Publishing"
+        },
+        {
+          "page_id": "4594892801",
+          "title": "Model Creation 2b of 4: AI-Assisted Mapping Rules"
+        },
+        {
+          "page_id": "4444455089",
+          "title": "Model Creation Overview Index"
+        },
+        {
+          "page_id": "4470800387",
+          "title": "Merging Catalog Lineage Tabs"
+        },
+        {
+          "page_id": "4476731473",
+          "title": "Catalog - Search and Filter"
+        },
+        {
+          "page_id": "4523196435",
+          "title": "Data Studio: Schema Definition \u2014 Dataset Definition (DRAFT)"
+        },
+        {
+          "page_id": "4523163672",
+          "title": "Data Studio: Accounting Config \u2014 Dataset Definition (DRAFT)"
+        },
+        {
+          "page_id": "4522967047",
+          "title": "Data Studio: Entity Configuration \u2014 Dataset Definition (DRAFT)"
+        },
+        {
+          "page_id": "4523229282",
+          "title": "Data Studio: Error Patterns & Handling (DRAFT)"
+        },
+        {
+          "page_id": "4523098246",
+          "title": "Data Studio: Platform Features \u2014 Eventing (DRAFT)"
+        },
+        {
+          "page_id": "4552884252",
+          "title": "Data Studio: Onboarding Guide"
+        },
+        {
+          "page_id": "4577068106",
+          "title": "Sub-PRD 2 \u2014 Entity Management (NetSuite Direct API)"
+        },
+        {
+          "page_id": "4580245790",
+          "title": "Sub-PRD 3 \u2014 Auto-Setup & Standard Mapping (NetSuite Direct API)"
+        },
+        {
+          "page_id": "4575821882",
+          "title": "Sub-PRD 4 \u2014 Mapping Configuration (NetSuite Direct API)"
+        },
+        {
+          "page_id": "4581523546",
+          "title": "Sub-PRD 5 \u2014 Scheduling (NetSuite Direct API)"
+        },
+        {
+          "page_id": "4575887400",
+          "title": "Sub-PRD 5 (Detail) \u2014 Scheduling & On-Demand Refresh (NetSuite Direct API)"
+        },
+        {
+          "page_id": "4583850074",
+          "title": "Sub-PRD 6 \u2014 Notifications & Logging (NetSuite Direct API)"
+        },
+        {
+          "page_id": "4584013971",
+          "title": "Sub-PRD 7 \u2014 Additional Endpoint Configuration (NetSuite Direct API)"
+        },
+        {
+          "page_id": "4575461451",
+          "title": "NetSuite Direct API \u2014 Master PRD"
+        },
+        {
+          "page_id": "4593582175",
+          "title": "Intacct Direct API \u2014 Master PRD"
+        },
+        {
+          "page_id": "4606722077",
+          "title": "Sub-PRD 8: Legacy Migration \u2014 NetSuite Direct API"
+        },
+        {
+          "page_id": "4600103051",
+          "title": "Intacct Sub-PRD 2 \u2014 Entity Management"
+        },
+        {
+          "page_id": "4600496148",
+          "title": "Intacct Sub-PRD 3 \u2014 Auto-Setup & Standard Mapping"
+        },
+        {
+          "page_id": "4600791177",
+          "title": "Intacct Sub-PRD 4 \u2014 Mapping Configuration"
+        },
+        {
+          "page_id": "4600529015",
+          "title": "Intacct Sub-PRD 5 \u2014 Scheduling"
+        },
+        {
+          "page_id": "4600824036",
+          "title": "Intacct Sub-PRD 6 \u2014 Notifications & Logging"
+        },
+        {
+          "page_id": "4607279135",
+          "title": "Intacct Sub-PRD 7 \u2014 Additional Endpoint Configuration"
+        },
+        {
+          "page_id": "4606885925",
+          "title": "Intacct Sub-PRD 8 \u2014 Legacy Migration"
+        },
+        {
+          "page_id": "4606590983",
+          "title": "Logging & Error Handling Requirements"
+        },
+        {
+          "page_id": "4604264674",
+          "title": "Source File and Model Edit Lifecycle PRD"
+        },
+        {
+          "page_id": "4601020433",
+          "title": "API Connection Management: Push API, AI Setup & Source Expansion"
+        },
+        {
+          "page_id": "4600561831",
+          "title": "Entity Mapping (v2)"
+        },
+        {
+          "page_id": "4600528949",
+          "title": "Foreign Key Alignment Warning \u2014 PRD"
+        },
+        {
+          "page_id": "4600397974",
+          "title": "Data Studio Customer Onboarding \u2014 Q3 2026 PRD"
+        },
+        {
+          "page_id": "4622778629",
+          "title": "Test Mapping Expressions (Q3 2026)"
+        },
+        {
+          "page_id": "4640407556",
+          "title": "Custom Data Models (Q3 2026)"
+        },
+        {
+          "page_id": "4632739923",
+          "title": "Transform using DP2.0 (Q3 2026)"
+        },
+        {
+          "page_id": "4624515155",
+          "title": "Logging & Audit (Q3 2026)"
+        },
+        {
+          "page_id": "4624613420",
+          "title": "Customer Facing Logging Adjustments (Q3 2026)"
+        },
+        {
+          "page_id": "4619829339",
+          "title": "Entity Mapping (Q3 2026)"
+        },
+        {
+          "page_id": "4633067751",
+          "title": "Data Explorer (Q3 2026)"
+        },
+        {
+          "page_id": "4633362841",
+          "title": "Data Explorer (Q4 2026 Enhancements)"
+        },
+        {
+          "page_id": "4626776226",
+          "title": "Dimensions View (Q3 2026)"
+        },
+        {
+          "page_id": "4626317445",
+          "title": "Usability Enhancement (Q3 2026)"
+        },
+        {
+          "page_id": "4624547926",
+          "title": "Logging, Versioning, Notifications & Warnings (Q3 2026)"
+        },
+        {
+          "page_id": "4625072135",
+          "title": "Notifications (Q3 2026)"
+        },
+        {
+          "page_id": "4624646370",
+          "title": "Versioning & Lifecycle of Models (Q3 2026)"
+        },
+        {
+          "page_id": "4619763787",
+          "title": "AI Field Mapping Editor"
+        },
+        {
+          "page_id": "4619731022",
+          "title": "Unmapped Entity Identification"
+        },
+        {
+          "page_id": "4596039687",
+          "title": "Hierarchical Data Model Support"
+        },
+        {
+          "page_id": "4594303031",
+          "title": "PRD: Entity Scope Grouping"
+        },
+        {
+          "page_id": "4589224242",
+          "title": "PRD: Field Tooltips on Mapping Page"
+        },
+        {
+          "page_id": "4589453417",
+          "title": "PRD: Model Groups"
+        },
+        {
+          "page_id": "4562714769",
+          "title": "Global Dimensions \u2014 Dimensions Tab PRD"
+        },
+        {
+          "page_id": "4643192911",
+          "title": "SAP Integrations \u2014 Master PRD (DRAFT)"
+        },
+        {
+          "page_id": "4591517938",
+          "title": "Master PRD: Data Studio \u2014 JEM Master Data Support"
+        },
+        {
+          "page_id": "4585980069",
+          "title": "PRD: Source Data Management Tab (File-Based Connections)"
+        },
+        {
+          "page_id": "4587520322",
+          "title": "Data Studio: JEM Support Requirements Outline"
+        },
+        {
+          "page_id": "4594073712",
+          "title": "Intacct Sub-PRD 1 \u2014 Connection Management"
+        },
+        {
+          "page_id": "4568547394",
+          "title": "CDC Sub-PRD 1 \u2014 Connection Setup & Configuration"
+        },
+        {
+          "page_id": "4575166527",
+          "title": "Sub-PRD 1 \u2014 Connection Management"
+        },
+        {
+          "page_id": "4577298150",
+          "title": "Bank Transaction Data Model (DRAFT)"
+        },
+        {
+          "page_id": "4576739512",
+          "title": "DP2.0 Models"
+        },
+        {
+          "page_id": "4568875091",
+          "title": "CDC Connector Framework"
+        },
+        {
+          "page_id": "4644307106",
+          "title": "Versioning (Q3 2026)"
+        },
+        {
+          "page_id": "4642865771",
+          "title": "Extend Tables in CDC Connectors (Q3 2026)"
+        },
+        {
+          "page_id": "4651450379",
+          "title": "Transform Integration with Data Platform (Q3 2026)"
+        },
+        {
+          "page_id": "4649451573",
+          "title": "Sample File Upload (Q3 2026)"
+        },
+        {
+          "page_id": "4678844434",
+          "title": "User Access Control - Options and Comparison Concerns"
+        },
+        {
+          "page_id": "4678615160",
+          "title": "Data Access"
+        },
+        {
+          "page_id": "4674978092",
+          "title": "Data Studio: Event Contract (Q3 2026)"
+        },
+        {
+          "page_id": "4663181551",
+          "title": "RBAC Support for DP2.0 APIs (Q3 2026)"
+        },
+        {
+          "page_id": "4653613342",
+          "title": "Accounting Config Attributes in Models (Q3 2026)"
+        },
+        {
+          "page_id": "4665180233",
+          "title": "SAP S/4HANA Private Cloud \u2014 Data Studio Connector Sub-PRD"
+        },
+        {
+          "page_id": "4665049179",
+          "title": "SAP ECC \u2014 Data Studio Connector Sub-PRD"
+        }
+      ]
+    }
+  },
+  "archived_notebooks": [
+    {
+      "id": "4378e386-1efb-4928-9d0a-92d30dcce5c6",
+      "title": "Q2 Data Studio PRDs (Connections & Endpoints)",
+      "url": "https://notebooklm.google.com/notebook/4378e386-1efb-4928-9d0a-92d30dcce5c6",
+      "archived": "2026-05-04",
+      "reason": "Merged into single 'Data Studio PRDs' notebook after NotebookLM Plus 300-source limit confirmed"
+    },
+    {
+      "id": "3192528f-c3db-4567-a095-99caa6c9fe16",
+      "title": "Q2 Data Studio PRDs (Models & Platform Features)",
+      "url": "https://notebooklm.google.com/notebook/3192528f-c3db-4567-a095-99caa6c9fe16",
+      "archived": "2026-05-04",
+      "reason": "Merged into single 'Data Studio PRDs' notebook after NotebookLM Plus 300-source limit confirmed"
+    }
+  ],
+  "ignored_page_ids": [
+    {
+      "page_id": "4537155591",
+      "title": "Data Platform Designs & Mock-ups",
+      "reason": "Design/mockup index page, not a PRD"
+    }
+  ]
+}

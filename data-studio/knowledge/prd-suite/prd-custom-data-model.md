@@ -1,0 +1,234 @@
+# PRD: Custom Data Model
+
+| Field | Value |
+|---|---|
+| **Owner** | Alex Kearns |
+| **Status** | Draft |
+| **Epic / Jira** | TBD |
+| **Last Updated** | 2026-06-12 |
+| **Target Release** | 2026-09-30 |
+| **Dependencies** | Source Datasets, Dimensions |
+| **Confluence** | [Custom Data Models Q3 2026](https://floqast.atlassian.net/wiki/spaces/Data/pages/4640407556/Custom+Data+Models+Q3+2026) |
+
+---
+
+## Objective
+
+Today, Data Studio only supports a fixed set of model types — Accounts, Balances, Transactions, and others that map to FloQast's pre-defined canonical schemas. Admins who need to bring in data that doesn't fit one of those types — billing data, HR data, headcount files, or any customer-specific dataset FloQast hasn't modeled — have no path to do so within Data Studio.
+
+This PRD defines a Custom Data model type that removes that constraint. It introduces three new capabilities:
+
+1. **Custom model creation** — Admins can select "Custom Data" as the model type when creating a new model in the Catalog, using the same source dataset and connection infrastructure as standard models.
+2. **Pass-through field mapping** — Rather than mapping to FloQast's canonical fields, the source schema becomes the output schema. Admins configure which source fields to include and can rename them.
+3. **Dimension linking** — Custom models support the same Define / Link Dimension mechanic as standard models. Dimensions are a defined model type in Data Studio with a specific structure — at minimum a Key field and an optional Value field — and exist separately from Custom Data models. An admin can either define a new Dimension sourced from the custom model's fields, or link the custom model to an existing Dimension.
+4. **Entity attachment** — Custom models can be attached to one or more FloQast entities, the same way standard models can. Entity attachment is optional but required by certain downstream systems.
+
+When this ships, a Data Studio admin can bring any structured dataset into the platform — regardless of whether FloQast has a standard model for that data type — and make it available for reporting and downstream consumption.
+
+---
+
+## Definitions & Terms
+
+See the canonical [Definitions & Terms](https://floqast.atlassian.net/wiki/spaces/Data/pages/4464869409) page.
+
+---
+
+## Why This Is Important
+
+Data Studio was built around the datasets FloQast normalizes today — the canonical financial data that powers Close and Reporting. But finance teams operate with far more data than what falls within FloQast's current data model. Billing data, headcount files, HR system data — these datasets live outside standard connectors and outside FloQast's pre-defined model types, which means they currently have no path into the platform.
+
+This creates two concrete gaps today:
+
+**FloQast Transform** requires Data Studio as its data ingestion layer for Q3. Transform customers bring in HR and other source data that falls outside FloQast's current data model. Without a Custom Data model, those files have nowhere to land in Data Studio, blocking the broader Transform integration effort.
+
+**Reporting and AI-powered products** are increasingly dependent on data outside FloQast's current model. The AI Variance product, for example, needs billing data to surface meaningful variance explanations — but billing data has no standard model type. Every time a new data need like this surfaces, it requires either a net-new standard model (engineering investment) or a workaround. Custom Data gives the platform a generalized answer to that class of problem.
+
+More broadly, this PRD advances Data Studio's role as FloQast's shared data layer — not just for the datasets FloQast models today, but for any structured dataset a customer needs to bring into the platform for reporting, modeling, or downstream product consumption.
+
+---
+
+## Key Benefits
+
+| Beneficiary | Benefit |
+|---|---|
+| **Data Studio admins** | Can bring any structured dataset into the platform without waiting for FloQast to build a standard model for that data type |
+| **Transform customers** | HR and other source data that falls outside FloQast's current data model has a supported ingestion path in Data Studio |
+| **Reporting & AI products** | Data outside FloQast's current model (e.g. billing data for AI Variance) becomes available for analysis and downstream consumption without requiring a net-new standard model |
+| **Sales** | Removes a common objection — customers asking whether they can bring in a specific data type no longer require an engineering commitment; Custom Data is the answer |
+
+---
+
+## Use Cases
+
+1. **Transform HR data ingestion** — A Transform customer needs to bring in HR data that falls outside FloQast's current data model. The admin creates a Custom Data model, connects the source, configures the pass-through field mapping, and publishes. The data is available for Transform to consume.
+
+2. **Billing data for AI Variance** — An admin wants to bring in billing data to enrich AI Variance analysis. They create a Custom Data model, connect the billing source, map the fields, and the data becomes available for reporting.
+
+3. **Custom dataset with dimension linking** — An admin brings in a custom dataset that contains a segment field (e.g. cost center, department). They use the Dimensions tab to either link it to an existing dimension or define a new one, making that segment available in downstream systems.
+
+---
+
+## Assumptions — Established
+
+1. The Custom Data model type uses the same source dataset and connection infrastructure as standard models — no new connector work required.
+2. The field mapping experience is pass-through: source schema columns are the default output schema, listed in the order they appear in the source file. Admins configure which fields to include and can rename them.
+3. Custom models support the same Dimensions tab and Define / Link Dimension mechanic as standard models.
+4. The model creation, versioning, and publishing lifecycle (Draft → Publish, V1-Draft badges, Save/Publish/Cancel/Delete actions) is the same as standard models.
+5. **Custom fields are not supported in Q3.** Admins cannot add net-new fields that don't originate from a source column. This is an engineering-scoped constraint for the initial release.
+6. Custom Data models surface in FDM as a standard table, the same as any other published model.
+7. Entity attachment behavior for Custom Data models is identical to standard models — no new entity mapping infrastructure required.
+
+---
+
+## Open Items to Confirm
+
+| #    | Item                                                                                                                                                                                                                                                    | Owner          | Status |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | ------ |
+| OI-1 | Why are custom fields out of scope for Q3? Rationale needed to understand if this is an architectural constraint or a resourcing call, and how to communicate the limitation to customers.                                                              | Engineering    | Open   |
+| OI-2 | How do Custom Data models surface in downstream products once published — do they appear automatically or does additional configuration exist?                                                                                                          | Engineering    | Open   |
+| OI-3 | *(Future)* What signals or usage patterns should FloQast track to identify which custom data model types are strong candidates for promotion to standard model types? Not blocking Q3, but worth establishing an intentional feedback loop post-launch. | Data Studio PM | Future |
+
+---
+
+## Scope
+
+**In Scope**
+
+- New "Custom Data" model type selectable during model creation in the Catalog
+- Pass-through field mapping: source schema columns are the default output schema; admins can include/exclude and rename fields
+- Source dataset configuration using existing connection and source dataset infrastructure
+- Full model lifecycle: Draft, Save, Publish, versioning (same as standard models)
+- Dimensions tab on custom models: Define New dimension and Link Existing dimension
+- Entity attachment: custom models can be attached to one or more FloQast entities
+
+**Out of Scope**
+
+- Custom fields — admins cannot add net-new fields that don't originate from a source column (Q3 constraint)
+- New connector types or changes to connection infrastructure
+- Aggregation or rollup of source data (e.g. rolling row-level data up to group totals)
+- Promotion of custom model types to standard FloQast model types (future consideration)
+- Any Transform-specific ingestion mechanics beyond what standard source dataset configuration supports
+
+---
+
+## Requirements
+
+### Story 1: Creating a Custom Data model from the Catalog
+
+**As a** Data Studio admin, **I want to** create a new Custom Data model from the Catalog **so that** I can bring in a dataset that falls outside FloQast's standard model types.
+
+**Acceptance Criteria:**
+- AC1: The model creation flow includes "Custom Data" as a selectable model type, visually distinguished from standard model types (e.g. labeled "Custom" as shown in the prototype)
+- AC2: Selecting "Custom Data" and entering a model name creates a new model in Draft status and navigates the admin into the model editor
+- AC3: The model editor for a Custom Data model contains the same left nav tabs as standard models: Overview, Source Datasets, Field Mappings, Data Explorer, Versions, Logs
+- AC4: A Custom Data model in Draft state is visible in the Catalog and identified as a custom model type
+
+---
+
+### Story 2: Configuring pass-through field mapping
+
+**As a** Data Studio admin, **I want to** configure which source fields are included in my custom model's output schema **so that** I can define exactly what data is available downstream.
+
+**Acceptance Criteria:**
+- AC1: When an admin navigates to Field Mappings on a Custom Data model, source fields from the configured source dataset are listed in the order they appear in the source file — no mapping to FloQast canonical fields is required
+- AC2: The admin can rename any source field to a preferred display name without changing the underlying source column reference
+- AC3: The admin can exclude a source field from the output schema
+- AC4: Data type is shown for each field and can be edited by the admin
+- AC5: Admins cannot add custom fields that do not originate from a source column (Q3 constraint)
+- AC6: Changes to field mapping are saved in Draft state and do not affect any published version until the admin explicitly publishes
+
+---
+
+### Story 3: Defining / linking a dimension on a custom model
+
+**As a** Data Studio admin, **I want to** define a new dimension or link an existing dimension to my custom model **so that** custom data can be connected to FloQast's dimensional framework and made available downstream in FDM.
+
+**Acceptance Criteria:**
+- AC1: The Dimensions tab is available on Custom Data models and behaves identically to the Dimensions tab on standard models
+- AC2: From the Dimensions tab, the admin can open the Add / Link Dimension modal via a "Define / Link Dimension" button
+- AC3: In the "Define New" tab, the admin can enter a name and description, select a Key Field from the custom model's output schema, and optionally select a Value Field — saving creates a new dimension linked to this model
+- AC4: In the "Link Existing" tab, the admin can select any existing dimension from the catalog and link it to the custom model
+- AC5: A linked dimension appears in the Dimensions tab showing its Key and Value field configuration
+- AC6: A dimension defined or linked on a custom model behaves the same as one defined on a standard model for downstream FDM consumption
+
+---
+
+### Story 4: Attaching a custom model to FloQast entities
+
+**As a** Data Studio admin, **I want to** attach a Custom Data model to one or more FloQast entities **so that** the model's data is scoped correctly for downstream systems that require entity context.
+
+**Acceptance Criteria:**
+- AC1: The entity attachment experience on a Custom Data model is identical to that of standard models
+- AC2: Entity attachment is optional — a custom model can be published without an entity attached
+- AC3: A custom model can be attached to one or more entities
+- AC4: Entity attachment can be updated after a model is published without requiring a new version to be published
+
+---
+
+### Story 5: Publishing a custom model
+
+**As a** Data Studio admin, **I want to** publish a Custom Data model **so that** the configured dataset is available for downstream consumption.
+
+**Acceptance Criteria:**
+- AC1: An admin can publish a Custom Data model using the same Publish action as standard models
+- AC2: Publishing is only available when the model has at least one source dataset configured and at least one field included in the output schema
+- AC3: On publish, the model status updates from Draft to Published and the version is labeled accordingly (e.g. V1)
+- AC4: A published Custom Data model appears in the Catalog with a Published status
+- AC5: After publishing, subsequent edits create a new draft version without affecting the currently published version until re-published
+
+---
+
+## UX Requirements
+
+**Reference:** [Custom Data Model Mock-up](https://www.figma.com/make/WPfPHQ2h1D6QGeeD65F3Mj/Custom-Data-Model-Mock-up) (Figma Make prototype)
+
+**Model Creation — Overview Step**
+- The Model Type dropdown includes "Custom Data" as an option, visually distinguished with a "Custom" label (as shown in prototype)
+- All other model creation fields (Model Name, etc.) are identical to standard model creation
+
+**Source Datasets Step**
+- No changes from the standard model source dataset configuration experience
+
+**Field Mappings Step**
+- The Field column displays the source field name, editable via an inline rename interaction
+- The Source Fields column shows the originating source column
+- Data Type is shown per field and is editable
+- There is no FloQast canonical field column — the output schema is defined entirely by the source fields configured here
+- "Add Custom Field" is not present in Q3
+
+**Dimensions Step**
+- Identical to the Dimensions tab on standard models
+- "Define / Link Dimension" button opens the Add / Link Dimension modal with two tabs: Define New and Link Existing
+
+**Open UX questions for designer:**
+- How is a Custom Data model visually distinguished from standard models in the Catalog list view?
+- What empty state is shown on Field Mappings before a source dataset has been configured?
+- How does the rename interaction work inline — click to edit, or an explicit edit icon?
+
+---
+
+## Open Questions
+
+| # | Question | Owner |
+|---|---|---|
+| OQ-1 | Why are custom fields out of scope for Q3? Is this an architectural constraint or a resourcing decision? Answer needed to determine how to communicate this limitation to customers. | Engineering |
+
+---
+
+## Gaps
+
+1. **Custom fields** — The ability for admins to add net-new fields not originating from a source column is out of scope for Q3. Flagged as a natural follow-on once the core pass-through model is established.
+
+2. **Promoting custom model types to standard models** — As Custom Data usage grows, FloQast will accumulate signal on which data types customers bring in most frequently. There is no mechanism today to track this or use it to inform the standard model roadmap. A feedback loop and promotion pathway is a meaningful post-Q3 investment.
+
+3. **Custom model discoverability in the Catalog** — No filtering, tagging, or categorization for custom models vs. standard models in the Catalog is defined in this PRD. As the number of custom models grows, findability may become a problem worth solving.
+
+---
+
+## References
+
+| Resource                        | Link                                                                                      |     |
+| ------------------------------- | ----------------------------------------------------------------------------------------- | --- |
+| Custom Data Model prototype     | [Figma Make](https://www.figma.com/make/WPfPHQ2h1D6QGeeD65F3Mj/Custom-Data-Model-Mock-up) |     |
+| Definitions & Terms             | [Confluence](https://floqast.atlassian.net/wiki/spaces/Data/pages/4464869409)             |     |
+| Custom Data Modeling brainstorm | `playspace/data-studio/q3/custom-data-modeling/brainstorm.md`                             |     |

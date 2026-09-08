@@ -1,0 +1,415 @@
+# Data Studio: Platform Features — Eventing (DRAFT)
+
+| Field | Value |
+|---|---|
+| Target release | Q2 2026 (aligned with DATA-2815, Data Sprint 6: Apr 27–May 8) |
+| Epic | IDEA-2488 — Data Studio: Platform Features |
+| Idea Link | https://floqast.atlassian.net/jira/polaris/projects/IDEA/ideas/view/11291632?selectedIssue=IDEA-2488 |
+| Engineering ticket | DATA-2815 — Build Eventing System for Data Platform |
+| Document status | DRAFT |
+| Document owner | Alex Kearns |
+| Designer | Natasha Clark |
+| Tech lead | (assign) |
+| Technical writers | (assign) |
+| QA | (assign) |
+| Depends on | DATA-2815 (event infrastructure); Fivetran connection (Q2); Logging & Audit PRD (trigger_type must include "event") |
+| Related sub-PRDs | [Scheduling](prd-scheduling.md) · [On-demand Refresh](prd-on-demand-refresh.md) · [Logging & Audit](prd-logging-audit.md) · [Error Patterns & Handling](prd-error-patterns.md) |
+
+---
+
+## 🎯 Objective
+
+Today, Data Studio model runs are triggered manually by engineering on the back end. The one exception is SFTP push eventing, which already works but is not yet systematized or extensible to other event sources. There is no mechanism for Data Studio to automatically respond to source system events — and no way for downstream FloQast products to know when fresh data is ready without polling or manual coordination.
+
+This PRD defines two capabilities, built on the event infrastructure Engineering is delivering in DATA-2815:
+
+1. **Inbound event triggers** — Data Studio listens for source system events (SFTP file drop, Fivetran sync completion) and automatically triggers the relevant model run when they occur.
+2. **Outbound event emission** — When a model run completes successfully and data is available, Data Studio publishes a "data available for consumption" event that all downstream FloQast products (Close, Reporting, and others) can consume.
+
+When this ships, source data flowing into Data Studio automatically kicks off model runs — and the moment fresh data is ready, every downstream product knows about it without manual coordination or engineering intervention.
+
+---
+
+## 🔤 Definitions
+
+For a complete glossary of terms used across this series, see the shared [Data Studio: Definitions & Terms](https://floqast.atlassian.net/wiki/spaces/Data/pages/4464869099) page.
+
+---
+
+## 🏅 Why This Is Important
+
+Data Studio sits upstream of the accounting close. Every FloQast product that touches financial data — Close, Reporting, and others — depends on Data Studio delivering fresh, accurate data at the right time. Today, that delivery is manual: engineers trigger runs on the back end, and downstream products have no systematic signal that new data is ready. At low volume this is manageable; at scale it becomes a reliability risk and an operational bottleneck.
+
+Two pressures make this the right time to solve it:
+
+**Source system events already exist — Data Studio just can't respond to them.** When a Fivetran sync completes or a file lands on SFTP, that's a signal that new source data is available. Without eventing, that signal is lost and the run has to be initiated separately, manually. Eventing closes that gap: the source event becomes the trigger.
+
+**Downstream products need a reliable "data is ready" signal.** Close and Reporting cannot efficiently react to fresh data if they have to poll for it or wait for manual coordination. A published "data available for consumption" event lets every downstream product subscribe and react in real time — accelerating the close and reducing the latency between data arrival and product availability.
+
+This is also foundational infrastructure: the event contracts defined here (inbound triggers, outbound emissions) become the standard integration pattern for any future source system or downstream product that joins the Data Studio ecosystem.
+
+---
+
+## 💡 Key Benefits
+
+- **Admins get automated, source-driven runs** — When a Fivetran sync completes or a file lands on SFTP, the relevant model runs automatically. Admins no longer need to manually trigger runs or rely on engineering to do it for them.
+
+- **Downstream products get fresh data faster** — Close, Reporting, and other FloQast products receive a reliable "data is ready" signal the moment a run completes. No polling, no coordination lag, no stale data at the start of a close cycle.
+
+- **Engineering is removed from the critical path** — Today, a run requires manual back-end intervention by a FloQast engineer. Eventing makes that intervention unnecessary for event-driven scenarios, freeing engineering from operational overhead.
+
+- **A standard integration pattern for the platform** — The event contracts defined here — inbound triggers, outbound emissions — become the template for onboarding future source systems and downstream consumers. Adding a new source or a new subscriber doesn't require bespoke plumbing.
+
+- **Reliability and auditability at scale** — Every event-triggered run is logged with `trigger_type: "event"` in the job log (Logging & Audit PRD), giving admins and compliance teams full visibility into what triggered each run and when.
+
+---
+
+## 🗝️ Key Examples
+
+- **Example 1:** A customer's QuickBooks Online data syncs overnight via Fivetran. The moment Fivetran emits a completion event, Data Studio triggers the linked model run automatically. By morning, Close and Reporting have fresh data — no engineer intervened, no admin clicked anything.
+- **Example 2:** A customer's finance team drops a GL export to SFTP at month end. Data Studio detects the file arrival, triggers the model run, and emits a "data available" event when processing is complete. Reporting picks up the signal and refreshes its dataset in real time.
+- **Example 3:** An admin publishes a new model version that changes the field mapping for historical periods. Rehydration runs overnight. Data Studio withholds the "data available" event until every historical period is fully rebuilt — Close never serves partially rehydrated data.
+
+---
+
+## ✅ Use Cases
+
+| # | Persona | Scenario | Expected Outcome |
+|---|---|---|---|
+| 1 | Admin | A Fivetran sync for their QuickBooks connection completes overnight | Data Studio automatically triggers the relevant model run; admin sees `trigger_type: event` in the Logs tab with the source and timestamp |
+| 2 | Admin | A file is pushed to the configured SFTP location | Data Studio detects the file arrival and automatically triggers the model run linked to that SFTP connection |
+| 3 | Close user | A Data Studio model run completes successfully | Close receives the "data available for consumption" event and refreshes its data — no manual sync or coordination needed |
+| 4 | Reporting user | A Data Studio model run completes | Reporting receives the same event and updates its dataset automatically |
+| 5 | Admin | An event-triggered run fails (e.g., connection error mid-run) | The failure is logged and surfaced in the Logs tab per the Error Patterns PRD; the "data available" event is NOT emitted until the run succeeds |
+| 6 | Admin | Two Fivetran sync events arrive in quick succession for the same model | Data Studio deduplicates — only one run is triggered; the second event is discarded or queued, not double-executed |
+
+---
+
+## 🤔 Assumptions
+
+**Established**
+- Engineering is building the underlying event infrastructure (schema, producers, consumers, DLQ, at-least-once delivery semantics) in DATA-2815. This PRD defines the product contract on top of that infrastructure — not the implementation.
+- SFTP push eventing already works in production. This PRD formalizes it as part of the standard eventing framework rather than a one-off.
+- v1 inbound event sources are SFTP file drop and Fivetran sync completion only. Additional source types are future scope.
+- v1 outbound event consumers are all FloQast products (Close, Reporting, and others). Each product team is responsible for implementing their own consumer against the published event contract.
+- **The "data available for consumption" event is emitted only when ALL data for ALL periods is fully processed and available — including any historical backfill from rehydration. A run that has completed processing for current periods but is still backfilling historical data does NOT emit this event until the backfill is also complete.**
+- **During rehydration (new model version published → teardown → historical data rebuilt), no "data available" event is emitted. The event is withheld for the entire duration of the rehydration cycle and only fires once all periods are fully available.**
+- The "data available for consumption" event is never emitted on a failed or partial run.
+- Run deduplication applies to event-triggered runs: if a run for a given model is already in progress when an inbound event arrives, the duplicate trigger is discarded or queued — not double-executed.
+- **The "data available for consumption" event payload must include at minimum: `tlc_id` (Top Level Client), `entity_id`, `model_id`, `model_type_id` (FloQast model type — stable enum, values TBD / Engineering to define), `run_id`, `completed_at`.**
+- Event-triggered runs are logged with `trigger_type: "event"`. The Logging & Audit PRD must be updated to add "event" as a valid `trigger_type` value.
+- Admin visibility into event-triggered runs is through the existing Logs tab (Logging & Audit PRD) — no separate UI surface is needed for eventing in v1.
+- Event wiring (which model is triggered by which source event) is configured by Engineering in v1. There is no admin-facing configuration UI for event triggers in this release.
+
+**Open Items to Confirm**
+- Should the event payload include a `run_type` field ("standard" vs "rehydration") so downstream products can show appropriate messaging during a rehydration cycle?
+- Should Data Studio emit a "data processing" / "data unavailable" event at the *start* of rehydration, so downstream products know to stop serving old data as current? Or is withholding "data available" sufficient?
+- What happens when a Fivetran sync completes but the linked model is in Draft state — ignored, queued, or error?
+- Can one Fivetran connection trigger multiple models? If so, does each get its own independent run?
+- What is the deduplication window for back-to-back events on the same model?
+- Who are the integration owners on the Close and Reporting teams?
+- Does v1 require event replay capability for consumers who miss an event?
+
+---
+
+## 🌟 Milestones
+
+| Milestone | Owner | Target Date |
+|---|---|---|
+| Phase 1: Inbound event triggers (SFTP + Fivetran) | (assign) | Aligned with DATA-2815 — Data Sprint 6 (Apr 27–May 8) |
+| Phase 2: Outbound event emission ("data available") | (assign) | Aligned with DATA-2815 |
+| Phase 3: Rehydration event handling | (assign) | TBD |
+
+---
+
+## 🗺️ Scope
+
+### 🚗 In Scope
+- Inbound event trigger: SFTP file drop → automatically trigger linked model run
+- Inbound event trigger: Fivetran sync completion → automatically trigger linked model run
+- Outbound event emission: "data available for consumption" published when a model run completes and ALL data for ALL periods is fully available (including post-rehydration backfill)
+- Event payload definition: `tlc_id`, `entity_id`, `model_id`, `model_type_id`, `run_id`, `completed_at` (enum values for `model_type_id` TBD — Engineering to define)
+- Run deduplication for event-triggered runs: duplicate inbound events for an in-progress model run are discarded or queued
+- Logging of event-triggered runs with `trigger_type: "event"` (requires Logging & Audit PRD update)
+- Rehydration handling: "data available" event withheld for the full duration of a rehydration cycle; emitted only when all periods are complete
+
+### 🚦 Out of Scope
+- Admin-facing UI for configuring event trigger mappings — Engineering-configured in v1
+- Additional inbound event sources beyond SFTP and Fivetran — future scope
+- Webhook endpoints for external (non-FloQast) systems to subscribe to outbound events — future scope
+- "Data processing" / "data unavailable" event at start of rehydration — open item, pending Engineering input
+- `model_type_id` enum definition — Engineering to define; not specified in this PRD
+- Event replay capability for downstream consumers — open item
+- Each downstream product team's consumer implementation — owned by Close, Reporting, and other product teams
+- Error notification to downstream products when a run fails — covered by Error Patterns & Handling PRD
+
+---
+
+## 📋 Requirements — User Stories
+
+### Quick Reference
+
+| # | Story | Importance |
+|---|---|---|
+| EV1 | SFTP file drop triggers model run | High |
+| EV2 | Fivetran sync completion triggers model run | High |
+| EV3 | Inbound event received for Draft model | High |
+| EV4 | Duplicate inbound event deduplication | High |
+| EV5 | Outbound event emitted on successful run completion | High |
+| EV6 | Outbound event withheld on failed or partial run | High |
+| EV7 | Outbound event withheld during rehydration; emitted on full completion | High |
+| EV8 | Event-triggered runs logged with trigger_type: "event" | High |
+
+---
+
+### EV1 — SFTP File Drop Triggers Model Run
+
+**User Story:** As a Data Studio admin, I want a model run to trigger automatically when a file is dropped to the configured SFTP location so that I don't need to manually initiate the run or involve engineering.
+
+**Importance:** High
+
+**Acceptance Criteria:**
+
+**AC-EV1-01 — Run triggered on file arrival**
+```
+Given a model is linked to an SFTP connection and is in Active state
+When a file is dropped to the configured SFTP location
+Then Data Studio automatically triggers a run for that model
+And the run is logged with trigger_type: "event" and the source identified as the SFTP connection
+```
+
+**AC-EV1-02 — No run triggered for unlinked SFTP drop**
+```
+Given a file is dropped to an SFTP location not linked to any Active model
+When the file arrives
+Then no run is triggered
+And the event is logged internally for diagnostics
+```
+
+---
+
+### EV2 — Fivetran Sync Completion Triggers Model Run
+
+**User Story:** As a Data Studio admin, I want a model run to trigger automatically when a Fivetran sync completes so that my model always processes the freshest available data.
+
+**Importance:** High
+
+**Acceptance Criteria:**
+
+**AC-EV2-01 — Run triggered on Fivetran sync completion**
+```
+Given a model is linked to a Fivetran connection and is in Active state
+When Fivetran emits a sync completion event for that connection
+Then Data Studio automatically triggers a run for that model
+And the run is logged with trigger_type: "event" and the source identified as the Fivetran connection
+```
+
+**AC-EV2-02 — One Fivetran connection can trigger multiple models**
+```
+Given multiple Active models are linked to the same Fivetran connection
+When Fivetran emits a sync completion event
+Then each linked model receives its own independent run trigger
+```
+
+---
+
+### EV3 — Inbound Event Received for Draft Model
+
+**User Story:** As a Data Studio admin, I want inbound events to be handled gracefully when my model is in Draft state so that incomplete configurations are never run automatically.
+
+**Importance:** High
+
+**Acceptance Criteria:**
+
+**AC-EV3-01 — Inbound event ignored for Draft model**
+```
+Given a model is in Draft state
+When an inbound event (SFTP or Fivetran) arrives for that model
+Then no run is triggered
+And the event is logged internally with a note that the model was in Draft state
+```
+
+---
+
+### EV4 — Duplicate Inbound Event Deduplication
+
+**User Story:** As a Data Studio admin, I want duplicate inbound events to be deduplicated so that a model is never double-executed from the same source trigger.
+
+**Importance:** High
+
+**Acceptance Criteria:**
+
+**AC-EV4-01 — Duplicate event discarded while run is in progress**
+```
+Given a model run is already in progress for a given model
+When a second inbound event arrives for the same model
+Then the second trigger is discarded
+And the in-progress run continues unaffected
+```
+
+---
+
+### EV5 — Outbound Event Emitted on Successful Run Completion
+
+**User Story:** As a downstream FloQast product (Close, Reporting), I want to receive a "data available for consumption" event when a Data Studio model run completes so that I can refresh my data automatically without polling.
+
+**Importance:** High
+
+**Acceptance Criteria:**
+
+**AC-EV5-01 — Outbound event emitted with full payload**
+```
+Given a model run completes successfully
+And ALL data for ALL periods is fully available (including any backfill)
+When the run finishes
+Then Data Studio emits a "data available for consumption" event
+And the event payload includes: tlc_id, entity_id, model_id, model_type_id, run_id, completed_at
+```
+
+**AC-EV5-02 — All downstream consumers receive the event**
+```
+Given the "data available for consumption" event is emitted
+When the event is published
+Then all registered downstream consumers (Close, Reporting, and others) receive it
+```
+
+---
+
+### EV6 — Outbound Event Withheld on Failed or Partial Run
+
+**User Story:** As a downstream FloQast product, I want to receive the "data available" event only when data is genuinely ready so that I never refresh against incomplete or failed data.
+
+**Importance:** High
+
+**Acceptance Criteria:**
+
+**AC-EV6-01 — No event emitted on run failure**
+```
+Given a model run fails for any reason
+When the failure is recorded
+Then no "data available for consumption" event is emitted
+```
+
+**AC-EV6-02 — No event emitted on partial run**
+```
+Given a model run completes but some records failed to process
+When the partial completion is recorded
+Then no "data available for consumption" event is emitted
+```
+
+---
+
+### EV7 — Outbound Event Withheld During Rehydration
+
+**User Story:** As a downstream FloQast product, I want to receive the "data available" event only after a full rehydration cycle completes so that I never serve partially rebuilt historical data as current.
+
+**Importance:** High
+
+**Acceptance Criteria:**
+
+**AC-EV7-01 — Event withheld during rehydration**
+```
+Given a new model version is published and a rehydration cycle begins
+When the rehydration is in progress (including historical backfill)
+Then no "data available for consumption" event is emitted for any period
+Until ALL periods — current and historical — are fully rehydrated
+```
+
+**AC-EV7-02 — Event emitted on full rehydration completion**
+```
+Given a rehydration cycle has completed for all periods
+When the last period is confirmed fully available
+Then Data Studio emits the "data available for consumption" event
+And the payload includes the standard fields: tlc_id, entity_id, model_id, model_type_id, run_id, completed_at
+```
+
+---
+
+### EV8 — Event-Triggered Runs Logged
+
+**User Story:** As a Data Studio admin, I can see in the Logs tab that a run was triggered by a source system event so that I have full visibility into what initiated each run.
+
+**Importance:** High
+
+**Acceptance Criteria:**
+
+**AC-EV8-01 — trigger_type logged as "event"**
+```
+Given a model run is triggered by an inbound source system event
+When the run is logged
+Then the job log entry shows trigger_type: "event"
+And the log entry identifies the source connection (SFTP or Fivetran) that triggered the run
+```
+
+---
+
+## ▶️ User Flow Reference
+
+Eventing applies at two points in the Data Studio user flow:
+- **Inbound:** After a source connection is configured and a model is published (Active), inbound events from that connection trigger runs automatically
+- **Outbound:** After a run completes with all data available, the "data available for consumption" event is emitted to downstream FloQast products
+
+(Link to full user flow document — assign)
+
+---
+
+## 🎨 User Interaction & Design
+
+> No new UI surfaces are required for this PRD. Admin visibility into event-triggered runs is through the existing Logs tab (Logging & Audit PRD). To be confirmed with Natasha Clark.
+
+---
+
+## ❓ Open Questions
+
+| # | Question | Owner | Status | Answer |
+|---|---|---|---|---|
+| OQ-1 | Should the "data available" event payload include a `run_type` field ("standard" vs "rehydration") so downstream products can display appropriate messaging? | Alex K / Engineering | Open | |
+| OQ-2 | Should Data Studio emit a "data processing" / "data unavailable" event at the start of a rehydration cycle, so downstream products know to stop serving stale data? Or is withholding "data available" sufficient? | Alex K / Engineering / Close / Reporting | Open | |
+| OQ-3 | What is the deduplication window for back-to-back inbound events on the same model? | Engineering | Open | |
+| OQ-4 | What are the valid enum values for `model_type_id`? | Engineering | Open | |
+| OQ-5 | Does v1 require event replay capability for downstream consumers who miss an event? | Engineering / Close / Reporting | Open | |
+| OQ-6 | Who are the integration owners on the Close and Reporting teams for implementing their event consumers? | Alex K / Steve | Open | |
+| OQ-7 | When a Fivetran sync completes for a connection linked to models across multiple TLCs or entities, does one event cover all or does Data Studio emit one event per TLC/entity? | Engineering | Open | |
+
+---
+
+## 🚫 Gaps
+
+| # | Gap | Impact | Proposed Resolution |
+|---|---|---|---|
+| G1 | No "data processing" event at start of rehydration | Medium — downstream products have no signal to stop serving stale data during a rehydration window | Pending Engineering input on OQ-2; add to backlog if required |
+| G2 | No admin-facing UI for configuring event trigger mappings | Medium — admins cannot self-serve to link a model to an event source | Deferred to future iteration |
+| G3 | `model_type_id` enum values undefined | Medium — downstream consumers cannot filter or route events by model type until schema is finalized | Engineering to define as part of DATA-2815 event schema work |
+| G4 | No event replay capability | Low — a downstream consumer that misses an event has no recovery path | Deferred pending OQ-5; DATA-2815 DLQ handling may partially address |
+| G5 | External (non-FloQast) webhook subscribers not supported | Low — customers or partners cannot subscribe directly to Data Studio events | Deferred; internal FQ product consumption is sufficient for v1 |
+| G6 | Additional inbound event sources beyond SFTP and Fivetran not defined | Low — other source systems cannot trigger runs in v1 | Deferred; SFTP and Fivetran are the Q2 priorities |
+
+---
+
+## 😎 Future Considerations
+
+- **Admin-facing event trigger configuration** — Allow admins to configure which models are triggered by which source events, without engineering involvement.
+- **"Data processing" event at rehydration start** — Signal to downstream products that data is being rebuilt, enabling them to show appropriate in-progress states.
+- **External webhook subscribers** — Allow customers or partners to subscribe to "data available" events via webhook for integration with non-FloQast systems.
+- **Additional inbound event sources** — Extend beyond SFTP and Fivetran to other source system event types as the platform grows.
+- **Event replay** — Allow downstream consumers to request replay of missed events, improving resilience during outages.
+
+---
+
+## 📚 References
+
+### Related Sub-PRDs
+- [Scheduling](prd-scheduling.md)
+- [On-demand Refresh](prd-on-demand-refresh.md)
+- [Error Patterns & Handling](prd-error-patterns.md)
+- [Logging & Audit Requirements](prd-logging-audit.md) *(requires update: add "event" as valid `trigger_type` value)*
+
+### Engineering
+- DATA-2815 — Build Eventing System for Data Platform: https://floqast.atlassian.net/browse/DATA-2815
+- DATA-2813 — Data Platform 2.0 - Platform Features (parent epic)
+
+### JPD
+- IDEA-2488 — Data Studio: Platform Features: https://floqast.atlassian.net/jira/polaris/projects/IDEA/ideas/view/11291632?selectedIssue=IDEA-2488
+
+### Design Resources
+- Figma: Lineage Product — https://www.figma.com/design/pF3J27wNhb7TRnCmmJGrB9/Lineage---Product?node-id=1-2

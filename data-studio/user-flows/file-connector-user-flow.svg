@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="2700" viewBox="0 0 1400 2700" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
+<rect width="1400" height="2700" fill="#F1F5F9"/>
+<defs>
+  <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#64748B"/></marker>
+  <marker id="arr_blue" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#3B82F6"/></marker>
+  <marker id="arr_green" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#16A34A"/></marker>
+  <marker id="arr_amber" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#D97706"/></marker>
+  <marker id="arr_red" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#EF4444"/></marker>
+  <marker id="arr_teal" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#059669"/></marker>
+  <filter id="sh" x="-5%" y="-5%" width="110%" height="115%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.07"/></filter>
+</defs>
+<text x="700" y="44" text-anchor="middle" font-size="21" font-weight="700" fill="#0F172A">File Connector Setup — User Flow</text>
+<text x="700" y="66" text-anchor="middle" font-size="13" fill="#64748B">SFTP and Close Upload transport types · Data Studio</text>
+<rect x="530" y="66" width="340" height="68" rx="10" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2.5"  filter="url(#sh)"/>
+<text x="700" y="88" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1E3A5F">Admin</text>
+<text x="700" y="105" text-anchor="middle" font-size="12.5" font-weight="400" fill="#1E3A5F">Add dataset / configure file connector</text>
+<polygon points="700,178 840,230 700,282 560,230" fill="#FFF7ED" stroke="#FB923C" stroke-width="2" filter="url(#sh)"/>
+<text x="700" y="220" text-anchor="middle" font-size="12.5" font-weight="400" fill="#7C2D12">Select Transport Type</text>
+<line x1="700" y1="134" x2="700" y2="178" stroke="#64748B" stroke-width="1.7" marker-end="url(#arr)"/>
+<path d="M 560 230 L 350 230 L 350 346" stroke="#64748B" stroke-width="1.7" fill="none"  marker-end="url(#arr)"/>
+<rect x="370" y="205" width="40" height="18" rx="4" fill="white" opacity="0.92"/><text x="390" y="219" text-anchor="middle" font-size="11" fill="#475569">SFTP</text>
+<rect x="180" y="346" width="340" height="68" rx="10" fill="#F0FDF4" stroke="#86EFAC" stroke-width="1.8"  filter="url(#sh)"/>
+<text x="350" y="368" text-anchor="middle" font-size="12.5" font-weight="700" fill="#14532D">SFTP Credential Setup</text>
+<text x="350" y="385" text-anchor="middle" font-size="12.5" font-weight="400" fill="#14532D">Enter username & password</text>
+<rect x="180" y="476" width="340" height="68" rx="10" fill="#FEF3C7" stroke="#D97706" stroke-width="2.2"  filter="url(#sh)"/>
+<text x="350" y="498" text-anchor="middle" font-size="12.5" font-weight="700" fill="#92400E">System: Provide SFTP Endpoint</text>
+<text x="350" y="515" text-anchor="middle" font-size="12.5" font-weight="400" fill="#92400E">Host & path shown to admin</text>
+<line x1="350" y1="414" x2="350" y2="476" stroke="#64748B" stroke-width="1.7" marker-end="url(#arr)"/>
+<polygon points="350,588 490,640 350,692 210,640" fill="#FFF7ED" stroke="#FB923C" stroke-width="2" filter="url(#sh)"/>
+<text x="350" y="630" text-anchor="middle" font-size="12.5" font-weight="400" fill="#7C2D12">Optional encryption?</text>
+<line x1="350" y1="544" x2="350" y2="588" stroke="#64748B" stroke-width="1.7" marker-end="url(#arr)"/>
+<rect x="-20" y="746" width="270" height="68" rx="10" fill="#F0FDF4" stroke="#86EFAC" stroke-width="1.8"  filter="url(#sh)"/>
+<text x="150" y="768" text-anchor="middle" font-size="12.5" font-weight="700" fill="#14532D">Configure PGP</text>
+<text x="150" y="785" text-anchor="middle" font-size="12.5" font-weight="400" fill="#14532D">Paste or upload public key</text>
+<path d="M 210 640 L 150 640 L 150 746" stroke="#64748B" stroke-width="1.7" fill="none"  marker-end="url(#arr)"/>
+<rect x="153" y="615" width="34" height="18" rx="4" fill="white" opacity="0.92"/><text x="170" y="629" text-anchor="middle" font-size="11" fill="#475569">PGP</text>
+<rect x="380" y="746" width="270" height="68" rx="10" fill="#F0FDF4" stroke="#86EFAC" stroke-width="1.8"  filter="url(#sh)"/>
+<text x="550" y="768" text-anchor="middle" font-size="12.5" font-weight="700" fill="#14532D">Upload SSH Key</text>
+<text x="550" y="785" text-anchor="middle" font-size="12.5" font-weight="400" fill="#14532D"></text>
+<path d="M 490 640 L 550 640 L 550 746" stroke="#64748B" stroke-width="1.7" fill="none"  marker-end="url(#arr)"/>
+<rect x="501" y="615" width="58" height="18" rx="4" fill="white" opacity="0.92"/><text x="530" y="629" text-anchor="middle" font-size="11" fill="#475569">SSH key</text>
+<rect x="180" y="886" width="340" height="68" rx="10" fill="#FEF3C7" stroke="#D97706" stroke-width="2.2"  filter="url(#sh)"/>
+<text x="350" y="908" text-anchor="middle" font-size="12.5" font-weight="700" fill="#92400E">System: Validate Credentials</text>
+<text x="350" y="925" text-anchor="middle" font-size="12.5" font-weight="400" fill="#92400E">Tests username, password & keys</text>
+<path d="M 150 814 L 150 920 L 180 920" stroke="#64748B" stroke-width="1.7" fill="none"  marker-end="url(#arr)"/>
+<path d="M 550 814 L 550 920 L 520 920" stroke="#64748B" stroke-width="1.7" fill="none"  marker-end="url(#arr)"/>
+<path d="M 350 692 L 350 886" stroke="#64748B" stroke-width="1.7" fill="none"  marker-end="url(#arr)"/>
+<rect x="271" y="701" width="58" height="18" rx="4" fill="white" opacity="0.92"/><text x="300" y="715" text-anchor="middle" font-size="11" fill="#475569">Neither</text>
+<polygon points="350,988 490,1040 350,1092 210,1040" fill="#FFF7ED" stroke="#FB923C" stroke-width="2" filter="url(#sh)"/>
+<text x="350" y="1030" text-anchor="middle" font-size="12.5" font-weight="400" fill="#7C2D12">Credentials valid?</text>
+<line x1="350" y1="954" x2="350" y2="988" stroke="#64748B" stroke-width="1.7" marker-end="url(#arr)"/>
+<rect x="-40" y="1126" width="290" height="68" rx="10" fill="#FEF2F2" stroke="#EF4444" stroke-width="1.8"  filter="url(#sh)"/>
+<text x="130" y="1148" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7F1D1D">Credential Error</text>
+<text x="130" y="1165" text-anchor="middle" font-size="12.5" font-weight="400" fill="#7F1D1D">Invalid username, password, or key</text>
+<path d="M 210 1040 L 130 1040 L 130 1126" stroke="#EF4444" stroke-width="1.7" fill="none"  marker-end="url(#arr_red)"/>
+<rect x="156" y="1015" width="28" height="18" rx="4" fill="white" opacity="0.92"/><text x="170" y="1029" text-anchor="middle" font-size="11" fill="#EF4444">No</text>
+<path d="M -40 1160 L 120 1160 L 120 380 L 180 380" stroke="#EF4444" stroke-width="1.7" fill="none" stroke-dasharray="5,3" marker-end="url(#arr_red)"/>
+<rect x="97" y="349" width="46" height="18" rx="4" fill="white" opacity="0.92"/><text x="120" y="363" text-anchor="middle" font-size="11" fill="#475569">Retry</text>
+<path d="M 490 1040 L 700 1040 L 700 1286" stroke="#16A34A" stroke-width="1.7" fill="none"  marker-end="url(#arr_green)"/>
+<rect x="643" y="1015" width="34" height="18" rx="4" fill="white" opacity="0.92"/><text x="660" y="1029" text-anchor="middle" font-size="11" fill="#16A34A">Yes</text>
+<path d="M 840 230 L 1050 230 L 1050 1320 L 870 1320" stroke="#64748B" stroke-width="1.7" fill="none"  marker-end="url(#arr)"/>
+<rect x="1016" y="205" width="88" height="18" rx="4" fill="white" opacity="0.92"/><text x="1060" y="219" text-anchor="middle" font-size="11" fill="#475569">Close Upload</text>
+<rect x="530" y="1286" width="340" height="68" rx="10" fill="#EFF6FF" stroke="#93C5FD" stroke-width="1.8"  filter="url(#sh)"/>
+<text x="700" y="1308" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1E3A5F">Source File Selection</text>
+<text x="700" y="1325" text-anchor="middle" font-size="12.5" font-weight="400" fill="#1E3A5F">Choose a file to define the schema</text>
+<polygon points="700,1398 840,1450 700,1502 560,1450" fill="#FFF7ED" stroke="#FB923C" stroke-width="2" filter="url(#sh)"/>
+<text x="700" y="1440" text-anchor="middle" font-size="12.5" font-weight="400" fill="#7C2D12">Files already landed?</text>
+<line x1="700" y1="1354" x2="700" y2="1398" stroke="#64748B" stroke-width="1.7" marker-end="url(#arr)"/>
+<rect x="310" y="1556" width="300" height="68" rx="10" fill="#EFF6FF" stroke="#93C5FD" stroke-width="1.8"  filter="url(#sh)"/>
+<text x="480" y="1578" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1E3A5F">Browse Files</text>
+<text x="480" y="1595" text-anchor="middle" font-size="12.5" font-weight="400" fill="#1E3A5F">Transport · Username · Date landed</text>
+<path d="M 560 1450 L 480 1450 L 480 1556" stroke="#64748B" stroke-width="1.7" fill="none"  marker-end="url(#arr)"/>
+<rect x="493" y="1425" width="34" height="18" rx="4" fill="white" opacity="0.92"/><text x="510" y="1439" text-anchor="middle" font-size="11" fill="#475569">Yes</text>
+<polygon points="480,1688 600,1730 480,1772 360,1730" fill="#FFF7ED" stroke="#FB923C" stroke-width="2" filter="url(#sh)"/>
+<text x="480" y="1720" text-anchor="middle" font-size="12.5" font-weight="400" fill="#7C2D12">File selected?</text>
+<line x1="480" y1="1624" x2="480" y2="1688" stroke="#64748B" stroke-width="1.7" marker-end="url(#arr)"/>
+<rect x="750" y="1556" width="310" height="68" rx="10" fill="#F0FDF4" stroke="#86EFAC" stroke-width="1.8"  filter="url(#sh)"/>
+<text x="920" y="1578" text-anchor="middle" font-size="12.5" font-weight="700" fill="#14532D">Upload Sample File</text>
+<text x="920" y="1595" text-anchor="middle" font-size="12.5" font-weight="400" fill="#14532D">Schema definition + field mapping tester</text>
+<path d="M 840 1450 L 920 1450 L 920 1556" stroke="#64748B" stroke-width="1.7" fill="none"  marker-end="url(#arr)"/>
+<rect x="846" y="1425" width="88" height="18" rx="4" fill="white" opacity="0.92"/><text x="890" y="1439" text-anchor="middle" font-size="11" fill="#475569">No files yet</text>
+<path d="M 600 1730 L 920 1730 L 920 1624" stroke="#64748B" stroke-width="1.7" fill="none"  marker-end="url(#arr)"/>
+<rect x="848" y="1705" width="64" height="18" rx="4" fill="white" opacity="0.92"/><text x="880" y="1719" text-anchor="middle" font-size="11" fill="#475569">No match</text>
+<rect x="530" y="1866" width="340" height="68" rx="10" fill="#EFF6FF" stroke="#93C5FD" stroke-width="1.8"  filter="url(#sh)"/>
+<text x="700" y="1888" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1E3A5F">File Naming Pattern</text>
+<text x="700" y="1905" text-anchor="middle" font-size="12.5" font-weight="400" fill="#1E3A5F">Define pattern to identify incoming files</text>
+<path d="M 480 1772 L 480 1900 L 530 1900" stroke="#16A34A" stroke-width="1.7" fill="none"  marker-end="url(#arr_green)"/>
+<rect x="478" y="1771" width="64" height="18" rx="4" fill="white" opacity="0.92"/><text x="510" y="1785" text-anchor="middle" font-size="11" fill="#16A34A">Selected</text>
+<path d="M 920 1624 L 920 1900 L 870 1900" stroke="#64748B" stroke-width="1.7" fill="none"  marker-end="url(#arr)"/>
+<rect x="530" y="2006" width="340" height="68" rx="10" fill="#FEF3C7" stroke="#D97706" stroke-width="2.2"  filter="url(#sh)"/>
+<text x="700" y="2028" text-anchor="middle" font-size="12.5" font-weight="700" fill="#92400E">Schema Definition</text>
+<text x="700" y="2045" text-anchor="middle" font-size="12.5" font-weight="400" fill="#92400E">System infers columns & types from file</text>
+<line x1="700" y1="1934" x2="700" y2="2006" stroke="#64748B" stroke-width="1.7" marker-end="url(#arr)"/>
+<polygon points="700,2118 840,2170 700,2222 560,2170" fill="#FFF7ED" stroke="#FB923C" stroke-width="2" filter="url(#sh)"/>
+<text x="700" y="2160" text-anchor="middle" font-size="12.5" font-weight="400" fill="#7C2D12">Schema valid?</text>
+<line x1="700" y1="2074" x2="700" y2="2118" stroke="#64748B" stroke-width="1.7" marker-end="url(#arr)"/>
+<rect x="790" y="2266" width="290" height="68" rx="10" fill="#FEF2F2" stroke="#EF4444" stroke-width="1.8"  filter="url(#sh)"/>
+<text x="960" y="2288" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7F1D1D">Schema Error</text>
+<text x="960" y="2305" text-anchor="middle" font-size="12.5" font-weight="400" fill="#7F1D1D">Adjust file or column mapping</text>
+<path d="M 840 2170 L 960 2170 L 960 2266" stroke="#EF4444" stroke-width="1.7" fill="none"  marker-end="url(#arr_red)"/>
+<rect x="907" y="2145" width="46" height="18" rx="4" fill="white" opacity="0.92"/><text x="930" y="2159" text-anchor="middle" font-size="11" fill="#EF4444">Error</text>
+<path d="M 960 2334 L 960 2060 L 870 2060" stroke="#EF4444" stroke-width="1.7" fill="none" stroke-dasharray="5,3" marker-end="url(#arr_red)"/>
+<rect x="310" y="2266" width="310" height="68" rx="10" fill="#EFF6FF" stroke="#93C5FD" stroke-width="1.8"  filter="url(#sh)"/>
+<text x="480" y="2288" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1E3A5F">Accounting Period Config</text>
+<text x="480" y="2305" text-anchor="middle" font-size="12.5" font-weight="400" fill="#1E3A5F">Derive period from filename or column</text>
+<path d="M 560 2170 L 480 2170 L 480 2266" stroke="#16A34A" stroke-width="1.7" fill="none"  marker-end="url(#arr_green)"/>
+<rect x="507" y="2145" width="46" height="18" rx="4" fill="white" opacity="0.92"/><text x="530" y="2159" text-anchor="middle" font-size="11" fill="#16A34A">Valid</text>
+<rect x="530" y="2396" width="340" height="68" rx="10" fill="#EFF6FF" stroke="#93C5FD" stroke-width="1.8"  filter="url(#sh)"/>
+<text x="700" y="2418" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1E3A5F">Entity Config</text>
+<text x="700" y="2435" text-anchor="middle" font-size="12.5" font-weight="400" fill="#1E3A5F">Identify entity from data</text>
+<path d="M 480 2334 L 480 2430 L 530 2430" stroke="#64748B" stroke-width="1.7" fill="none"  marker-end="url(#arr)"/>
+<rect x="530" y="2536" width="340" height="68" rx="10" fill="#DCFCE7" stroke="#16A34A" stroke-width="2.5"  filter="url(#sh)"/>
+<text x="700" y="2558" text-anchor="middle" font-size="12.5" font-weight="700" fill="#14532D">Dataset Configured</text>
+<text x="700" y="2575" text-anchor="middle" font-size="12.5" font-weight="400" fill="#14532D">Sample file retained for Field Mapping tester</text>
+<line x1="700" y1="2464" x2="700" y2="2536" stroke="#64748B" stroke-width="1.7" marker-end="url(#arr)"/>
+<rect x="60" y="2610" width="16" height="16" rx="3" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2.5"/><text x="82" y="2622" font-size="12" fill="#475569">Entry Point</text>
+<rect x="255" y="2610" width="16" height="16" rx="3" fill="#EFF6FF" stroke="#93C5FD" stroke-width="1.8"/><text x="277" y="2622" font-size="12" fill="#475569">Screen / View</text>
+<rect x="450" y="2610" width="16" height="16" rx="3" fill="#F0FDF4" stroke="#86EFAC" stroke-width="1.8"/><text x="472" y="2622" font-size="12" fill="#475569">User Action</text>
+<rect x="645" y="2610" width="16" height="16" rx="3" fill="#FFF7ED" stroke="#FB923C" stroke-width="2.0"/><text x="667" y="2622" font-size="12" fill="#475569">Decision</text>
+<rect x="840" y="2610" width="16" height="16" rx="3" fill="#FEF3C7" stroke="#D97706" stroke-width="2.2"/><text x="862" y="2622" font-size="12" fill="#475569">System / Auto</text>
+<rect x="1035" y="2610" width="16" height="16" rx="3" fill="#DCFCE7" stroke="#16A34A" stroke-width="2.5"/><text x="1057" y="2622" font-size="12" fill="#475569">Success / Terminal</text>
+<rect x="60" y="2640" width="16" height="16" rx="3" fill="#FEF2F2" stroke="#EF4444" stroke-width="1.8"/><text x="82" y="2652" font-size="12" fill="#475569">Error / Block</text>
+</svg>

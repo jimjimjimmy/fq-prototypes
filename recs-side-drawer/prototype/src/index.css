@@ -1,0 +1,127 @@
+/*
+ * Import Tailwind v4 without preflight to avoid conflicts with Flow UI
+ * global styles. Do NOT use layer() - Flow UI's Theme.apply() injects
+ * unlayered CSS, and layered styles always lose to unlayered ones.
+ */
+@import "tailwindcss/theme";
+@import "tailwindcss/utilities";
+
+/* Scan _shared components so their Tailwind classes get generated */
+@source "../../_shared";
+
+/*
+ * Preflight is off (see above), so nothing sets box-sizing. Without this,
+ * every `w-full` + `px-*`/`py-*` combo renders padding on top of the full
+ * width instead of inside it, pushing content past its container's edge
+ * (e.g. a drawer header's close button clipped by the drawer's overflow:hidden).
+ */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body, #root { background: #fff; }
+
+/* Minimal resets for interactive elements used outside Flow UI */
+button, [role="button"] {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+/*
+ * Flow UI's SideDrawer wrapper renders at z-index: 100. Its own Select
+ * popovers (Radix Popper, portalled to document.body) only get z-index: 2,
+ * so any dropdown opened from a field inside a SideDrawer paints invisibly
+ * underneath the drawer's opaque background - it opens, it's just buried.
+ * Force popovers above any drawer/modal layer.
+ */
+[data-radix-popper-content-wrapper] {
+  z-index: 1000 !important;
+}
+
+/*
+ * Every dropdown panel in this app (Select's option list, our own Popover.Content
+ * menus) renders through this same Radix wrapper, so one rule gives all of them
+ * the same fade + slide-into-place motion used elsewhere in the drawer (see
+ * RevealTransition/EnterTransition - 200ms, cubic-bezier(0.16, 1, 0.3, 1), 8px).
+ * Radix flips data-state to "closed" (briefly, while the exit animation plays)
+ * instead of unmounting immediately, so the same keyframes work both ways.
+ * data-side flips the slide direction to match which way the panel opened.
+ * `forwards` is required on all four - without it, the instant each 200ms
+ * animation ends, the browser reverts to the un-animated resting style
+ * (opacity: 1) for one paint frame before Radix actually removes the node,
+ * showing a brief flash of the fully-opaque panel right after it "closed".
+ */
+@keyframes popover-in-from-top {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes popover-out-to-top {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-8px); }
+}
+@keyframes popover-in-from-bottom {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes popover-out-to-bottom {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(8px); }
+}
+[data-radix-popper-content-wrapper] > [data-state="open"][data-side="bottom"] {
+  animation: popover-in-from-top 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+[data-radix-popper-content-wrapper] > [data-state="closed"][data-side="bottom"] {
+  animation: popover-out-to-top 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+[data-radix-popper-content-wrapper] > [data-state="open"][data-side="top"] {
+  animation: popover-in-from-bottom 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+[data-radix-popper-content-wrapper] > [data-state="closed"][data-side="top"] {
+  animation: popover-out-to-bottom 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/*
+ * Flow UI's Radio circle (RadioItem) is a fixed 16x16 flex child sitting
+ * next to its label in a `flex-wrap: nowrap` row, but never gets
+ * `flex-shrink: 0`. A long label forces the row to shrink on the main
+ * axis, and since shrink only affects width (not height), the circle
+ * squishes into an oval instead of staying a fixed-size circle.
+ */
+[role="radio"] {
+  flex-shrink: 0;
+}
+
+/*
+ * Post-create feedback for a newly added table row (Add Group/Add Account/
+ * Add Task): a quick, noticeable flash (brand blue) that immediately
+ * settles into a held info-secondary tint (~3s of the row's total 3.8s
+ * animation), then fades back to normal - a passive "this is the thing you
+ * just created" cue that needs no dismissal, applied once via
+ * `onAnimationEnd`.
+ */
+@keyframes row-created-pulse {
+  0% { background-color: #3d7bf7; opacity: 0.5; }
+  8% { background-color: #bed3fe; opacity: 0.5; }
+  87% { background-color: #bed3fe; opacity: 0.5; }
+  100% { background-color: #bed3fe; opacity: 0; }
+}
+
+/*
+ * Post-create success toast: slides up into place, holds for ~5s, then
+ * slides back down while fading out. FlowUI's `Toast`/`showToast` render
+ * react-hot-toast "custom" toasts with no built-in enter/exit animation of
+ * their own (that only exists on the default `ToastBar`, which custom
+ * toasts bypass entirely) - this keyframe is a standalone replacement, not
+ * a hook into react-hot-toast's own visible/dismiss lifecycle.
+ */
+@keyframes toast-slide-fade {
+  0% { transform: translateY(16px); opacity: 0; }
+  5% { transform: translateY(0); opacity: 1; }
+  95% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(16px); opacity: 0; }
+}
+.toast-slide-fade {
+  animation: toast-slide-fade 5600ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

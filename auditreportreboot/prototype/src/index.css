@@ -1,0 +1,186 @@
+@import "tailwindcss/theme";
+@import "tailwindcss/utilities";
+@source "../../_shared";
+
+/* Tailwind v4 without preflight skips box-sizing reset. */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Reset button browser defaults — Tailwind v4 without preflight doesn't
+   reset these. Font-family override is in main.tsx (injected after
+   Theme.apply() for correct source order). */
+button {
+  color: inherit;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  text-align: inherit;
+}
+button:disabled {
+  cursor: default;
+}
+
+/* Raise FlowUI Popover / Select / Calendar portals above the 56px global
+   left rail (z-index: 10) — otherwise the rail clips the left side of the
+   PeriodRangeCalendar popover. Matches the same rule used in FDM rollup. */
+[data-radix-popper-content-wrapper] {
+  z-index: 20 !important;
+}
+
+/* ── Report builder ──────────────────────────────────────────────
+   Custom CSS is limited to the step container chrome, the disabled-
+   step state, and the Excel preview tree. Everything visual inside
+   the steps (checkboxes, radios, inputs, buttons, typography) comes
+   from FlowUI components. */
+
+.rb-section { margin-bottom: 48px; max-width: 800px; }
+.rb-page-header { margin-bottom: 24px; display: flex; flex-direction: column; gap: 4px; }
+.rb-page-footer {
+  position: sticky;
+  /* -15px compensates for the scrollbar gutter in the main scroll
+     container so the footer's bottom sits flush against the viewport
+     edge. With bottom:0 there was a ~15px gap from the scrollbar. */
+  bottom: -15px;
+  /* Each .rb-step above already has margin-bottom: 16px, so padding-top
+     here is the remaining 8px to land at a clean 24px above the button. */
+  padding: 8px 0 24px;
+  display: flex;
+  justify-content: flex-end;
+  max-width: 800px;
+  /* Soft fade so content scrolling behind the button doesn't read as
+     overlapping it. */
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, #fff 30%);
+  z-index: 5;
+}
+
+/* Download dropdown menu — Radix Popover portal floats above any scroll
+   container so the menu can't be clipped. FlowUI's SelectOption provides
+   the row styling. */
+.rb-download-menu {
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: var(--flo-sem-shadow-dropdown, 0 6px 16px rgba(0, 0, 0, 0.08));
+  border: 1px solid var(--flo-sem-color-border-default, #E1E6EF);
+  min-width: 160px;
+  padding: 4px 0;
+}
+
+/* Step container */
+.rb-step {
+  border: 1px solid var(--flo-sem-color-border-default, #E1E6EF);
+  border-radius: 6px;
+  background: #fff;
+  margin-bottom: 16px;
+  overflow: clip; /* clip keeps border-radius without blocking sticky children */
+}
+.rb-step-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--flo-sem-color-border-default, #E1E6EF);
+}
+.rb-step-desc-slot { margin-left: auto; }
+.rb-step-body { padding: 16px 18px 18px; }
+.rb-step-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 14px 18px;
+  border-top: 1px solid var(--flo-sem-color-border-default, #E1E6EF);
+  background: var(--flo-base-color-neutral-100, #FAFBFC);
+}
+
+/* Layout helpers */
+.rb-stack > * + * { margin-top: 12px; }
+/* Indent children so they sit visually under the parent's label, not the
+   chevron. Chevron(20) + gap(8) + checkbox(~16) + gap(~4) ≈ 48px from the
+   stack's left edge, which aligns with where the parent's label text begins. */
+.rb-indent { padding-left: 48px; }
+.rb-indent > * + * { margin-top: 8px; }
+.rb-indent > :first-child { margin-top: 8px; }
+
+/* Expandable group — chevron toggle on the left, then the checkbox */
+.rb-expandable-row { display: flex; align-items: center; gap: 8px; }
+
+/* When a stack contains expandable rows, indent the non-expandable checkbox
+   children so they vertically align with the parent checkbox in expandables.
+   Chevron is 20px + 8px gap = 28px offset. */
+.rb-stack-with-expandables > [data-flow-name="checkbox"] {
+  padding-left: 28px;
+}
+.rb-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: var(--flo-sem-color-text-muted, #6B7280);
+  cursor: pointer;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.rb-chevron:hover:not(:disabled) {
+  color: var(--flo-sem-color-text-body, #1D2433);
+  background: var(--flo-base-color-neutral-100, #F1F3F9);
+}
+.rb-chevron:disabled {
+  cursor: default;
+  color: var(--flo-base-color-neutral-400, #ADB2BB);
+}
+
+.rb-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+
+/* In Step 3, the items list scrolls internally so a long Products list
+   doesn't push Workspaces out of view. The heading + search input stay
+   pinned at the top of each column; only the rb-stack scrolls. */
+#step-3 .rb-stack-with-expandables {
+  max-height: 420px;
+  overflow-y: auto;
+  /* Tiny right padding so the scrollbar doesn't crowd the checkbox edges. */
+  padding-right: 4px;
+}
+
+.rb-custom-range { margin-top: 8px; padding-left: 24px; }
+.rb-custom-range > * { max-width: 280px; }
+.rb-custom-range button { max-width: 280px; }
+
+/* Disabled step (Login-only short-circuit on Step 3) */
+.rb-step-disabled .rb-step-header { opacity: 0.5; }
+.rb-step-disabled .rb-step-body {
+  opacity: 0.4;
+  pointer-events: none;
+  user-select: none;
+  filter: grayscale(0.4);
+}
+.rb-step-disabled .rb-step-num { background: var(--flo-base-color-neutral-500, #ADB2BB); }
+.rb-step-disabled-banner {
+  padding: 12px 18px;
+  background: var(--flo-sem-color-warning-background, #FFF8EB);
+  color: var(--flo-sem-color-warning, #DB7712);
+  font-size: 12px;
+  border-bottom: 1px solid #F4E0BF;
+}
+
+/* Excel preview tree (monospace data preview, not a FlowUI primitive) */
+.rb-preview { margin-top: 16px; }
+.rb-preview-tree {
+  background: var(--flo-base-color-neutral-100, #FAFBFC);
+  border: 1px solid var(--flo-sem-color-border-default, #E1E6EF);
+  border-radius: 4px;
+  padding: 12px 16px;
+  font-family: 'Roboto Mono', 'SF Mono', Monaco, Menlo, monospace;
+  font-size: 12px;
+  color: var(--flo-sem-color-text-body, #1D2433);
+  line-height: 1.7;
+}
+.rb-preview-tree .tab { display: flex; align-items: center; gap: 6px; }
+.rb-preview-tree .tab .glyph { color: var(--flo-base-color-neutral-400, #ADB2BB); }
+.rb-preview-tree .subtab { padding-left: 22px; color: var(--flo-sem-color-text-secondary, #424867); }
+.rb-preview-tree .more { padding-top: 4px; color: var(--flo-sem-color-text-muted, #6B7280); font-style: italic; }

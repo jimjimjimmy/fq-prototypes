@@ -1,0 +1,130 @@
+<h1>PRD 2a: Field Mapping — Visual Refresh + AI-Suggested Mappings</h1>
+<p><strong>Source:</strong> <a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4449927443">Confluence — 2 of 4</a>
+<strong>Status:</strong> DRAFT
+<strong>Last updated:</strong> Mar 19, 2026
+<strong>Owner:</strong> Alex Kearns
+<strong>Target release:</strong> 2026-06-30</p>
+<hr>
+<h2>Summary</h2>
+<p>Covers the Field Mapping page redesign and AI-suggested source-to-target field mappings. This PRD focuses on the visual refresh of the field mapping grid, AI auto-suggestions for initial draft mappings, many-to-one source field mapping, and custom field support.</p>
+<p>Transformation logic definition (function-based and AI-assisted rule authoring) is out of scope for this release and covered in <a href="prd-2b-field-mapping-transformations.md">PRD 2b: AI-Assisted Transformation Functions (9/30)</a>.</p>
+<p><strong>This is the highest-effort, highest-risk step in Model configuration.</strong> Errors propagate silently into downstream FQ products.</p>
+<h2>Key Requirements</h2>
+<h3>FM1: Field Mapping List (High)</h3>
+<ul>
+<li>All mandatory FQ target fields pre-populated for the selected domain</li>
+<li>Each row shows field name, data type, current mapping status</li>
+<li>Unmapped mandatory fields visually distinguished</li>
+<li>Progress indicator (mapped vs total required)</li>
+<li>Tab not accessible until source datasets are linked</li>
+</ul>
+<h3>FM2: AI Draft of Field Mappings (Medium)</h3>
+<ul>
+<li>AI analyzes linked source schema and auto-suggests mappings on first load</li>
+<li>Suggestions displayed inline, labeled &quot;AI suggested&quot;</li>
+<li><strong>Suggestions require user confirmation</strong> — not auto-applied</li>
+<li>Runs once on initial Draft only (pending confirmation)</li>
+<li>Standard Models bypass AI and use pre-defined default mappings</li>
+<li>Loading state shown during AI suggestion</li>
+</ul>
+<h3>FM3: Many-to-One Source Field Mapping (High — NEW capability)</h3>
+<ul>
+<li>Select multiple source fields for single FQ target field</li>
+<li>UI clearly represents multi-field selections (chips, etc.)</li>
+<li>Existing 1-to-1 mappings unaffected</li>
+<li>Note: Transformation logic for multi-field mappings will be defined in PRD 2b (9/30)</li>
+</ul>
+<h3>FM4: Add Custom Fields (High — existing, must maintain)</h3>
+<ul>
+<li>Source selector populated exclusively from Linked Datasets</li>
+<li>Custom fields visually distinguished from mandatory</li>
+<li>User defines data type for custom target field</li>
+</ul>
+<h3>FM6: Field Mapping Validation &amp; Error Handling (High)</h3>
+<ul>
+<li>Publish is blocked if any mandatory FQ target fields are unmapped — user sees a clear error indicating which fields are missing</li>
+<li>Data type mismatches between source and target fields are flagged inline (e.g., mapping a text field to a numeric target)</li>
+<li>Validation runs on save/autosave and on publish attempt — errors surfaced inline on the affected row, not just as a generic banner</li>
+<li>Duplicate mappings (same source field mapped to multiple targets unintentionally) are flagged as a warning</li>
+<li>Clear error states for: unmapped required fields, type mismatches, invalid many-to-one combinations (e.g., incompatible data types across selected source fields)</li>
+<li>User cannot publish until all blocking validation errors are resolved</li>
+</ul>
+<h2>Out of Scope (moved to PRD 2b — 9/30)</h2>
+<ul>
+<li><strong>FM5: Define Transformation Logic — AI &amp; Functions</strong> — Per-row transformation editor, manual function-based logic, AI-generated transformations via AI Chat Modal, natural language → expression, function library definition</li>
+<li><strong>AI Chat Modal</strong> — The conversational AI interaction pattern for describing transformations in natural language</li>
+<li><strong>Function library / syntax</strong> — The supported transformation function set (To_Upper, To_Lower, Safe Cast, if/else, etc.)</li>
+</ul>
+<h2>Design Implications</h2>
+<ul>
+<li><strong>Field Mapping grid</strong> is the core workspace for this PRD</li>
+<li><strong>Directed inline flow</strong> — AI suggests source-to-target mappings inline, user reviews/confirms per row. This is the primary AI interaction model for the 6/30 release.</li>
+<li><strong>Vertical left nav</strong> replaces old sub-navigation under &quot;Lineage&quot;</li>
+<li>Actions lightning bolt removed</li>
+<li>Autosave with visual indicator (no Save button)</li>
+</ul>
+<h2>Current State (What Exists Today)</h2>
+<ul>
+<li>Custom fields supported</li>
+<li>Source-to-target field mappings (1-to-1 only via &quot;Actions&quot; lightning bolt)</li>
+<li>Functions: To_Upper, To_Lower, Safe Cast, Strip Currency Symbols, Right, Left, Substring, Split Column, Default Value, Trim Spaces</li>
+</ul>
+<h2>What&#39;s New in This Release (6/30)</h2>
+<ul>
+<li>Redesigned field mapping page</li>
+<li>AI-suggested source-to-target mappings on first draft</li>
+<li>Multiple source fields per target (many-to-one)</li>
+</ul>
+<h2>Open Questions</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Question</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>OQ-1</td>
+<td>Is adding a custom field a change requiring new version?</td>
+<td>Open</td>
+</tr>
+<tr>
+<td>OQ-2</td>
+<td>Loading state for AI suggestion — design + timing?</td>
+<td>Open</td>
+</tr>
+<tr>
+<td>OQ-3</td>
+<td>Does AI auto-suggestion run only once on initial draft? Product decision or technical constraint?</td>
+<td>Open</td>
+</tr>
+</tbody></table>
+<h2>Gaps</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Gap</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>G1</td>
+<td>Behavior when AI can&#39;t suggest mappings undefined</td>
+<td>High</td>
+</tr>
+<tr>
+<td>G2</td>
+<td>Autosave failure behavior undefined</td>
+<td>High</td>
+</tr>
+<tr>
+<td>G6</td>
+<td>Custom fields can&#39;t use many-to-one mapping yet (blocked on FM3)</td>
+<td>High</td>
+</tr>
+</tbody></table>
+<h2>User Flow Steps</h2>
+<p>Steps 13-18: Field Mappings Tab → AI Suggests → Review Mandatory Fields → Override/Adjust → Autosave</p>
+

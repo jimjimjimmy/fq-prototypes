@@ -1,0 +1,86 @@
+import type { SuggestedRule } from '../types';
+
+export const SUGGESTED_RULES: SuggestedRule[] = [
+  // Transaction Analysis Rules
+  {
+    id: 'SR-001',
+    name: 'Missing Vendor on Transaction',
+    description: 'Flags or blocks transactions where the Vendor field is empty. Ensures all expenditures are linked to a specific supplier for accurate AP reporting and 1099 tracking.',
+    naturalLanguageInput: 'Flag transactions where vendor is empty',
+    category: 'Transaction Analysis Rules',
+    anomalyCount: 8,
+  },
+  {
+    id: 'SR-002',
+    name: 'Missing Department on Transaction',
+    description: 'Requires a Department selection before a transaction can be saved. This prevents "unallocated" expenses and ensures departmental P&L statements remain accurate.',
+    naturalLanguageInput: 'Flag transactions where department is empty',
+    category: 'Transaction Analysis Rules',
+    anomalyCount: 15,
+  },
+  {
+    id: 'SR-003',
+    name: 'Missing Subsidiary on Transaction',
+    description: 'Mandates the assignment of a Subsidiary to every record. Critical for multi-entity organizations to ensure proper consolidation and intercompany eliminations.',
+    naturalLanguageInput: 'Flag transactions where subsidiary is empty',
+    category: 'Transaction Analysis Rules',
+    anomalyCount: 5,
+  },
+  {
+    id: 'SR-004',
+    name: 'Memo Field Removal',
+    description: 'Automatically clears or hides the Memo field under specific conditions (e.g., for sensitive payroll entries) to maintain data privacy and standardize header-level documentation.',
+    naturalLanguageInput: 'Flag transactions where memo field was cleared or removed',
+    category: 'Transaction Analysis Rules',
+    anomalyCount: 20,
+  },
+  {
+    id: 'SR-005',
+    name: 'Weekend Transaction Alert',
+    description: 'Detects transactions posted on Saturdays or Sundays when regular business operations are typically closed. May indicate unauthorized activity or batch import errors.',
+    naturalLanguageInput: 'Flag transactions that were created or posted on Saturday or Sunday',
+    category: 'Transaction Analysis Rules',
+    anomalyCount: 12,
+  },
+  {
+    id: 'SR-006',
+    name: 'Post-Close Period Entries',
+    description: 'Flags transactions booked after the accounting period has been marked as closed. Helps maintain period integrity and prevents unauthorized adjustments.',
+    naturalLanguageInput: 'Flag transactions where the posting date is after the period close date',
+    category: 'Transaction Analysis Rules',
+    anomalyCount: 3,
+  },
+  // Common Accounting Anomalies
+  {
+    id: 'SR-007',
+    name: 'Amount Removal',
+    description: 'Triggers the clearing of the Amount field if certain criteria aren\'t met, or resets the value to zero if a transaction is flagged for re-evaluation or voiding.',
+    naturalLanguageInput: 'Flag transactions where amount was changed to zero',
+    category: 'Common Accounting Anomalies',
+    anomalyCount: 100,
+  },
+  {
+    id: 'SR-008',
+    name: 'Transaction Type Removal',
+    description: 'A system-level override that clears the Transaction Type classification when a record is being repurposed or stripped of its accounting impact during a batch import.',
+    naturalLanguageInput: 'Flag transactions where transaction type was cleared',
+    category: 'Common Accounting Anomalies',
+    anomalyCount: 4,
+  },
+  {
+    id: 'SR-009',
+    name: 'Duplicate Payment Detection',
+    description: 'Identifies potential duplicate payments by flagging transactions with the same vendor, amount, and date within a short time period.',
+    naturalLanguageInput: 'Flag transactions where the same vendor receives multiple payments of the same amount within 7 days',
+    category: 'Common Accounting Anomalies',
+    anomalyCount: 6,
+  },
+  {
+    id: 'SR-010',
+    name: 'Round Dollar Amount Review',
+    description: 'Highlights transactions with suspiciously round dollar amounts that may indicate estimated or fabricated entries requiring additional scrutiny.',
+    naturalLanguageInput: 'Flag transactions where the amount is a round number ending in 00 and exceeds $1,000',
+    category: 'Common Accounting Anomalies',
+    anomalyCount: 14,
+  },
+];

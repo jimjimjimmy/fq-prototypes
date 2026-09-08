@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Data Studio — Connector Selection Flow (V2)</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --surface: #ffffff;
+      --border: #e4e7ec;
+      --border-strong: #d0d5dd;
+      --text: #101828;
+      --text-muted: #475467;
+      --text-subtle: #667085;
+      --accent: #1a73e8;
+      --accent-soft: #e8f0fe;
+      --warn-soft: #fff4e5;
+      --warn-border: #f59e0b;
+      --ok-soft: #e8f5e9;
+      --ok-border: #4caf50;
+      --question-soft: #f3e8ff;
+      --question-border: #9333ea;
+      --code-bg: #f3f4f6;
+      --shadow: 0 1px 3px rgba(16, 24, 40, 0.05), 0 1px 2px rgba(16, 24, 40, 0.06);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 15px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 56px 32px 96px;
+    }
+
+    header.hero {
+      margin-bottom: 40px;
+      padding-bottom: 28px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .eyebrow {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-subtle);
+      margin: 0 0 12px;
+    }
+
+    h1 {
+      font-size: 32px;
+      line-height: 1.2;
+      font-weight: 600;
+      margin: 0 0 12px;
+      letter-spacing: -0.01em;
+    }
+
+    h1 .version {
+      display: inline-block;
+      vertical-align: middle;
+      margin-left: 12px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: var(--text-muted);
+      margin: 0;
+      max-width: 720px;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .chip a { color: var(--accent); text-decoration: none; }
+    .chip a:hover { text-decoration: underline; }
+
+    section { margin-top: 44px; }
+
+    h2 {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0 0 8px;
+      letter-spacing: -0.005em;
+    }
+
+    h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0 0 6px;
+    }
+
+    p { margin: 0 0 12px; color: var(--text-muted); }
+    p.lede { color: var(--text); }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .card + .card { margin-top: 16px; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0 8px;
+      font-size: 14px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    th {
+      font-weight: 600;
+      color: var(--text);
+      background: #fafbfc;
+      font-size: 13px;
+      letter-spacing: 0.01em;
+    }
+
+    td { color: var(--text-muted); }
+    td strong { color: var(--text); }
+
+    .diagram-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px 24px;
+      box-shadow: var(--shadow);
+      overflow-x: auto;
+    }
+
+    .mermaid {
+      display: flex;
+      justify-content: center;
+      min-width: 600px;
+    }
+
+    .question-card {
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      gap: 16px;
+      align-items: start;
+      padding: 18px 20px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      margin-bottom: 12px;
+    }
+
+    .question-card .qnum {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      background: var(--question-soft);
+      color: var(--question-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 0.05em;
+    }
+
+    .question-card h3 { margin-bottom: 4px; color: var(--text); }
+    .question-card .branches {
+      display: grid;
+      gap: 6px;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    .question-card .branch {
+      display: grid;
+      grid-template-columns: 100px 1fr;
+      gap: 12px;
+      padding: 6px 0;
+    }
+    .question-card .branch .badge {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: var(--code-bg);
+      color: var(--text);
+      text-align: center;
+      align-self: start;
+    }
+    .question-card .branch .desc { color: var(--text-muted); }
+
+    .lean-note {
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: var(--accent-soft);
+      border-left: 3px solid var(--accent);
+      border-radius: 4px;
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    .delta-table th { background: var(--accent-soft); }
+
+    ul.bullets {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--text-muted);
+    }
+    ul.bullets li { margin-bottom: 6px; }
+    ul.bullets li strong { color: var(--text); }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .legend-item { display: inline-flex; align-items: center; gap: 6px; }
+    .swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      border: 1px solid var(--border-strong);
+    }
+    .swatch.question { background: var(--question-soft); border-color: var(--question-border); }
+    .swatch.decision-node { background: var(--warn-soft); border-color: var(--warn-border); }
+    .swatch.escape { background: #fafbfc; border-color: #98a2b3; border-style: dashed; }
+    .swatch.done { background: var(--ok-soft); border-color: var(--ok-border); }
+
+    blockquote.comment {
+      margin: 0 0 16px;
+      padding: 14px 18px;
+      background: #fafbfc;
+      border-left: 3px solid var(--border-strong);
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-style: italic;
+    }
+    blockquote.comment strong { color: var(--text); font-style: normal; }
+
+    footer {
+      margin-top: 64px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--text-subtle);
+    }
+
+    @media (max-width: 720px) {
+      .page { padding: 32px 18px 64px; }
+      h1 { font-size: 26px; }
+      .question-card { grid-template-columns: 1fr; }
+      .question-card .branch { grid-template-columns: 1fr; gap: 4px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <p class="eyebrow">Data Studio · Connectors</p>
+      <h1>Connector Selection Flow <span class="version">V2 · Question-driven</span></h1>
+      <p class="subtitle">
+        A question-driven decision tree for selecting a connector, structured around
+        Rebecca's framing: <em>Pre-Built vs. Custom</em> first, then narrow from there.
+        Replaces V1's flat tiered grid with a guided sequence + an express path for power users.
+        Recommended interaction model: <strong>progressive disclosure on a single screen</strong>
+        (Dropbox onboarding pattern).
+      </p>
+      <div class="meta">
+        <span class="chip">Scope: entry &rarr; selection</span>
+        <span class="chip">Coverage: Pre-Built (CDC + DC API) · Custom (file · API · SFTP)</span>
+        <span class="chip">Interaction: progressive disclosure</span>
+        <span class="chip">Compare: <a href="connector-select-flow.html">V1 (tier-based)</a></span>
+      </div>
+    </header>
+
+    <section>
+      <h2>What changed from V1</h2>
+      <div class="card">
+        <table class="delta-table">
+          <thead>
+            <tr>
+              <th style="width: 28%;">Dimension</th>
+              <th style="width: 36%;">V1 — Tier-based</th>
+              <th style="width: 36%;">V2 — Question-driven</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>First decision</strong></td>
+              <td>Pick from a flat grid (sources + file + custom on one screen)</td>
+              <td>Pre-Built or Custom? &mdash; routes to a narrower second screen</td>
+            </tr>
+            <tr>
+              <td><strong>Mental model</strong></td>
+              <td>"What system am I connecting?"</td>
+              <td>"What kind of connection do I need?" then "What system?"</td>
+            </tr>
+            <tr>
+              <td><strong>Manual Upload</strong></td>
+              <td>Tier 2 CTA, visually distinct on the main screen</td>
+              <td>Branch of "custom" alongside API and SFTP</td>
+            </tr>
+            <tr>
+              <td><strong>SFTP</strong></td>
+              <td>Tier 3 footer link (de-emphasized)</td>
+              <td>First-class option under "custom" &mdash; addresses Alex's question</td>
+            </tr>
+            <tr>
+              <td><strong>QBO Basic vs. Enhanced</strong></td>
+              <td>Sub-screen after picking QBO</td>
+              <td>Same &mdash; sub-screen, but framed as a generalizable Q3 for any system with multiple tiers</td>
+            </tr>
+            <tr>
+              <td><strong>Express path</strong></td>
+              <td>Not addressed</td>
+              <td>"Show me everything" bypass &mdash; could reuse Kristin's single-screen mockup</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>The questions, in order</h2>
+      <p>From Rebecca's comment on Kristin's mockup. Each question narrows the path.</p>
+
+      <blockquote class="comment">
+        <strong>Rebecca:</strong> "Do you want to use a pre-built connection or build a custom connection
+        (files, API)? If pre-built, then they can choose from either our DC API standard integrations or
+        our CDC connections. What system if pre-built? What type of connection (file, or API) if custom?
+        If we have two types of systems, then we show them the options for basic vs. enhanced. Basic is
+        for just accounts and balances. Enhanced is broader. I also think having a path for people who
+        don't need to answer questions and know exactly what they are doing is useful."
+      </blockquote>
+
+      <div class="question-card">
+        <div class="qnum">Q1</div>
+        <div>
+          <h3>Pre-Built or Custom?</h3>
+          <p>Sets the entire downstream path. Most users land in <em>Pre-Built</em>; <em>Custom</em> is for files, API, or SFTP.</p>
+          <div class="branches">
+            <div class="branch">
+              <span class="badge">Pre-Built</span>
+              <span class="desc">FQ-supported integrations &mdash; DC API standard (e.g., QBO direct) or CDC (e.g., NetSuite). FQ owns the source mapping.</span>
+            </div>
+            <div class="branch">
+              <span class="badge">Custom</span>
+              <span class="desc">User-controlled transmission &mdash; file upload, API, or SFTP. User defines the schema.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <div class="qnum">Q2a</div>
+        <div>
+          <h3>If Pre-Built: which system?</h3>
+          <p>The familiar source picker &mdash; QBO, NetSuite, Sage Intacct, Salesforce, Workday, etc. Vendor abstraction stays: no Fivetran in any label.</p>
+          <p style="margin-top: 8px;"><em>This is the column from Kristin's mockup ("Which System?") &mdash; it shows up here, scoped to Pre-Built only.</em></p>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <div class="qnum">Q2b</div>
+        <div>
+          <h3>If Custom: which connection type?</h3>
+          <div class="branches">
+            <div class="branch">
+              <span class="badge">File</span>
+              <span class="desc">Manual Upload &mdash; .xlsx / .csv with schema inferred from a sample.</span>
+            </div>
+            <div class="branch">
+              <span class="badge">API</span>
+              <span class="desc">User-defined API endpoint &mdash; FQ pulls from a customer-hosted source.</span>
+            </div>
+            <div class="branch">
+              <span class="badge">SFTP</span>
+              <span class="desc">SFTP push/pull &mdash; existing pattern, retained per Kristin's note ("let's keep what's there now").</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <div class="qnum">Q3</div>
+        <div>
+          <h3>(Conditional) Basic or Enhanced?</h3>
+          <p>Only fires for systems that have two tiers. QBO is the known case today.</p>
+          <div class="branches">
+            <div class="branch">
+              <span class="badge">Basic</span>
+              <span class="desc">Accounts and Balances only.</span>
+            </div>
+            <div class="branch">
+              <span class="badge">Enhanced</span>
+              <span class="desc">Broader scope &mdash; transactions, dimensions, etc. Definition per source.</span>
+            </div>
+          </div>
+          <div class="lean-note">
+            <strong>Generalizable:</strong> treat this as a per-source attribute. If a future system adds tiers, it inherits this screen automatically. If a system has only one tier, Q3 is skipped.
+          </div>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <div class="qnum">Q4</div>
+        <div>
+          <h3>Express path &mdash; "I know what I'm doing"</h3>
+          <p>For repeat users and implementation team members who don't need to be guided. Bypasses progressive disclosure entirely.</p>
+          <p>In the progressive-disclosure model below, this lives as a <strong>"Show all options"</strong> link near the top of the screen. Clicking it swaps the guided sequence for a single-screen picker (Kristin's mockup pattern) where the user picks System + Data at once.</p>
+          <div class="lean-note">
+            <strong>Lean:</strong> single-screen bypass &mdash; reuses what Kristin already designed and gives implementation-team users a fast path. Search becomes valuable later when source count grows past ~12.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>The flow</h2>
+      <p>
+        Users drop directly into the guided experience &mdash; Q1 is the first thing they see.
+        The express view is reachable via a <strong>de-emphasized "Show all connector types" link</strong>
+        on the screen (shown as a dashed escape hatch in the diagram), not a gating choice.
+      </p>
+      <div class="diagram-wrap">
+        <div class="mermaid">
+flowchart TD
+    Start([User enters Data Studio])
+
+    Start --> Branch1{Has connectors?}
+    Branch1 -->|No| Empty["Empty state on Connectors tab<br/><b>'Connect your data'</b> primary CTA"]
+    Branch1 -->|Yes| Populated["Connectors tab populated<br/><b>'+ Add Connector'</b> in toolbar"]
+
+    Empty --> Q1
+    Populated --> Q1
+
+    Q1{"<b>Q1</b><br/>Pre-Built or Custom?"}
+
+    Q1 -.->|"Escape hatch:<br/>'Show all connector types' link<br/>(de-emphasized)"| AllView["<i>Express view</i><br/>Single-screen picker<br/><i>(Kristin's mockup pattern)</i>"]
+
+    Q1 -->|Pre-Built| Q2A{"<b>Q2a</b><br/>Which system?"}
+    Q1 -->|Custom| Q2B{"<b>Q2b</b><br/>Which connection type?"}
+
+    Q2A --> SysQBO[QBO]
+    Q2A --> SysCDC["NetSuite, Sage,<br/>Salesforce, Workday, ..."]
+
+    Q2B --> File["File<br/>(Manual Upload)"]
+    Q2B --> API[API]
+    Q2B --> SFTP[SFTP]
+
+    SysQBO --> Q3{"<b>Q3</b><br/>Basic or Enhanced?"}
+    Q3 -->|Basic| QBOBasic["Accounts +<br/>Balances only"]
+    Q3 -->|Enhanced| QBOEnhanced["Broader scope"]
+
+    AllView --> Done([Selection complete &mdash; proceed to setup wizard])
+    QBOBasic --> Done
+    QBOEnhanced --> Done
+    SysCDC --> Done
+    File --> Done
+    API --> Done
+    SFTP --> Done
+
+    classDef question fill:#f3e8ff,stroke:#9333ea,stroke-width:2px,color:#101828;
+    classDef decision fill:#fff4e5,stroke:#f59e0b,color:#101828;
+    classDef escape fill:#fafbfc,stroke:#98a2b3,stroke-dasharray:5 4,color:#667085;
+    classDef done fill:#e8f5e9,stroke:#4caf50,color:#101828;
+
+    class Q1,Q2A,Q2B,Q3 question;
+    class Branch1 decision;
+    class AllView escape;
+    class Done done;
+
+    linkStyle 7 stroke:#98a2b3,stroke-dasharray:5 4;
+        </div>
+        <div class="legend">
+          <span class="legend-item"><span class="swatch question"></span> Rebecca's questions</span>
+          <span class="legend-item"><span class="swatch decision-node"></span> System decision point</span>
+          <span class="legend-item"><span class="swatch escape"></span> Escape hatch (de-emphasized link)</span>
+          <span class="legend-item"><span class="swatch done"></span> End of selection scope</span>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Recommended interaction model: progressive disclosure</h2>
+      <p class="lede">
+        The decision tree above is the <em>logic</em>. Progressive disclosure is <em>how</em> we deliver
+        it &mdash; one screen, questions revealed sequentially as the user answers each one. Inspired by
+        Dropbox's onboarding pattern: prior answers stay visible and editable, the screen feels like a
+        single conversation rather than a stack of wizard steps.
+      </p>
+
+      <div class="card">
+        <h3>How it behaves</h3>
+        <ul class="bullets">
+          <li><strong>One screen, one title.</strong> "Add a connector" or "What are you connecting?" Sub-line: "A few quick questions to get you set up."</li>
+          <li><strong>Q1 appears first.</strong> Pre-Built or Custom? &mdash; presented as a clear binary selection (specific control TBD in wireframes).</li>
+          <li><strong>Q2 reveals after Q1 is answered.</strong> Pre-Built &rarr; system picker (compact logo grid). Custom &rarr; the three connection-type options (File / API / SFTP). The same Q2 slot, different content based on Q1.</li>
+          <li><strong>Q3 reveals only when needed.</strong> If Q2 = QBO, Basic vs. Enhanced appears with a brief subtitle: "Since you picked QBO, we need one more thing." Otherwise this question doesn't exist.</li>
+          <li><strong>Prior answers stay editable.</strong> Click any earlier answer to change it &mdash; downstream questions adjust live.</li>
+          <li><strong>Progress indicator at the top.</strong> Fills as the user advances. Sets expectation of remaining work.</li>
+          <li><strong>"Show all options" link near the title.</strong> The Q4 express bypass &mdash; swaps the guided flow for a single-screen picker (Kristin's mockup).</li>
+          <li><strong>Continue is disabled until required answers are present.</strong> No premature progress.</li>
+        </ul>
+      </div>
+
+      <div class="card" style="margin-top: 16px;">
+        <h3>Why this fits Data Studio better than a traditional wizard</h3>
+        <ul class="bullets">
+          <li><strong>Conditional questions feel natural.</strong> Q3 only fires for some sources &mdash; progressive disclosure handles "appears or doesn't" cleanly. A wizard would need an awkward "skipped step" UI or unbalanced step counters.</li>
+          <li><strong>Q2 branches dramatically.</strong> Pre-Built &rarr; system picker is visually rich (logos, descriptions). Custom &rarr; three lightweight options. Progressive disclosure swaps the same slot's content based on Q1; a wizard would need two distinct screens.</li>
+          <li><strong>Audience profile.</strong> Admins set up connectors infrequently &mdash; maybe once a quarter. The "remind me what I'm doing as I go" feel of progressive disclosure serves a returning-but-not-frequent user well.</li>
+          <li><strong>Editing is cheap.</strong> Click an earlier answer to change it. No "Back" button needed.</li>
+        </ul>
+      </div>
+
+      <div class="card" style="margin-top: 16px;">
+        <h3>Trade-offs &amp; mitigations</h3>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 30%;">Concern</th>
+              <th style="width: 14%;">Severity</th>
+              <th>Mitigation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Conflicts with the express path</strong></td>
+              <td>High</td>
+              <td>"Show all options" link near the title bypasses progressive disclosure to a single-screen picker (Kristin's mockup). Default = guided; opt-out for power users.</td>
+            </tr>
+            <tr>
+              <td><strong>Compact selectors don't scale past ~6 options</strong></td>
+              <td>Medium</td>
+              <td>Lightweight selection works for Q1 (2 options) and custom-type Q2 (3 options). For "Which system?" with 5&ndash;20+ sources, use a logo grid or searchable input &mdash; same approach Dropbox uses for Industry.</td>
+            </tr>
+            <tr>
+              <td><strong>Conditional reveal can feel jumpy</strong></td>
+              <td>Low</td>
+              <td>Brief subtitle on Q3: "Since you picked QBO, we need one more thing." Sets expectation that the question exists <em>because</em> of a prior answer.</td>
+            </tr>
+            <tr>
+              <td><strong>Path length not visible up front</strong></td>
+              <td>Low&ndash;Medium</td>
+              <td>Progress bar at top. Optional explicit step counter ("Step 2 of 3") if user testing reveals confusion. Don't pre-commit to either &mdash; test first.</td>
+            </tr>
+            <tr>
+              <td><strong>Long screen at the end</strong></td>
+              <td>Low</td>
+              <td>If all 3 questions are answered + revealed, screen gets tall. Acceptable, but verify on smaller viewports during low-fi sketching.</td>
+            </tr>
+            <tr>
+              <td><strong>Power users still feel slowed down</strong></td>
+              <td>Medium</td>
+              <td>Resolved by the express bypass. Watch usage data after launch &mdash; if &gt;30% of admins use the bypass, default screen may need rethinking.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="lean-note" style="margin-top: 16px;">
+        <strong>Logic vs. presentation:</strong> the decision tree (questions, branches, conditions) is what we've agreed on. Progressive disclosure is how it's rendered &mdash; if user testing later shows the pattern doesn't work, the underlying logic stays valid and we can swap to a multi-step wizard or a single-screen picker without re-doing this work.
+      </div>
+    </section>
+
+    <section>
+      <h2>What still needs to be sketched</h2>
+      <p>
+        This document defines logic and interaction model. Visual design comes next. The unresolved
+        UI questions to work through when we move to wireframes:
+      </p>
+      <ul class="bullets">
+        <li><strong>Q1 visual treatment.</strong> Big two-up cards with descriptions? Radio with helper text? Segmented control? The choice signals which path is the "default" expectation.</li>
+        <li><strong>Q2 system picker layout.</strong> Logo grid: how many visible vs. behind a "More sources" expand? Sort order? Source descriptions inline or on hover?</li>
+        <li><strong>Q3 trigger affordance.</strong> Does Q3 fade in below Q2, slide in, or just appear? Subtle motion can soften the "extra question" feel.</li>
+        <li><strong>Express link placement.</strong> Top-right of screen? Subdued footer link? In-context "Skip the questions" CTA next to Q1? Discoverability vs. visual noise.</li>
+        <li><strong>Progress indicator style.</strong> Continuous bar (Dropbox-style) or stepped dots? Stepped reads as "you have N steps total" which conflicts with conditional questions.</li>
+        <li><strong>Empty-state hand-off.</strong> First-time user "Connect your data" hero &rarr; this screen. Same screen, different entry framing? Or a dedicated welcome screen first?</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>How this resolves Alex's SFTP question</h2>
+      <blockquote class="comment">
+        <strong>Alex:</strong> "I'm not clear on how this lines up with SFTP &hellip; how does that fit in?"
+      </blockquote>
+      <p>
+        Rebecca's framing put files and API under "custom" but didn't explicitly call out SFTP.
+        V2 places SFTP as a third sibling under <strong>Q2b: which connection type?</strong> &mdash;
+        same status as file and API. This keeps existing SFTP support intact (per Kristin's
+        "let's keep what's there now") and gives it a clear home in the new framework, so it doesn't
+        get orphaned or treated as a backdoor.
+      </p>
+    </section>
+
+    <section>
+      <h2>How Kristin's mockup fits</h2>
+      <p class="lede">
+        Kristin's "What Are We Connecting Today?" screen does a lot in one view: pick System + pick
+        Data domains. V2 splits those out across the question sequence &mdash; but the single-screen
+        pattern doesn't go away. It becomes the <strong>express path (Q4)</strong>: the same
+        compressed picker, repurposed for users who don't want to be walked through.
+      </p>
+      <p>
+        Two questions to resolve about Kristin's "Which Data?" column:
+      </p>
+      <ul class="bullets">
+        <li><strong>Does data-domain selection belong in selection, or in the wizard?</strong> The CDC PRD
+          puts table selection in step 3 of the setup wizard (Provision). If we surface data domains
+          here too, we either duplicate or replace that step. Worth a follow-up with Kristin and Alex.</li>
+        <li><strong>Is "Custom/Non-Standard" (in Kristin's data column) the same as Q1's "custom" branch?</strong>
+          The wording overlaps but the meaning differs &mdash; Kristin's appears to be a data-domain
+          (a non-standard FQ Model), Rebecca's is a transmission method. We'll want to disambiguate
+          before either ships.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Open questions</h2>
+      <ul class="bullets">
+        <li><strong>Naming.</strong> "Pre-Built" and "Custom" are working labels and may be jargony. Better candidates: <code>Standard / Custom</code>, <code>Connect a system / Bring your own data</code>, <code>FQ-supported / User-defined</code>. Worth a separate naming pass.</li>
+        <li><strong>Q1 visual treatment.</strong> Big two-up cards? Radio with descriptions? Toggle? The choice signals which path is the "default" expectation.</li>
+        <li><strong>Express path discoverability.</strong> Where does the "I know what I want" link live? Header link on Q1? A second CTA on the empty state? Part of the user's profile preference?</li>
+        <li><strong>Conditional Q3 logic.</strong> How does the system know which sources have multiple tiers? Source registry attribute &mdash; needs to be defined as part of the source taxonomy.</li>
+        <li><strong>Custom path scope.</strong> Are file, API, and SFTP all genuinely first-class? Or should one (e.g., file) get visual primacy because it's the most common custom path?</li>
+      </ul>
+    </section>
+
+    <footer>
+      Branch: <code>data-studio/connector-select-flow</code> &middot; Knowledge folder &middot; Companion: <a href="connector-select-flow.html">V1 — tier-based</a>
+    </footer>
+  </main>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'base',
+      themeVariables: {
+        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+        fontSize: '14px',
+        primaryColor: '#ffffff',
+        primaryBorderColor: '#d0d5dd',
+        primaryTextColor: '#101828',
+        lineColor: '#98a2b3',
+        secondaryColor: '#f7f8fa',
+        tertiaryColor: '#f7f8fa'
+      },
+      flowchart: {
+        curve: 'basis',
+        padding: 16,
+        nodeSpacing: 50,
+        rankSpacing: 60
+      }
+    });
+  </script>
+</body>
+</html>

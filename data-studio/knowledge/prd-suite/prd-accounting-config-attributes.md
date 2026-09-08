@@ -1,0 +1,244 @@
+# PRD: Accounting Config Attributes & Model Parameters
+
+| Field | Value |
+|---|---|
+| **Owner** | Alex Kearns |
+| **Status** | Draft |
+| **Epic / Jira** | IDEA-2630 |
+| **Last Updated** | 2026-06-23 |
+| **Target Release** | 2026-09-30 |
+| **Supersedes** | prd-accounting-config.md (Q2 draft — not fully delivered) |
+| **Dependencies** | Mapping Expressions v2 |
+
+---
+
+## Objective
+
+Data Studio currently supports parsing an accounting period from a filename or a file column. But this implementation has three gaps that limit what admins can do with file-level metadata.
+
+First, only accounting period is configurable as a parsed attribute — period mode (MTD, QTD, YTD, ITD), subledger name, and folder name cannot be declared and parsed the same way. Second, Excel reference cells are not a supported parsing source — some source files encode key attributes in fixed cell addresses (e.g., cell B2 always contains the accounting period) rather than in the filename or a data column. Third, once parsed, these attributes are only partially usable in models — they appear as Keywords in the field picker but cannot be referenced inside mapping expressions like CASE_WHEN.
+
+This PRD extends accounting config to cover four parseable source dataset-level attributes (accounting period, period mode, subledger name, folder name), adds Excel reference cell as a supported parsing source alongside filename tokens and columns, and ensures all parsed attributes are fully available as parameters in model mapping expressions — including CASE_WHEN and other mapping functions.
+
+---
+
+## Definitions & Terms
+
+See the canonical [Definitions & Terms](https://floqast.atlassian.net/wiki/spaces/Data/pages/4464869409) page.
+
+**Additional terms for this PRD:**
+
+| Term | Definition |
+|---|---|
+| **Accounting period** | The period boundary a file belongs to — typically end-of-month (e.g., March 2026). Parsed once per file and used to assign the file's data to the correct close period |
+| **Period mode** | The accumulation type the file's data represents. Values: MTD (month-to-date), QTD (quarter-to-date), YTD (year-to-date), ITD (inception-to-date). Distinct from accounting period: period tells you *when*, mode tells you *how much* of that time window the data covers |
+| **Subledger name** | An attribute identifying which subledger the file's data belongs to. Parseable from filename, column, Excel reference cell, or hard-coded value |
+| **Folder name** | An attribute identifying the folder the file was delivered from. Parseable from filename, column, Excel reference cell, or hard-coded value |
+| **Source dataset-level attribute** | A metadata value parsed once per file (not per row) — accounting period, period mode, subledger name, and folder name are all source dataset-level attributes |
+| **Excel reference cell** | A fixed cell address in an Excel file (e.g., B2) that contains a source dataset-level attribute value. The platform reads the value from that cell at runtime rather than scanning a column or the filename |
+| **Model parameter** | A source dataset-level attribute that has been parsed and made available for use in a model's mapping expressions — referenceable in mapping functions including CASE_WHEN |
+
+---
+
+## Why This Is Important
+
+File-level attributes like accounting period, subledger name, and period mode are foundational to how Data Studio organizes and processes financial data. They tell the platform what a file is, when it belongs, and how its data should be interpreted — before a single row of mapping logic runs.
+
+Today, these attributes are only partially supported. Accounting period can be parsed from a filename or column, but period mode, subledger name, and folder name cannot be declared the same way. And for customers whose source files encode these values in fixed Excel cells rather than filenames or columns, there is no supported path at all — the platform cannot read them.
+
+The second gap is in how parsed attributes flow into models. Accounting period already appears in the field picker, which means it can be added to a mapping. But it is not available as a reference value inside mapping expressions like CASE_WHEN — which is where admins actually need it. A common pattern is branching mapping logic based on period mode or subledger name: "if subledger is AP, map this way; if subledger is AR, map that way." That pattern is not possible today.
+
+Closing both gaps — extending which attributes can be configured, and making all of them fully available in mapping expressions — is what allows Data Studio to correctly handle the range of file formats that real customers send.
+
+---
+
+## Key Benefits
+
+| Beneficiary | Benefit |
+|---|---|
+| **Data Studio admins** | Can declare and parse four source dataset-level attributes (accounting period, period mode, subledger name, folder name) from filename tokens, columns, Excel reference cells, or hard-coded values — covering real-world file formats not handled today |
+| **Data Studio admins** | Parsed attributes are fully available in mapping expressions including CASE_WHEN — enabling branching logic based on subledger, period mode, or accounting period without workarounds |
+| **Customers with Excel sources** | Files that encode key attributes in fixed reference cells (e.g., cell B2 = accounting period) are supported natively — no manual intervention or file transformation required |
+| **Engineering / Support** | Reduces a class of manual workarounds and implementation team interventions for customers whose files don't fit the filename-token or column patterns |
+
+---
+
+## Use Cases
+
+1. **Accounting period from an Excel reference cell** — A customer's Excel file always encodes the accounting period in cell B2. The admin declares cell B2 as the source for accounting period during source dataset setup. At runtime, the platform reads that cell and assigns the file to the correct close period — without requiring the period to appear in the filename or a data column.
+
+2. **Period mode from a filename token** — A customer delivers separate YTD and MTD files each month, distinguished by a token in the filename (e.g., `GL_March_2026_YTD.csv`). The admin declares a period mode token in the filename pattern and maps it to the period mode attribute. The platform parses YTD/MTD from the filename on each file arrival.
+
+3. **Period mode as a hard-coded value** — A dataset always delivers MTD data. Rather than parsing period mode from the file, the admin declares "this dataset is always MTD" at setup time. The period mode attribute is set statically and becomes available as a model parameter on every file arrival.
+
+4. **Subledger name from a column** — A customer delivers a single file containing data from multiple subledgers, identified by a column value. The admin declares that column as the source for subledger name. The parsed subledger name becomes available as a model parameter.
+
+5. **Branching mapping logic using subledger name** — An admin needs to map a source field differently depending on which subledger the file belongs to. They use subledger name as a reference value inside a CASE_WHEN expression — "if subledger name is AP, map to accounts payable; if subledger name is AR, map to accounts receivable." This is not possible today.
+
+6. **Branching mapping logic using period mode** — An admin needs to apply different mapping rules for YTD files vs. MTD files from the same source. They reference period mode inside a CASE_WHEN expression to branch the logic accordingly.
+
+---
+
+## Assumptions — Established
+
+1. All four attributes are configured at the source dataset level and apply to every file that matches the dataset's filename pattern.
+2. Each attribute is parsed once per file — not per row. The parsed value is a source dataset-level constant for that run.
+3. The Excel reference cell parsing source applies to Excel files only (`.xls`, `.xlsx`). Extension to CSV is a future consideration.
+4. A hard-coded value is a valid source for period mode, subledger name, and folder name. Hard-coded accounting period is not supported — accounting period is always dynamic.
+5. All four attributes, once parsed, are available as model parameters in the field picker and as reference values in mapping expressions including CASE_WHEN.
+6. The existing accounting period parsing behavior (filename token and column) is preserved — this PRD extends it, it does not replace it.
+7. Configuring period mode, subledger name, and folder name is optional — a dataset that does not declare these attributes continues to function as today.
+8. Period mode values are: MTD (month-to-date), QTD (quarter-to-date), YTD (year-to-date), ITD (inception-to-date).
+
+---
+
+## Open Items to Confirm
+
+| # | Item | Owner | Status |
+|---|---|---|---|
+| OI-1 | What is the correct user-facing label for source dataset-level attributes in the field picker and mapping expressions — "Keywords," "Parameters," "File Attributes," or something else? | PM / Design | Open |
+| OI-2 | Final user-facing name for "period mode" | PM | Open |
+
+---
+
+## Scope
+
+**In Scope**
+
+- Four parseable source dataset-level attributes: accounting period, period mode, subledger name, folder name
+- Four parsing sources: filename token, column in the file, Excel reference cell, hard-coded value (hard-coded not available for accounting period)
+- Excel reference cell as a new parsing source — admin declares a fixed cell address and the platform reads that cell's value at runtime
+- All four parsed attributes available in the field picker as model parameters
+- All four parsed attributes available as reference values in mapping expressions, including CASE_WHEN and other mapping functions
+- Configuration as part of the source dataset setup flow
+- Error handling for Excel reference cell parsing failures
+
+**Out of Scope**
+
+- Excel reference cell parsing for CSV files — future consideration
+- Per-row attribute parsing — attributes are source dataset-level constants only
+- Hard-coded accounting period — accounting period is always dynamic
+- Changes to how entity mapping works — covered in the Entity Mapping v2 PRD
+- Retroactive re-parsing of previously processed files when attribute config changes
+- User-facing naming finalization for "period mode" — TBD before launch
+
+---
+
+## Requirements
+
+### Story 1: Extended source dataset-level attribute configuration
+
+**As a** Data Studio admin, **I want to** configure period mode, subledger name, and folder name as parseable source dataset-level attributes **so that** my source dataset captures the full set of metadata needed for accurate downstream processing and mapping.
+
+**Acceptance Criteria:**
+- AC1: In source dataset setup, admins can configure four source dataset-level attributes: accounting period, period mode, subledger name, and folder name
+- AC2: For each attribute, the admin can select from the available parsing sources: filename token, column, Excel reference cell, or hard-coded value (hard-coded not available for accounting period)
+- AC3: Period mode, subledger name, and folder name support a hard-coded value option — the admin declares a static value that applies to every file in this dataset
+- AC4: Configuring period mode, subledger name, and folder name is optional — datasets that do not configure these attributes continue to function as today
+- AC5: The accounting period configuration behavior (filename token and column) is preserved from the existing implementation
+
+---
+
+### Story 2: Excel reference cell as a parsing source
+
+**As a** Data Studio admin, **I want to** declare a fixed Excel cell address as the source for a source dataset-level attribute **so that** files that encode key metadata in reference cells are supported without requiring filename or column patterns.
+
+**Acceptance Criteria:**
+- AC1: For any source dataset-level attribute, the admin can select "Excel reference cell" as the parsing source
+- AC2: When selected, the admin enters a cell address (e.g., B2) that the platform will read at runtime
+- AC3: The platform reads the value from the declared cell on each file arrival and uses it as the attribute value for that run
+- AC4: Excel reference cell is available for Excel files (`.xls`, `.xlsx`) only — it does not appear as an option for non-Excel datasets
+- AC5: If the declared cell is empty or does not exist in an arriving file, the run fails with a clear error indicating which attribute could not be parsed and from which cell
+
+---
+
+### Story 3: Parsed attributes available in mapping expressions
+
+**As a** Data Studio admin, **I want to** reference parsed source dataset-level attributes inside mapping expressions including CASE_WHEN **so that** I can write branching mapping logic based on subledger name, period mode, or other attributes.
+
+**Acceptance Criteria:**
+- AC1: All four configured source dataset-level attributes (accounting period, period mode, subledger name, folder name) are available in the field picker when building a model's field mappings
+- AC2: All four attributes are available as reference values inside mapping expressions — including CASE_WHEN condition branches and other mapping functions that accept field references
+- AC3: In the CASE_WHEN builder, source dataset-level attributes appear in the reference value dropdown alongside source fields
+- AC4: A source dataset-level attribute that has not been configured on the source dataset does not appear as an available parameter in the model's mapping expressions
+- AC5: The attribute value used in mapping expressions is the value parsed for that specific file run — not a static or cached value from a prior run
+
+---
+
+### Story 4: Error handling for Excel reference cell parsing failures
+
+**As a** Data Studio admin, **I want to** receive a clear error when a declared reference cell cannot be parsed **so that** I can identify and fix the issue without having to diagnose a silent data problem.
+
+**Acceptance Criteria:**
+- AC1: If a declared reference cell is empty in an arriving file, the run fails with an error identifying the attribute and the cell address that could not be read
+- AC2: If a declared reference cell contains a value that cannot be parsed into the expected format, the run fails with an error identifying the attribute, the cell address, and the value that was found
+- AC3: If a declared reference cell does not exist in the arriving file (e.g., the file has fewer rows or columns than expected), the run fails with a clear error
+- AC4: In all failure cases, no partial data is written — the run fails cleanly before any records are processed
+- AC5: The error is surfaced in the model's run log so the admin can diagnose and retry
+
+---
+
+## UX Requirements
+
+**Reference:** No prototype reference yet — TBD with designer.
+
+**Source dataset setup — attribute configuration**
+- The four attributes (accounting period, period mode, subledger name, folder name) are configurable within the source dataset setup flow
+- Each attribute has a parsing source selector: filename token, column, Excel reference cell, hard-coded value (hard-coded not shown for accounting period)
+- Excel reference cell option: a text input for the cell address (e.g., B2), only visible for Excel datasets
+- Hard-coded value option: a text input for the static value
+- Unconfigured attributes are collapsed or hidden by default — the admin opts in to configuring each one
+- The existing accounting period UI is preserved and extended to include the Excel reference cell option
+
+**Field picker — model mapping**
+- Configured source dataset-level attributes appear in the field picker, distinct from source fields
+- Only attributes that have been configured on the source dataset appear — unconfigured attributes are not shown
+- Attribute names use their user-facing labels (final names TBD)
+
+**Mapping Builder — CASE_WHEN and expressions**
+- Source dataset-level attributes appear in the reference value dropdown inside CASE_WHEN condition branches
+- Attributes are visually distinguished from source fields in the dropdown
+
+**Open UX questions:**
+- How should source dataset-level attributes be labeled and visually distinguished from source fields in the field picker and CASE_WHEN builder?
+- How does the attribute configuration section sit within the existing source dataset setup flow — a new step, an extension of an existing step, or a collapsible section?
+- What is the visual treatment for a hard-coded value vs. a dynamically parsed value in the configuration UI?
+- Should the admin be able to preview a parsed attribute value against a sample file before saving the configuration?
+
+---
+
+## Open Questions
+
+| # | Question | Owner |
+|---|---|---|
+| OQ-1 | What is the correct user-facing label for source dataset-level attributes in the field picker and mapping expressions — "Keywords," "Parameters," "File Attributes," or something else? | PM / Design |
+| OQ-2 | How should source dataset-level attributes be visually distinguished from source fields in the field picker and CASE_WHEN builder — or should they be? | Design |
+| OQ-3 | If an admin adds or changes a source dataset-level attribute configuration on a published dataset, how does this interact with versioning — does it require creating a new Draft, does it trigger a publish, or is it a lightweight config change outside the versioning lifecycle? | Engineering / PM |
+| OQ-4 | How do changes to source dataset-level attributes affect teardown and rehydration — if a dataset is torn down and rehydrated, are the attribute configs preserved, re-applied, or reset? | Engineering |
+| OQ-5 | If a source dataset-level attribute is removed or reconfigured after models have already been built using it in mapping expressions, what happens to those expressions — do they break, surface a warning, or fall back gracefully? | Engineering / PM |
+| OQ-6 | Should the admin be able to preview a parsed attribute value against a sample file before saving the configuration? | PM / Design |
+| OQ-7 | What is the final user-facing name for "period mode"? | PM |
+
+---
+
+## Gaps
+
+1. **Versioning and attribute config changes** — The interaction between source dataset-level attribute configuration changes and the versioning lifecycle (Draft, publish, effective date) is unresolved — tracked as OQ-3. Until this is answered, it is unclear whether attribute config changes are safe to make on a live dataset without a formal publish step.
+
+2. **Teardown and rehydration behavior** — How attribute configurations behave through a dataset teardown and rehydration cycle is undefined — tracked as OQ-4. This is a potential data loss vector if configs are not preserved correctly.
+
+3. **Downstream expression breakage** — If an attribute is removed or reconfigured after models have been built using it in mapping expressions, the impact on those expressions is undefined — tracked as OQ-5. A silent break here could cause incorrect data to be produced without any visible error.
+
+4. **CSV reference cell support** — Excel reference cell parsing is limited to `.xls` and `.xlsx` files in Q3. Customers with fixed-cell patterns in CSV files are not served by this feature. This is noted as a future consideration.
+
+---
+
+## References
+
+| Resource | Link |
+|---|---|
+| Definitions & Terms | [Confluence](https://floqast.atlassian.net/wiki/spaces/Data/pages/4464869409) |
+| Accounting Config Q2 PRD (superseded) | [prd-accounting-config.md](prd-accounting-config.md) · [Confluence](https://floqast.atlassian.net/wiki/spaces/Data/pages/4523163672) |
+| Entity Mapping v2 PRD | [prd-entity-mapping.md](prd-entity-mapping.md) · [Confluence](https://floqast.atlassian.net/wiki/spaces/Data/pages/4600561831/Entity+Mapping+v2) |
+| Mapping Expressions v2 PRD | [prd-mapping-expressions-v2.md](prd-mapping-expressions-v2.md) · [Confluence](https://floqast.atlassian.net/wiki/spaces/Data/pages/4594892801/Mapping+Expressions+v2) |
+| IDEA-2630 — Refining File Ingestion Experience | [Jira](https://floqast.atlassian.net/jira/polaris/projects/IDEA/ideas/view/11291632?selectedIssue=IDEA-2630) |

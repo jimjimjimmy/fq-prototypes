@@ -1,0 +1,71 @@
+@import './fonts.css';
+@import './tailwind.css';
+@import './theme.css';
+
+/*
+ * Global typography defaults — page body defaults to the FlowUI body
+ * font (Inter), so any text that doesn't explicitly opt into a different
+ * family inherits the design system's body-text spec. Display elements
+ * (app title, large amounts, section headings) opt in via .font-display
+ * which is Playfair Display. Monospace via font-mono tailwind utility
+ * resolves to JetBrains Mono via CSS variable. Section headers and
+ * buttons opt into Museo Sans via .font-header.
+ */
+html,
+body {
+  font-family: var(--font-body);
+  color: var(--foreground);
+  background: var(--background);
+}
+
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+/* JetBrains Mono for every `font-mono` utility — softer than the
+ * default system monospace. */
+.font-mono {
+  font-family: var(--font-mono) !important;
+  font-feature-settings: 'cv01', 'cv02';
+}
+
+/* Slight softening on all buttons so the prototype reads as a polished
+ * surface, not a bare utility. Components can still override. */
+button {
+  font-family: inherit;
+}
+
+/*
+ * Always show the hand cursor on anything the user can click. Tailwind
+ * v4's preflight ships with `cursor: default` on buttons, which makes
+ * link-styled text feel inert. Restore the pointer for buttons, anchors,
+ * any element with role="button" or role="link", and for elements
+ * carrying an `onClick`-driven hover state (we rely on the standard
+ * Tailwind cursor utilities to opt out — e.g. `cursor-default`,
+ * `cursor-not-allowed` — wherever a button is read-only or disabled).
+ */
+button:not(:disabled),
+a,
+[role="button"]:not([aria-disabled="true"]),
+[role="link"]:not([aria-disabled="true"]) {
+  cursor: pointer;
+}
+
+/* FlowUI header font — Museo Sans. Used on buttons, section headers, and
+ * other elements that match Figma's `font-family/header` token. Defined as
+ * a real CSS utility class because Tailwind v4 doesn't reliably handle
+ * arbitrary font-family values containing spaces. */
+.font-header {
+  font-family: var(--font-header);
+}
+
+/* FlowUI body font — Inter. Already the page default via html/body
+ * above, but kept as an explicit utility class for parity with
+ * .font-header and for components that need to opt back in after
+ * overriding font-family inline or via inheritance from a styled
+ * parent. Tailwind v4's `font-['Inter']` arbitrary notation isn't
+ * reliable across the codebase. */
+.font-body {
+  font-family: var(--font-body);
+}

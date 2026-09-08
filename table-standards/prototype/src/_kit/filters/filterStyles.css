@@ -1,0 +1,87 @@
+/*
+ * FlowUI restyle of AG Grid's NATIVE per-column filter popups (set / text / number).
+ * Benjamin: "I want to see if we can style that ag-grid filter box to look more flowui."
+ * We keep AG Grid's out-of-the-box filter ENGINE and only restyle its chrome — Inter type,
+ * 6px radii, FlowUI border/greens, comfortable spacing — so it reads as a FloQast control.
+ *
+ * These override themeQuartz defaults, so a few rules need specificity/!important.
+ */
+
+.ag-popup-child,
+.ag-menu,
+.ag-filter {
+  font-family: Inter, system-ui, sans-serif !important;
+  border-radius: 8px !important;
+  border: 1px solid #e1e6ef !important;
+  box-shadow: 0 6px 20px rgba(29, 36, 51, 0.12) !important;
+  overflow: hidden;
+}
+/* The set-filter body sometimes carries its own dark border — neutralize it. */
+.ag-menu .ag-menu-list,
+.ag-menu .ag-filter-body-wrapper,
+.ag-set-filter {
+  border-color: #f1f3f9 !important;
+}
+
+/* The set-filter search box + text/number filter inputs → FlowUI form field */
+.ag-filter .ag-input-field-input,
+.ag-mini-filter .ag-input-field-input {
+  border: 1px solid #cbd2e1 !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  min-height: 30px !important;
+  padding: 4px 8px !important;
+  color: #1d2433 !important;
+}
+.ag-filter .ag-input-field-input:focus,
+.ag-mini-filter .ag-input-field-input:focus {
+  border-color: #1fac76 !important;
+  box-shadow: 0 0 0 2px rgba(31, 172, 118, 0.15) !important;
+  outline: none !important;
+}
+
+/* Set-filter option list rows */
+.ag-set-filter-list {
+  padding: 4px !important;
+}
+.ag-set-filter-item {
+  border-radius: 6px !important;
+  padding: 2px 6px !important;
+}
+.ag-set-filter-item:hover {
+  background: #f8fafc !important;
+}
+.ag-set-filter-item .ag-label,
+.ag-filter-title {
+  font-size: 12px !important;
+  color: #1d2433 !important;
+}
+
+/* Apply / Reset / Clear footer → FlowUI buttons (primary green + secondary) */
+.ag-filter-apply-panel {
+  padding: 8px !important;
+  border-top: 1px solid #f1f3f9 !important;
+  gap: 8px !important;
+}
+.ag-filter-apply-panel button {
+  font-family: Inter, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  border-radius: 6px !important;
+  padding: 6px 12px !important;
+  border: 1px solid #cbd2e1 !important;
+  background: #ffffff !important;
+  color: #424867 !important;
+  cursor: pointer;
+}
+.ag-filter-apply-panel button.ag-standard-button:first-child,
+.ag-filter-apply-panel button[data-ref='applyFilterButton'] {
+  background: #1fac76 !important;
+  border-color: #1fac76 !important;
+  color: #ffffff !important;
+}
+
+/* Header filter (funnel) icon — muted until active, FlowUI green when a filter is on */
+.ag-header-cell-filtered .ag-icon-filter {
+  color: #1fac76 !important;
+}

@@ -1,0 +1,86 @@
+@import "tailwindcss/theme";
+@import "tailwindcss/utilities";
+
+/* Reset button browser defaults — Tailwind v4 without preflight
+   doesn't reset these. Font-family override is in main.tsx
+   (injected after Theme.apply() for correct source order). */
+button {
+  color: inherit;
+}
+
+.writing-mode-vertical {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+.flexlayout__layout {
+  position: relative !important;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+
+.flexlayout__splitter {
+  background-color: var(--flo-sem-color-text-tertiary, #adb2bb) !important;
+}
+
+.flexlayout__splitter:hover {
+  background-color: var(--flo-sem-color-success) !important;
+}
+
+.flexlayout__tab {
+  background-color: white !important;
+  border-color: var(--flo-sem-color-border-default) !important;
+}
+
+.flexlayout__tab_button {
+  color: var(--flo-sem-color-text-secondary, #424867) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  font-family: 'Museo Sans', 'Museo_Sans', sans-serif !important;
+}
+
+.flexlayout__tab_button--selected {
+  background-color: white !important;
+  border-bottom: 2px solid var(--flo-sem-color-success) !important;
+  color: var(--flo-sem-color-text-default, #1d2433) !important;
+}
+
+.flexlayout__tab_button:hover {
+  background-color: var(--flo-base-color-neutral-100) !important;
+}
+
+.flexlayout__tabset {
+  background-color: white !important;
+}
+
+.flexlayout__tabset_header {
+  background-color: var(--flo-base-color-neutral-100, #f8f9fb) !important;
+  border-bottom: 1px solid var(--flo-sem-color-border-default) !important;
+}
+
+.flexlayout__tabset_tabbar_outer {
+  background-color: var(--flo-base-color-neutral-100, #f8f9fb) !important;
+}
+
+.flexlayout__tabset_content {
+  background-color: white !important;
+  overflow: hidden;
+}
+
+.flexlayout__tab_toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.flexlayout__border {
+  background-color: white !important;
+  border: 1px solid var(--flo-sem-color-border-default) !important;
+}
+
+/* Suppress AG Grid cell focus ring — row selection only, no per-cell border */
+.ag-cell-focus {
+  border-color: transparent !important;
+  outline: none !important;
+}

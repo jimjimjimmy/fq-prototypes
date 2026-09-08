@@ -1,0 +1,340 @@
+# Data Studio: Notifications (DRAFT)
+
+| Field | Value |
+|---|---|
+| Target release | TBD |
+| Epic | _(link to epic)_ |
+| Idea Link | https://floqast.atlassian.net/browse/IDEA-2488 |
+| Document status | DRAFT |
+| Document owner | Alex Kearns |
+| Designer | _(assign)_ |
+| Tech lead | _(assign)_ |
+| Technical writers | _(assign)_ |
+| QA | _(assign)_ |
+| Depends on | [Logging & Audit sub-PRD](https://floqast.atlassian.net/wiki/spaces/Data/pages/4508254281) · Scheduling sub-PRD · [Pull API Support](https://floqast.atlassian.net/wiki/spaces/Data/pages/4491214866) · [Auth Type Support](https://floqast.atlassian.net/wiki/spaces/Data/pages/4491214908) |
+| Related PRDs | [Logging & Audit](https://floqast.atlassian.net/wiki/spaces/Data/pages/4508254281) · [Scheduling](https://floqast.atlassian.net/wiki/spaces/Data/pages/4504485941) · [Pull API Support](https://floqast.atlassian.net/wiki/spaces/Data/pages/4491214866) · [Auth Type Support](https://floqast.atlassian.net/wiki/spaces/Data/pages/4491214908) |
+
+> ⚠️ **Scope note:** The current IDEA-2488 Jira ticket lists "SLA alerting and late data notifications" as explicitly out of scope for the initial Beta milestone. This sub-PRD captures requirements for a near-follow-on release. Target release is TBD pending prioritization discussion with Steve. See OQ-1.
+
+---
+
+## 🎯 Objective
+
+Data Studio runs pipelines on behalf of customers — often overnight, unattended. When something goes wrong (a job fails, data doesn't arrive on schedule, a schema changes unexpectedly), customers currently have no proactive way to know. They discover problems only when they open the product and notice missing or stale data, or when FQ support reaches out.
+
+This PRD defines a notification system that proactively alerts the right people — FloQast Admins and optionally FQ support staff — when job events require attention. Notifications close the feedback loop between what Data Studio does and what the admin needs to know.
+
+**Note on connector-level notifications:** The Pull API Support PRD (REQ-25) and Auth Type Support PRD both define email notification behavior at the connector level (sync log export emails, auth failure routing). This PRD must align with those requirements to ensure a consistent email notification experience across connector-level and model-level events.
+
+---
+
+## 🔤 Definitions & Terms
+
+| Term | Definition |
+|---|---|
+| **Notification** | A proactive, user-facing alert triggered by a job or system event in Data Studio. |
+| **Notification trigger** | The event that causes a notification to be sent (e.g., job failed, data late, auth failure). |
+| **Notification channel** | The delivery method for a notification (e.g., in-app, email). |
+| **Late data** | A data job that did not complete within its defined schedule window. Requires the Scheduling sub-PRD to be in place. |
+| **Connector-level notification** | An email triggered by a connector event (e.g., sync log export ready, auth failure). Defined in Pull API Support and Auth Type Support PRDs. |
+
+---
+
+## 🏅 Why This Is Important
+
+Data Studio is a platform customers depend on for financial close. If a pipeline fails the night before close, an admin needs to know immediately — not when they open the product the next morning. Today, there is no proactive alerting:
+
+- Customers discover job failures by noticing stale data in downstream applications
+- FQ support learns about failures reactively, from customer tickets
+- There is no mechanism for an admin to configure when or how they want to be notified
+
+The Logging & Audit PRD ensures failures are recorded. Notifications ensures the right people are told.
+
+---
+
+## 💡 Key Benefits
+
+| Benefit | Who It Helps |
+|---|---|
+| Admins are alerted immediately when a job fails — before they notice stale data | FloQast Admin |
+| Admins are warned when expected data hasn't arrived by its scheduled window | FloQast Admin, Controller |
+| FQ support can be looped in on critical failures without waiting for a customer ticket | FQ Implementation, Support |
+| Admins can configure which events they care about and how they want to be notified | FloQast Admin |
+| On-demand refresh results are confirmed so admins don't have to poll for status | FloQast Admin |
+
+---
+
+## ✅ Use Cases
+
+| # | Use Case | Description |
+|---|---|---|
+| UC-1 | Job failure before close | A nightly GL transaction job fails at 2am. The FloQast Admin receives an email notification and logs in to investigate before the close team starts work at 8am. |
+| UC-2 | Late data warning | A connection is scheduled to deliver data by 6am. By 7am the data hasn't arrived. The admin receives a notification that data is late for that connection. |
+| UC-3 | On-demand refresh confirmation | An admin triggers an on-demand refresh after updating a transformation function. They receive an in-app notification when the refresh completes (or fails). |
+| UC-4 | FQ support looped in | A critical pipeline fails for a large CAS customer. The notification is routed to both the FloQast Admin and the FQ implementation team member assigned to that customer. |
+| UC-5 | Auth failure on connector sync | A Pull API connector fails overnight due to an expired credential. The admin receives an email notification with a direct link to re-enter credentials. |
+| UC-6 | Sync log export ready | An admin requests a large sync log export. They receive an email when the file is ready to download. |
+
+---
+
+## 🤔 Assumptions
+
+**Established**
+- Notifications are triggered by events in the job log — this PRD does not define new event types, only the notification layer on top of existing log events.
+- The minimum notification channel for V1 is **email**. In-app notifications are desirable but lower priority.
+- Notification preferences are configurable per user — admins can opt in/out of specific notification types.
+- Notifications are scoped to the TLC — an admin only receives notifications for their own TLC's jobs.
+- "Late data" notifications require the Scheduling sub-PRD to be complete.
+- Connector-level email notifications (Pull API Support, Auth Type Support) should use the same email delivery mechanism and format as model-level notifications defined here.
+
+**Open Items to Confirm**
+
+| # | Assumption | Confirm with |
+|---|---|---|
+| A1 | Email is the V1 notification channel. | PM + Engineering |
+| A2 | Notification preferences are per-user (not per-TLC). | PM + Design |
+| A3 | FQ staff (support, implementation) can be added as notification recipients for a customer's TLC. | PM + Engineering |
+| A4 | Notifications are not sent for internal FQ system jobs (health checks, platform maintenance). | Engineering |
+| A5 | Connector-level notifications (Pull API, Auth) and model-level notifications share the same delivery infrastructure. | PM + Engineering |
+
+---
+
+## 🗺️ Scope
+
+### 🚗 In Scope
+
+**Notification triggers (V1):**
+- Job failure (scheduled or on-demand)
+- Data late — expected job did not complete within schedule window _(requires Scheduling sub-PRD)_
+- On-demand refresh completed (success or failure)
+- Auth failure on connector sync
+- Sync log export ready
+
+**Notification channels (V1):** Email
+
+**Configuration:**
+- Per-user notification preferences (opt in/out per trigger type)
+- Ability to add additional recipients (e.g., FQ implementation team member) per TLC
+
+### 🚦 Out of Scope
+
+- In-app notification center (V1 is email-only)
+- SMS or push notifications
+- Webhook/programmatic notifications to external systems
+- Notifications for configuration changes (covered by the Audit Log — LOG-2)
+- Schema change notifications _(future consideration — see OQ-5)_
+- Slack or other third-party channel integrations (V1 scope)
+
+---
+
+## 📋 Requirements — User Stories
+
+### Quick Reference
+
+| # | Story | Importance |
+|---|---|---|
+| NOTIF-1 | Job failure notification | High |
+| NOTIF-2 | Data late notification | High |
+| NOTIF-3 | On-demand refresh result notification | Medium |
+| NOTIF-4 | User notification preferences | Medium |
+| NOTIF-5 | Additional recipient configuration (FQ staff) | Low |
+
+---
+
+### NOTIF-1 — Job Failure Notification
+
+**User Story:** As a FloQast Admin, I want to be notified immediately when a scheduled or on-demand data job fails so that I can investigate and resolve the issue before it affects my close process.
+
+**Importance:** High
+
+**Acceptance Criteria:**
+
+**AC-NOTIF-1-01 — Email sent on job failure**
+```
+Given a data job fails
+When the failure is recorded in the job log
+Then an email notification is sent to all configured recipients within 15 minutes (SLA TBD — see OQ-3)
+```
+
+**AC-NOTIF-1-02 — Notification email contains required details**
+```
+Given a job failure notification is sent
+Then the email includes: model name, connection name, failure timestamp, error summary,
+and a direct link to the Logs tab for that model
+```
+
+**AC-NOTIF-1-03 — Repeated failures do not produce unbounded emails**
+```
+Given the same job fails on consecutive runs
+Then notification frequency is throttled or escalation logic applies (see OQ-4)
+```
+
+---
+
+### NOTIF-2 — Data Late Notification
+
+**User Story:** As a FloQast Admin, I want to be notified when a scheduled data job hasn't completed by its expected window so that I can investigate whether data is delayed before my team needs it.
+
+**Importance:** High
+
+**Depends on:** Scheduling sub-PRD _(requires a defined schedule window per connection)_
+
+**Acceptance Criteria:**
+
+**AC-NOTIF-2-01 — Email sent when data is late**
+```
+Given a connection has a defined schedule window
+And the scheduled job has not completed by the end of that window
+Then an email notification is sent to configured recipients
+```
+
+**AC-NOTIF-2-02 — Notification includes context**
+```
+Given a late data notification is sent
+Then the email includes: connection name, expected completion time, current time,
+and a link to the connection in Data Studio
+```
+
+**AC-NOTIF-2-03 — Notification is suppressed if job completes before delivery**
+```
+Given a job completes successfully
+And a late notification has not yet been sent
+Then no late notification is sent
+```
+
+---
+
+### NOTIF-3 — On-Demand Refresh Result Notification
+
+**User Story:** As a FloQast Admin, I want to be notified when an on-demand refresh I triggered has completed or failed so that I don't have to stay in the product waiting for it to finish.
+
+**Importance:** Medium
+
+**Acceptance Criteria:**
+
+**AC-NOTIF-3-01 — In-app notification on refresh completion**
+```
+Given I triggered an on-demand refresh
+When the refresh completes (success or failure)
+Then I receive an in-app notification indicating the result
+```
+
+**AC-NOTIF-3-02 — Email sent on refresh failure**
+```
+Given an on-demand refresh I triggered fails
+Then I also receive an email notification with the error details
+```
+
+---
+
+### NOTIF-4 — User Notification Preferences
+
+**User Story:** As a FloQast Admin, I want to configure which notification types I receive so that I only get alerts that are relevant to me.
+
+**Importance:** Medium
+
+**Acceptance Criteria:**
+
+**AC-NOTIF-4-01 — Notification preferences are configurable per user**
+```
+Given I navigate to my notification settings in Data Studio
+Then I can toggle on/off each notification type: Job Failure, Data Late, On-demand Refresh Result
+```
+
+**AC-NOTIF-4-02 — Default state is all notifications enabled**
+```
+Given a new user is created in Data Studio
+Then all notification types are enabled by default
+```
+
+**AC-NOTIF-4-03 — Preferences can be updated without contacting FQ support**
+```
+Given I want to change my notification preferences
+Then I can do so from within Data Studio without filing a support request
+```
+
+---
+
+### NOTIF-5 — Additional Recipient Configuration
+
+**User Story:** As a FloQast implementation team member, I want to be added as a notification recipient for a customer's TLC so that I'm alerted to issues without the customer having to contact me.
+
+**Importance:** Low
+
+**Acceptance Criteria:**
+
+**AC-NOTIF-5-01 — Additional recipients can be added at TLC level**
+```
+Given I am an authorized admin for a TLC
+Then I can add one or more additional email addresses to receive job failure and data late
+notifications for that TLC
+```
+
+**AC-NOTIF-5-02 — Additional recipients receive the same notification content**
+```
+Given an additional recipient is configured
+When a notification is triggered
+Then they receive the same email content as the primary admin recipients
+```
+
+---
+
+## 💻 UX Requirements
+
+### Notification Email Design
+
+All notification emails should include:
+- Clear subject line identifying event type, model/connection name, and TLC
+- Brief summary of what happened
+- Direct deep link into the relevant Data Studio view
+- Unsubscribe / manage preferences link
+
+### Notification Preferences Location
+
+- Surfaced in user account settings within Data Studio
+- Each user manages their own preferences — not buried in a global admin settings page
+
+### In-App Notification (future — NOTIF-3 and V2)
+
+- Notification bell icon in the Data Studio header
+- Badge count for unread notifications
+- Notification feed shows recent events with timestamp and status
+- _(In-app notifications are out of scope for V1 but should be accounted for in the design system)_
+
+---
+
+## ❓ Open Questions
+
+| # | Question | Owner | Status | Answer |
+|---|---|---|---|---|
+| OQ-1 | The current IDEA-2488 Jira ticket lists notifications as out of scope for Beta. Is this sub-PRD targeting Beta or a post-Beta release? | PM + Steve | Open | |
+| OQ-2 | Is email the right V1 channel, or should in-app notifications be prioritized? | PM + Design | Open | |
+| OQ-3 | What is the acceptable SLA for job failure notifications to be delivered after the failure event is recorded? | PM + Engineering | Open | |
+| OQ-4 | How should notification throttling work when the same job fails repeatedly? | PM + Engineering | Open | |
+| OQ-5 | Should schema change events trigger a notification? | PM | Open | |
+| OQ-6 | Is Slack integration in scope for V2? | PM | Open | |
+| OQ-7 | Should notification emails be sent from a product email address or a no-reply address? | PM + Engineering | Open | |
+| OQ-8 | Do Pull API Support and Auth Type Support use the same email delivery infrastructure as model-level notifications, or separate systems? | PM + Engineering | Open | |
+
+---
+
+## 🚫 Gaps
+
+| # | Gap | Impact | Proposed Resolution |
+|---|---|---|---|
+| G1 | Scope and timeline are unconfirmed. Notifications are currently out of scope for Beta (IDEA-2488). | High | Schedule a prioritization conversation with Steve. |
+| G2 | The notification trigger model depends on the job log event schema from the Logging & Audit PRD. | Medium | Align log schema with notification payload requirements before implementation. |
+| G3 | No definition of who the "authorized admin" is for adding additional recipients (NOTIF-5). | Low | Confirm RBAC model with Engineering. |
+| G4 | Pull API Support and Auth Type Support both define email notification behavior independently. | Medium | Confirm with Engineering whether a unified email notification pipeline is feasible. |
+
+---
+
+## 📚 References
+
+- [IDEA-2488 — DP 2.0: Platform Features](https://floqast.atlassian.net/browse/IDEA-2488)
+- [Logging & Audit sub-PRD](https://floqast.atlassian.net/wiki/spaces/Data/pages/4508254281)
+- [Scheduling sub-PRD](https://floqast.atlassian.net/wiki/spaces/Data/pages/4504485941)
+- [Pull API Support](https://floqast.atlassian.net/wiki/spaces/Data/pages/4491214866)
+- [Auth Type Support](https://floqast.atlassian.net/wiki/spaces/Data/pages/4491214908)
+- [Definitions & Terms (Data Studio)](https://floqast.atlassian.net/wiki/spaces/Data/pages/4464869409)
+- Confluence: https://floqast.atlassian.net/wiki/spaces/Data/pages/4504551492

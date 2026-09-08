@@ -1,0 +1,655 @@
+<h1>Data Studio: CDC Connection Setup (DRAFT)</h1>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Target release</strong></td>
+<td>TBD</td>
+</tr>
+<tr>
+<td><strong>Epic</strong></td>
+<td>(link to epic)</td>
+</tr>
+<tr>
+<td><strong>Document status</strong></td>
+<td>DRAFT</td>
+</tr>
+<tr>
+<td><strong>Document owner</strong></td>
+<td>@Alex Kearns</td>
+</tr>
+<tr>
+<td><strong>Designer</strong></td>
+<td>(assign)</td>
+</tr>
+<tr>
+<td><strong>Tech lead</strong></td>
+<td>(assign)</td>
+</tr>
+<tr>
+<td><strong>Technical writers</strong></td>
+<td>(assign)</td>
+</tr>
+<tr>
+<td><strong>QA</strong></td>
+<td>(assign)</td>
+</tr>
+<tr>
+<td><strong>Depends on</strong></td>
+<td>Sub-PRD 1: Model Creation &amp; Source Configuration</td>
+</tr>
+<tr>
+<td><strong>Related PRDs</strong></td>
+<td>Merging Catalog &amp; Lineage Tabs · Model Search &amp; Filter · Sub-PRD 2: Field Mapping</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Objective</h2>
+<p>CDC connections (e.g., NetSuite) are currently supported in Data Platform 1.0. Admins set up a connection by selecting a source, providing a connection name and credentials. However, the available tables for each connection are fixed — if a customer wants additional tables, engineering must manually add support. There is no self-serve path.</p>
+<p>This PRD defines the expansion of the CDC connection experience into <strong>Data Studio</strong>, with two new capabilities:</p>
+<ol>
+<li><strong>Self-serve table selection</strong> — Admins can select additional tables beyond the default set without requiring an engineering ticket. The system surfaces a FQ-controlled list of supported tables for the connected source — only tables with pre-defined Source-to-Target mappings are available. Admins choose what to include from that list.</li>
+<li><strong>Automatic model creation with Source-to-Target mappings</strong> — Once a connection is established and tables are selected, Data Studio automatically creates FloQast standard models by applying pre-defined Source-to-Target field mapping rules that transform raw source data into the FloQast model schema. (See also: <a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4465296047/QBO+Standard+Mapping">QBO Standard Mapping (RBC)</a> — defines the equivalent auto-provisioned mappings for QBO connections.)</li>
+</ol>
+<p>The result: a customer can set up a CDC connection, select their tables, and have fully mapped FloQast models ready to use — without engineering involvement.</p>
+<blockquote>
+<p><strong>Note (internal):</strong> CDC connections are powered by Fivetran. This is an implementation detail — user-facing language refers to the data source being connected (e.g., &quot;NetSuite&quot;), not to Fivetran.</p>
+</blockquote>
+<hr>
+<h2>Definitions &amp; Terms</h2>
+<p>See <a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4464869409/Definitions+Terms+Data+Studio">Definitions &amp; Terms (Data Studio)</a> for the canonical glossary.</p>
+<hr>
+<h2>Why This Is Important</h2>
+<p>Data Studio is FloQast&#39;s new self-service data integration product, designed to reduce implementation timelines and minimize the IT and professional services involvement required to get customers up and running. The goal is to put more control in the hands of admins — so customers can configure, expand, and manage their data connections without opening a support ticket or waiting on engineering.</p>
+<p>Today, CDC connections exist but are limited. Customers who want tables beyond the standard set have no self-serve path — every additional table requires an engineering request. As demand for more advanced data connections grows (particularly from the Reporting Business Unit, which needs richer datasets to power reporting workflows), this bottleneck becomes a meaningful barrier to adoption and time-to-value.</p>
+<p>This PRD addresses that gap by bringing CDC connection setup into Data Studio with self-serve table selection. It also establishes the repeatable foundation that makes self-serve scalable: rather than building a custom data setup for each customer, FloQast leverages Fivetran&#39;s logical data models and out-of-the-box source support to define standardized Source-to-Target mappings once — mappings that apply consistently across all customers using the same source. The result is a setup experience that is both customer-controlled and FloQast-governed.</p>
+<hr>
+<h2>Key Benefits</h2>
+<table>
+<thead>
+<tr>
+<th>Benefit</th>
+<th>Who It Helps</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Admins can add additional data tables without engineering involvement</td>
+<td>FloQast Admin, IT Manager</td>
+</tr>
+<tr>
+<td>Reduced implementation timelines for advanced data connections</td>
+<td>Customer, Professional Services</td>
+</tr>
+<tr>
+<td>Standardized Source-to-Target mappings apply consistently across all customers</td>
+<td>Engineering, Professional Services</td>
+</tr>
+<tr>
+<td>FloQast models are created automatically after connection setup — no manual model creation required</td>
+<td>FloQast Admin</td>
+</tr>
+<tr>
+<td>Reporting BU can access richer datasets without waiting on support requests</td>
+<td>Reporting Business Unit</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Use Cases</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Use Case</th>
+<th>Actor</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>UC-1</td>
+<td>Admin sets up a new CDC connection from the Connectors tab, selecting tables from the FQ-supported list. <strong>Note:</strong> The current assumption is that only a FQ-curated subset of Fivetran tables are shown — not the full Fivetran catalog. Only tables with pre-defined Source-to-Target mappings are available. See OQ-10.</td>
+<td>FloQast Admin</td>
+</tr>
+<tr>
+<td>UC-2</td>
+<td>Admin monitors initial sync progress before CDC streaming begins. <strong>Note:</strong> See CDC-6 for detail. Progress is shown on the Connectors tab — exact UX (progress bar, per-table list, percentage) needs design input (see Key UX Questions). (Raised by RBC)</td>
+<td>FloQast Admin</td>
+</tr>
+<tr>
+<td>UC-3</td>
+<td>System automatically creates draft models with Source-to-Target mappings applied; models appear in Catalog with &quot;Draft&quot; status</td>
+<td>System</td>
+</tr>
+<tr>
+<td>UC-4</td>
+<td>Admin reviews draft models, enriches them (custom fields, adjusted mappings), and publishes them to go live</td>
+<td>FloQast Admin</td>
+</tr>
+<tr>
+<td>UC-5</td>
+<td>Admin adds additional tables to an existing connection; new draft models are auto-created and follow the same review/publish flow</td>
+<td>FloQast Admin</td>
+</tr>
+<tr>
+<td>UC-6</td>
+<td>Admin creates a custom model manually, defining it using any available connected tables (new or existing)</td>
+<td>FloQast Admin</td>
+</tr>
+<tr>
+<td>UC-7</td>
+<td>Admin troubleshoots a stalled or broken CDC connection</td>
+<td>FloQast Admin</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Assumptions — Established</h2>
+<ul>
+<li>CDC connection setup is initiated from the <strong>Connectors tab</strong>, not from within a model.</li>
+<li>The list of available tables is FQ-controlled — only tables with pre-defined Source-to-Target mappings are surfaced to admins. Admins cannot add arbitrary tables from the raw source schema.</li>
+<li>A subset of available tables are pre-selected by default (the standard set for that source) and cannot be deselected. Admins can add additional supported tables during setup or later.</li>
+<li>Models are automatically created from selected tables after the initial sync completes — the admin does not need to manually create models.</li>
+<li>The initial sync (full historical load) must complete before CDC incremental streaming begins.</li>
+<li>CDC-sourced models are visible in the Catalog alongside batch-sourced models.</li>
+<li>Authentication to the source system (e.g., NetSuite credentials) is the admin&#39;s responsibility. Data Studio provides guidance but does not automate credential setup.</li>
+<li>Connections cannot be changed to a different type after setup. If a different connection type is needed, the admin must create a new connection.</li>
+<li>Draft model review is required before a model can be published and go live. Models cannot be activated directly from the auto-created draft state.</li>
+<li>Draft model enrichment (adding custom fields, adjusting mappings) is optional — admins may publish a model with only the auto-applied Source-to-Target mappings if no further customization is needed.</li>
+<li>User-facing language does not reference the underlying integration platform (e.g., &quot;Fivetran&quot;) — it refers to the data source being connected.</li>
+</ul>
+<hr>
+<h2>Open Items to Confirm</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Assumption</th>
+<th>Story</th>
+<th>Owner</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>A1</td>
+<td>CDC connector type is selectable from the same &quot;Add Connector&quot; flow as batch connectors, with CDC surfaced as a distinct option</td>
+<td>CDC-1</td>
+<td>PM + Engineering</td>
+<td>Pending</td>
+</tr>
+<tr>
+<td>A2</td>
+<td>Data Studio surfaces the initial sync progress as a percentage or record count, not just a spinner. <strong>RBC flag:</strong> We may not have the ability to do this — Fivetran may not expose total row counts during initial load, so we don&#39;t know what &quot;complete&quot; looks like until it&#39;s done. Needs engineering confirmation.</td>
+<td>CDC-3</td>
+<td>PM + Engineering</td>
+<td>Pending</td>
+</tr>
+<tr>
+<td>A3</td>
+<td>CDC-sourced models are visually distinguished from batch models in the Catalog AG Grid (e.g., a &quot;CDC&quot; badge or sync type column). <strong>RBC flag:</strong> Showing both Draft and Active/Published states per model could get messy at high volumes. See OQ-12.</td>
+<td>CDC-4</td>
+<td>PM + UX</td>
+<td>Pending</td>
+</tr>
+<tr>
+<td>A4</td>
+<td>Failed CDC connections surface an actionable error code, not a generic failure state</td>
+<td>CDC-5</td>
+<td>Engineering</td>
+<td>Pending</td>
+</tr>
+<tr>
+<td>A5</td>
+<td>Admins can pause a CDC connector without deleting it</td>
+<td>CDC-2</td>
+<td>Engineering</td>
+<td>Pending</td>
+</tr>
+<tr>
+<td>A6</td>
+<td>Adding a new table to an existing Fivetran connection triggers a data load for that table only — without re-syncing existing tables. Needs engineering confirmation on whether Fivetran supports per-table incremental activation. (Raised by RBC on CDC-8)</td>
+<td>CDC-8</td>
+<td>Engineering</td>
+<td>Pending</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Scope</h2>
+<h3>In Scope</h3>
+<ul>
+<li>CDC connection setup in Data Studio (Connectors tab)</li>
+<li>FQ-controlled table selection (default tables pre-selected + admin can add additional supported tables)</li>
+<li>Initial sync progress visibility</li>
+<li>Auto-creation of draft models with Source-to-Target mappings applied</li>
+<li>Draft model review, enrichment, and publish flow</li>
+<li>Adding additional tables to an existing connection post-setup</li>
+<li>Browsable table library with metadata (name, description, columns, activation status) per connection</li>
+<li>Active table summary in connection detail view</li>
+<li>Connection status and error states on the Connectors tab</li>
+</ul>
+<h3>Out of Scope</h3>
+<ul>
+<li>Defining the actual Source-to-Target field mappings for each source/provider (this PRD assumes mappings exist as a dependency; authoring them is a separate workstream)</li>
+<li>Retroactive updates to existing customer models when FQ updates a standard prebuilt mapping (e.g., a customer set up in February will not automatically receive new field mappings added two years later)</li>
+<li>How FQ manages and names prebuilt connector options in the product (e.g., &quot;NetSuite Advanced&quot; vs. a generic CDC option — the taxonomy and administration of connector types is out of scope)</li>
+<li>User-defined custom model creation from connected tables (deferred — see CDC-9)</li>
+<li>Batch connector setup</li>
+</ul>
+<hr>
+<h2>Requirements</h2>
+<h3>Story: CDC-1 — Select a Source to Connect</h3>
+<p><strong>User Story:</strong> As a FloQast Admin, I want to select a data source to connect so that I can get started without needing to understand the underlying connection technology.</p>
+<p><strong>Importance:</strong> High</p>
+<p><strong>Details:</strong> From the Connectors tab, the admin initiates a new connection by selecting from a list of FQ-supported sources (e.g., NetSuite, Salesforce). The system handles the connection type (CDC, batch, etc.) automatically based on the source selected — the admin is never asked to choose a connection type explicitly.</p>
+<blockquote>
+<p><strong>Cross-ref:</strong> The source selection flow is also covered in <a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4442718323/QBO+Connection">QBO Connection (RBC)</a>. This story is retained here to ensure CDC sources are included in the shared flow.</p>
+</blockquote>
+<p><strong>Acceptance Criteria:</strong></p>
+<ul>
+<li>AC-CDC-1-01 — Admin can initiate a new connection from the Connectors tab: Given I am on the Connectors tab, Then I see an option to add a new connection</li>
+<li>AC-CDC-1-02 — Supported sources are presented as a selectable list: Given I am adding a new connection, Then I see a list of FQ-supported sources to choose from</li>
+<li>AC-CDC-1-03 — Selecting a source routes to the correct setup flow: Given I select a source, Then I am taken into the setup flow for that source without being asked to choose a connection type</li>
+</ul>
+<hr>
+<h3>Story: CDC-2 — Configure Source Credentials</h3>
+<p><strong>User Story:</strong> As a FloQast Admin, I want to enter my source system credentials so that Data Studio can establish a connection to my data source.</p>
+<p><strong>Importance:</strong> High</p>
+<p><strong>Details:</strong> After selecting a source, the admin is presented with the credential fields specific to that source (e.g., NetSuite requires a connection name, account ID, and API token; other sources will have different requirements). Inline instructions explain where to find or generate each required credential. A &quot;Test Connection&quot; action validates credentials before proceeding.</p>
+<blockquote>
+<p><strong>Cross-ref:</strong> Credential configuration is partially covered in <a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4442718323/QBO+Connection">QBO Connection (RBC)</a> for QBO-specific fields. This story expands scope beyond QBO to cover source-specific credential flows for all CDC sources (e.g., NetSuite, Sage Intacct).</p>
+</blockquote>
+<p><strong>Acceptance Criteria:</strong></p>
+<ul>
+<li>AC-CDC-2-01 — Credential fields are source-specific: Given I have selected a source, Then I see only the credential fields relevant to that source</li>
+<li>AC-CDC-2-02 — Inline instructions are shown for each credential field: Given I am on the credentials step, Then each field includes guidance on where to find or generate the required value</li>
+<li>AC-CDC-2-03 — Test Connection validates credentials before proceeding: Given I click &quot;Test Connection&quot;, Then Data Studio confirms the credentials are valid before allowing me to proceed</li>
+<li>AC-CDC-2-04 — Test Connection failure shows an actionable error: Given credentials are invalid, Then I see a specific error message indicating what failed</li>
+</ul>
+<hr>
+<h3>Story: CDC-3 — Auto-Recommend Tables and Allow Optional Selection</h3>
+<p><strong>User Story:</strong> As a FloQast Admin, I want the system to automatically identify and pre-select the recommended tables so that I don&#39;t need to know which tables are required — I can just focus on identifying any extra tables I think will add value.</p>
+<p><strong>Importance:</strong> High</p>
+<p><strong>Details:</strong> After credentials are validated, the admin is shown the FQ-controlled list of supported tables for their source (e.g., all NetSuite tables for which Source-to-Target mappings exist). The standard/default tables are pre-selected. The admin can deselect defaults or add additional supported tables. They cannot add tables outside the FQ-supported list. At least one table must be selected to proceed.</p>
+<p><strong>Acceptance Criteria:</strong></p>
+<ul>
+<li>AC-CDC-3-01 — Only FQ-supported tables are shown: Given my credentials are valid, Then I see only the tables for which FloQast has pre-defined Source-to-Target mappings — not the full raw source schema</li>
+<li>AC-CDC-3-02 — Default tables are pre-selected: Given I am on the table selection step, Then the standard tables for this source are pre-selected by default</li>
+<li>AC-CDC-3-03 — Default tables are visually distinguished: Given I am on the table selection step, Then default/standard tables are visually indicated so the admin understands which are recommended</li>
+<li><del>AC-CDC-3-04</del> — <strong>Removed.</strong> Standard/default tables cannot be deselected. These are required for FloQast standard models to function correctly. (Per RBC + AK alignment.)</li>
+<li>AC-CDC-3-05 — Admin can add additional supported tables: Given I want to include non-default tables, Then I can select additional tables from the FQ-supported list</li>
+<li>AC-CDC-3-06 — At least one table must be selected to proceed: Given I have selected zero tables, Then I cannot proceed and see a validation message</li>
+<li>AC-CDC-3-07 — Table selection is editable after setup: Given the CDC connection is configured, When I navigate to its settings on the Connectors tab, Then I can add or remove tables (within the FQ-supported list)</li>
+</ul>
+<hr>
+<h3>Story: CDC-4 — Auto-Create Draft Models from Connected Tables</h3>
+<p><strong>User Story:</strong> As a FloQast Admin, I want models to be automatically created in Draft status from my connected tables so that I have a ready-to-review starting point without having to build models from scratch.</p>
+<p><strong>Importance:</strong> High</p>
+<p><strong>Details:</strong> Once the initial sync completes, the system automatically creates a draft model for each selected table with Source-to-Target mappings pre-applied. Draft models appear in Catalog with a &quot;Draft&quot; status. The admin must review the draft before publishing — enrichment (adding custom fields, adjusting mappings) is optional. Models cannot go live until the admin has reviewed and published them. The admin is notified when draft models are ready for review.</p>
+<blockquote>
+<p><strong>Open:</strong> If admins aren&#39;t enriching, is the Draft step necessary or should models go straight to Published? See OQ-11. (Raised by RBC)</p>
+</blockquote>
+<p><strong>Acceptance Criteria:</strong></p>
+<ul>
+<li>AC-CDC-4-01 — Draft models are auto-created after initial sync: Given the initial sync for a CDC connection has completed, Then a draft model is automatically created for each selected table, without admin action</li>
+<li>AC-CDC-4-02 — Source-to-Target mappings are pre-applied: Given a draft model is auto-created, Then the Source-to-Target field mappings for that source are already applied</li>
+<li>AC-CDC-4-03 — Draft models appear in Catalog with &quot;Draft&quot; status: Given models have been auto-created, Then they appear in the Catalog AG Grid table with a &quot;Draft&quot; status indicator</li>
+<li>AC-CDC-4-04 — Auto-created models have a meaningful default name: Given a model is auto-created, Then it has a default name (not blank). For 1:1 table-to-model mappings, the default name matches the source table name. For multi-table models, a naming convention is needed. (RBC flagged: clarify whether models are always 1:1 with tables — see OQ-13)</li>
+<li>AC-CDC-4-05 — Admin can rename draft models: Given a model is in Draft status, Then the admin can rename it</li>
+<li>AC-CDC-4-06 — Review is required before publishing: Given a model is in Draft status, Then the admin must open and review it before they can publish it — the model cannot go live without this step</li>
+<li>AC-CDC-4-07 — Enrichment is optional: Given a model is in Draft status, Then the admin may optionally add custom fields or adjust mappings before publishing, but is not required to do so</li>
+<li>AC-CDC-4-08 — Admin is notified when draft models are ready: Given auto-creation is complete, Then the admin receives an in-app notification that their draft models are ready for review in Catalog</li>
+</ul>
+<hr>
+<h3>Story: CDC-5 — Review, Enrich, and Publish Draft Models</h3>
+<p><strong>User Story:</strong> As a FloQast Admin, I want to review my auto-created draft models and publish them when I&#39;m ready so that I control when a model goes live.</p>
+<p><strong>Importance:</strong> High</p>
+<p><strong>Details:</strong> Draft models appear in Catalog with a &quot;Draft&quot; status. To publish, the admin opens the model and clicks &quot;Publish&quot; — this constitutes the required review step. Before publishing, the admin may optionally enrich the model by adding custom fields or adjusting mappings. Once published, the model status changes to &quot;Active&quot; and is available for use across FloQast.</p>
+<blockquote>
+<p><strong>Related PRDs:</strong> Full publish behavior is defined in <a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4449468593/Lineage+Creation+3+of+4+Testing+Publishing+DRAFT">Testing &amp; Publishing (3 of 4)</a>. Catalog view behavior is defined in <a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4476731473/Catalog+-+Search+and+Filter+DRAFT">Catalog — Search and Filter</a>.</p>
+</blockquote>
+<p><strong>Acceptance Criteria:</strong></p>
+<ul>
+<li>AC-CDC-5-01 — Draft models are visible in Catalog with &quot;Draft&quot; status: Given draft models have been auto-created, Then they appear in the Catalog AG Grid with a &quot;Draft&quot; status indicator</li>
+<li>AC-CDC-5-02 — Opening a draft model and clicking &quot;Publish&quot; completes the review step: Given I open a draft model, Then I see a &quot;Publish&quot; action, and clicking it satisfies the required review step and publishes the model</li>
+<li>AC-CDC-5-03 — Model status changes to &quot;Active&quot; upon publishing: Given I publish a draft model, Then its status updates to &quot;Active&quot; in Catalog</li>
+<li>AC-CDC-5-04 — Admin can optionally enrich before publishing: Given I have a draft model open, Then I can optionally add custom fields or adjust mappings before clicking &quot;Publish&quot;</li>
+<li>AC-CDC-5-05 — Draft models cannot go live without being opened and published: Given a model is in &quot;Draft&quot; status, Then it is not available for use in FloQast until the admin has opened it and clicked &quot;Publish&quot;</li>
+</ul>
+<hr>
+<h3>Story: CDC-6 — Monitor Initial Data Load Progress</h3>
+<p><strong>User Story:</strong> As a FloQast Admin, I want to see the progress of the initial data load so that I know when my data will be ready and can set expectations with my team.</p>
+<p><strong>Importance:</strong> High</p>
+<p><strong>Details:</strong> After configuration, a one-time full historical data load runs before incremental streaming begins. Data Studio surfaces this as an &quot;Initial Data Load&quot; state on the Connectors tab, with progress shown as a record count or percentage per table. Once the initial data load completes, the connection transitions to &quot;Active&quot; and draft models are auto-created. Connection status is displayed on the Connectors tab only — Catalog shows model status (Draft, Active, etc.), not connection status.</p>
+<blockquote>
+<p><strong>RBC flag:</strong> Per-table progress may not be technically feasible (see A2). Also unclear where per-table detail would live — inline on the Connectors tab row, in a connection detail view, or elsewhere. Needs engineering confirmation on data availability and UX input on placement.</p>
+</blockquote>
+<p><strong>Acceptance Criteria:</strong></p>
+<ul>
+<li>AC-CDC-6-01 — Connector shows &quot;Initial Data Load&quot; status during historical load: Given the CDC connection has been configured and the initial data load is running, Then the Connectors tab shows the connection status as &quot;Initial Data Load&quot; (not &quot;Active&quot;)</li>
+<li>AC-CDC-6-02 — Progress is shown per table: Given the initial data load is running, Then I can see sync progress (records synced or percentage) for each tracked table</li>
+<li>AC-CDC-6-03 — Status transitions to &quot;Active&quot; when initial data load completes: Given the initial data load has finished, Then the connection status updates to &quot;Active&quot;</li>
+<li>AC-CDC-6-04 — Draft models are auto-created once initial data load completes: Given the connection status transitions to &quot;Active&quot;, Then draft models are automatically created in Catalog</li>
+</ul>
+<hr>
+<h3>Story: CDC-7 — Connection Status and Error States on Connectors Tab</h3>
+<p><strong>User Story:</strong> As a FloQast Admin, I want to understand the health of my connections at a glance so that I can quickly identify and resolve issues.</p>
+<p><strong>Importance:</strong> High</p>
+<p><strong>Details:</strong> Each connection on the Connectors tab displays the source name (e.g., &quot;NetSuite&quot;), current status, last synced timestamp, and any active errors. Actionable error messages are shown for known failure states so admins know what went wrong and what to do next.</p>
+<p><strong>Acceptance Criteria:</strong></p>
+<ul>
+<li>AC-CDC-7-01 — Connections are identified by source name: Given I view the Connectors tab, Then each connection displays its source name (e.g., &quot;NetSuite&quot;) rather than a technical connection type label</li>
+<li>AC-CDC-7-02 — Last synced timestamp is shown: Given a connection is active, Then I see when data was last successfully synced</li>
+<li>AC-CDC-7-03 — Authentication failure is surfaced with a recommended action: Given a connection&#39;s credentials have expired or been revoked, Then I see an error indicating authentication has failed with guidance on how to re-authenticate</li>
+<li>AC-CDC-7-04 — Source system unavailable error is surfaced: Given the source system cannot be reached, Then I see an error indicating the source is unavailable</li>
+<li>AC-CDC-7-05 — Sync delayed warning is surfaced: Given data has not refreshed within an expected threshold, Then I see a warning that the sync is delayed</li>
+<li>AC-CDC-7-06 — Table no longer available error is surfaced: Given a previously connected table is no longer available in the source, Then I see an error identifying which table is affected</li>
+<li>AC-CDC-7-07 — All error messages include a recommended action: Given any error state, Then the error message includes a specific recommended action (not a generic &quot;sync failed&quot; message)</li>
+</ul>
+<hr>
+<h3>Story: CDC-8 — Add Additional Tables to an Existing Connection</h3>
+<p><strong>User Story:</strong> As a FloQast Admin, I want to add more tables to an existing connection after initial setup so that I can expand my data without reconfiguring the whole connection.</p>
+<p><strong>Importance:</strong> High</p>
+<p><strong>Details:</strong> From the Connectors tab, the admin can navigate to an existing connection&#39;s settings and add additional tables from the FQ-supported list. Adding a new table triggers a data load for that table only. Once complete, a new draft model is auto-created for the added table and follows the same review and publish flow as the initial setup.</p>
+<blockquote>
+<p><strong>RBC flag:</strong> The UX for how an admin accesses table management on an existing connection is undefined. Does it live in a connection detail view, a settings panel, or the table library (CDC-10)? Needs design input.</p>
+</blockquote>
+<p><strong>Acceptance Criteria:</strong></p>
+<ul>
+<li>AC-CDC-8-01 — Admin can access table selection from an existing connection&#39;s settings: Given I navigate to an existing connection on the Connectors tab, Then I can view and edit the list of connected tables</li>
+<li>AC-CDC-8-02 — Only FQ-supported tables are shown: Given I am adding tables to an existing connection, Then I only see tables from the FQ-supported list that are not already connected</li>
+<li>AC-CDC-8-03 — Adding a table triggers a data load for that table only: Given I add a new table to an existing connection, Then a data load runs for that table only — existing connected tables are not affected</li>
+<li>AC-CDC-8-04 — A new draft model is auto-created after the data load completes: Given the data load for a newly added table completes, Then a draft model is automatically created for that table in Catalog</li>
+<li>AC-CDC-8-05 — Admin is notified when the new draft model is ready: Given the draft model for a newly added table has been created, Then the admin receives an in-app notification</li>
+<li>AC-CDC-8-06 — New draft model follows the same review and publish flow: Given a draft model has been created for a newly added table, Then the admin must open and publish it before it goes live</li>
+</ul>
+<hr>
+<h3>Story: CDC-9 — Create a Custom User-Defined Model from Connected Tables (DEFERRED)</h3>
+<p><strong>User Story:</strong> As a FloQast Admin, I want to create my own model using connected tables so that I can build models tailored to my specific needs beyond the auto-created defaults.</p>
+<p><strong>Importance:</strong> <del>High</del> Future — out of scope for initial release per RBC + AK alignment. Retain for future iteration.</p>
+<p><strong>Details:</strong> From Catalog, the admin can initiate a new model and select one or more connected tables as its source. The full model creation flow is defined in <a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4450189505/Lineage+Creation+1+of+4+Model+Creation+Source+Configuration+DRAFT">Model Creation &amp; Source Configuration (1 of 4)</a>. This story captures the specific requirement that connected CDC tables are available as source options within that flow.</p>
+<p><strong>Acceptance Criteria:</strong></p>
+<ul>
+<li>AC-CDC-9-01 — Admin can initiate a new model from Catalog: Given I am on the Catalog landing, Then I see an option to create a new model</li>
+<li>AC-CDC-9-02 — Connected CDC tables are available as source options: Given I am creating a new model, Then I can select one or more tables from my existing CDC connections as the model source</li>
+<li>AC-CDC-9-03 — Custom models follow the same draft and publish flow: Given I create a custom model, Then it is created in &quot;Draft&quot; status and must be reviewed and published before going live</li>
+</ul>
+<hr>
+<h3>Story: CDC-10 — Browse Available Fivetran Tables for a Connection</h3>
+<p><strong>User Story:</strong> As a power user, I want to see which Fivetran tables are available for a given connection so I can activate what I need.</p>
+<p><strong>Importance:</strong> High</p>
+<p><strong>Details:</strong> Data Studio must provide a browsable library of available tables replicated by the Fivetran connector for a given connection. This library is accessible from the connection detail view and shows all tables that Fivetran supports for the connected source — both active and inactive. The library supports search and filtering to help admins find specific tables quickly at scale.</p>
+<p><strong>Acceptance Criteria:</strong></p>
+<ul>
+<li>AC-CDC-10-01 — A browsable table library is accessible from the connection detail view: Given I navigate to an existing connection, Then I can access a library showing all available Fivetran tables for that connection</li>
+<li>AC-CDC-10-02 — The library includes both active and inactive tables: Given I am viewing the table library, Then I see all tables Fivetran supports for this source, regardless of activation status</li>
+<li>AC-CDC-10-03 — Admins can activate tables directly from the library: Given I find an inactive table in the library, Then I can activate it from that view without navigating elsewhere</li>
+<li>AC-CDC-10-04 — The library supports search: Given I am viewing the table library, Then I can search by table name to find specific tables</li>
+</ul>
+<hr>
+<h3>Story: CDC-11 — View Table Details Before Activation</h3>
+<p><strong>User Story:</strong> As a power user, I want to understand what each Fivetran table contains before activating it.</p>
+<p><strong>Importance:</strong> High</p>
+<p><strong>Details:</strong> Each table in the Fivetran library must display: table name, description, column list, and current activation status for this connection. This information allows admins to make informed decisions about which tables to activate without requiring external documentation or engineering support.</p>
+<p><strong>Acceptance Criteria:</strong></p>
+<ul>
+<li>AC-CDC-11-01 — Table name is displayed: Given I am viewing a table in the library, Then I see the table name</li>
+<li>AC-CDC-11-02 — Table description is displayed: Given I am viewing a table in the library, Then I see a description explaining what data the table contains</li>
+<li>AC-CDC-11-03 — Column list is displayed: Given I am viewing a table in the library, Then I see the list of columns available in that table</li>
+<li>AC-CDC-11-04 — Activation status is displayed: Given I am viewing a table in the library, Then I see whether the table is currently active or inactive for this connection</li>
+</ul>
+<hr>
+<h3>Story: CDC-12 — View Active Tables for a Connection</h3>
+<p><strong>User Story:</strong> As an admin, I want to see which Fivetran tables are active for a connection at a glance.</p>
+<p><strong>Importance:</strong> High</p>
+<p><strong>Details:</strong> Users must be able to view a list of tables currently configured and active for a given Fivetran connection directly from the connection detail view. This provides a quick summary of what data is flowing through the connection without requiring the admin to open the full table library.</p>
+<p><strong>Acceptance Criteria:</strong></p>
+<ul>
+<li>AC-CDC-12-01 — Active tables are listed in the connection detail view: Given I navigate to a connection&#39;s detail view, Then I see a list of all currently active tables for that connection</li>
+<li>AC-CDC-12-02 — Active table count is visible: Given I am viewing the connection detail, Then I see the total count of active tables</li>
+<li>AC-CDC-12-03 — Active tables link to the full table library: Given I see the active tables list, Then I can navigate to the full table library for more detail or to activate additional tables</li>
+</ul>
+<hr>
+<h2>UX Requirements</h2>
+<h3>Connection Setup Wizard</h3>
+<p>The CDC connection setup follows a consistent 4-step wizard pattern, aligned with the QBO connection flow:</p>
+<pre><code>Connectors tab → &quot;Create Connector&quot; → Select Source
+  → Step 1: Name
+  → Step 2: Credentials
+  → Step 3: Provision (table selection)
+  → Step 4: Validate
+</code></pre>
+<blockquote>
+<p><strong>Note:</strong> Steps 1–2 (Name, Credentials) are covered in <a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4442718323/QBO+Connection">QBO Connection (RBC)</a> and follow the same shared pattern. This section focuses on Steps 3–4: how tables are viewable, selectable, and validated. (Per RBC feedback.)</p>
+</blockquote>
+<h4>Step 3: Provision (Table Selection)</h4>
+<ul>
+<li>System automatically provisions standard tables for the selected source</li>
+<li>Standard tables are displayed as pre-selected</li>
+<li>Admin can add additional tables from the FQ-supported list</li>
+<li>Tables not in the FQ-supported list are not shown</li>
+<li>Admin must select at least one table to proceed</li>
+</ul>
+<h4>Step 4: Validate</h4>
+<ul>
+<li>System tests the connection using the provided credentials</li>
+<li>Shows per-table validation status</li>
+<li>On success: connection is saved, initial data load begins, status shows &quot;Initial Data Load&quot; on Connectors tab</li>
+<li>On failure: actionable error message shown with recommended next step</li>
+</ul>
+<hr>
+<h3>Post-Setup: Connectors Tab State</h3>
+<p>After setup, the connection appears on the Connectors tab with:</p>
+<ul>
+<li><strong>Source name</strong> (e.g., &quot;NetSuite&quot;) as the identifier</li>
+<li><strong>Status:</strong> Initial Data Load → Active (once load completes)</li>
+<li><strong>Last Synced</strong> timestamp</li>
+<li><strong>Files</strong> count</li>
+<li>Error/warning indicators when applicable</li>
+</ul>
+<hr>
+<h3>Post-Setup: Catalog State</h3>
+<p>Once the initial data load completes:</p>
+<ul>
+<li>Draft models appear in Catalog AG Grid with <strong>&quot;Draft&quot;</strong> status badge</li>
+<li>Admin receives in-app notification that models are ready for review</li>
+<li>Admin opens a draft model → reviews → optionally enriches → clicks <strong>&quot;Publish&quot;</strong></li>
+<li>Model status changes to <strong>&quot;Active&quot;</strong></li>
+</ul>
+<hr>
+<h3>Wireframes</h3>
+<h4>Screens 1–3: Source Selection, Name, Credentials</h4>
+<blockquote>
+<p>See <a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4442718323/QBO+Connection">QBO Connection (RBC)</a> for the shared source selection, naming, and credential entry patterns. CDC sources follow the same flow.</p>
+</blockquote>
+<h4>Screen 4: Step 3 — Provision (Table Selection)</h4>
+<pre><code>┌─────────────────────────────────────────┐
+│ [logo] NetSuite                      ✕  │
+│ ○──────○──────●──────○                  │
+│ Name  Creds  Prov  Valid                │
+│                                         │
+│ Standard Tables                         │
+│ Pre-selected for FloQast standard       │
+│ models. Can be removed.                 │
+│                                         │
+│ ☑ Transactions                          │
+│ ☑ Accounts                              │
+│ ☑ GL Lines                              │
+│                                         │
+│ ── Additional Tables ───────────────────│
+│ Optional. Add tables to power           │
+│ custom models.                          │
+│                                         │
+│ ☐ Vendors                               │
+│ ☐ Customers                             │
+│ ☐ Subsidiaries                          │
+│ ☐ Departments                           │
+│                                         │
+│           [← Back]       [Next →]       │
+└─────────────────────────────────────────┘
+</code></pre>
+<p>Standard tables are locked and cannot be deselected — they are required for FloQast standard models.</p>
+<h4>Screen 5: Step 4 — Validate (auto-runs on load)</h4>
+<pre><code>┌─────────────────────────────────────────┐
+│ [logo] NetSuite                      ✕  │
+│ ○──────○──────○──────●                  │
+│ Name  Creds  Prov  Valid                │
+│                                         │
+│ Validating your connection...           │
+│ This may take a moment.                 │
+│                                         │
+│ ✓ Connection authenticated              │
+│ ✓ Transactions — accessible            │
+│ ✓ Accounts — accessible                │
+│ ⟳ GL Lines — checking...               │
+│                                         │
+│        [← Back]   [Save &amp; Connect]      │
+│              (disabled until complete)  │
+└─────────────────────────────────────────┘
+</code></pre>
+<p>On success:</p>
+<pre><code>│ ✓ Connection authenticated              │
+│ ✓ Transactions — accessible            │
+│ ✓ Accounts — accessible                │
+│ ✓ GL Lines — accessible                │
+│                                         │
+│ Your connection is ready.               │
+│                                         │
+│        [← Back]   [Save &amp; Connect]      │
+</code></pre>
+<p>On failure:</p>
+<pre><code>│ ✓ Connection authenticated              │
+│ ✕ Transactions — not found             │
+│   Check that your Account ID has       │
+│   access to transaction data.          │
+│                                         │
+│        [← Back]   [Save &amp; Connect]      │
+│                       (remains disabled)│
+</code></pre>
+<hr>
+<h3>Key UX Questions for Designer</h3>
+<ul>
+<li>How is the source list presented — scrollable list, card grid, or categorized menu?</li>
+<li>How are standard tables visually distinguished from optional tables in the Provision step?</li>
+<li>How is Initial Data Load progress displayed on the Connectors tab — progress bar, per-table list, or percentage?</li>
+<li>What does the &quot;Draft&quot; badge look like in the Catalog AG Grid — color, label, icon?</li>
+<li>Where does the &quot;Publish&quot; action live in the model detail view — primary CTA button, action menu, or inline in the header?</li>
+</ul>
+<hr>
+<h2>Open Questions</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Question</th>
+<th>Owner</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>OQ-1</td>
+<td>What is the threshold for sync delay before a warning is triggered on the Connectors tab?</td>
+<td>PM + Engineering</td>
+<td>Open</td>
+</tr>
+<tr>
+<td>OQ-6</td>
+<td>When FQ updates a standard prebuilt mapping (e.g., adds a new field), how do existing customers gain access to that update? Is there a manual migration path, an opt-in notification, or is it left to the customer to re-configure?</td>
+<td>PM + Engineering</td>
+<td>Open</td>
+</tr>
+<tr>
+<td>OQ-8</td>
+<td>If a source system&#39;s schema changes (e.g., a field is renamed or removed), how is this handled? Does Fivetran absorb the change automatically, or does it surface as an error in Data Studio? And if a field in an existing model&#39;s Source-to-Target mapping no longer exists in the source, what happens to that model?</td>
+<td>PM + Engineering</td>
+<td>Open</td>
+</tr>
+<tr>
+<td>OQ-14</td>
+<td>When a new table is added to an existing connection (CDC-8), should it always auto-create a new draft model? The added table might belong in an existing model rather than spawning a new one. Ties to OQ-13 (table-to-model cardinality). (Raised by RBC)</td>
+<td>PM + Engineering</td>
+<td>Open</td>
+</tr>
+<tr>
+<td>OQ-13</td>
+<td>Is the relationship between tables and auto-created models always 1:1, or can multiple tables map to a single model? If multi-table models are supported, what is the default naming convention? (Raised by RBC + AK)</td>
+<td>PM + Engineering</td>
+<td>Open</td>
+</tr>
+<tr>
+<td>OQ-12</td>
+<td>How should the Catalog handle models that have both an Active published version and a Draft in progress? At high volumes, showing both states per model could make the Catalog noisy. Need a UX pattern that makes it clear both exist without cluttering the table — e.g., a secondary indicator on the Active row, a collapsible sub-row, or filtering by version state. (Raised by RBC + AK)</td>
+<td>PM + UX</td>
+<td>Open</td>
+</tr>
+<tr>
+<td>OQ-11</td>
+<td>Should there be an auto-publish option that takes auto-created models straight to &quot;Active&quot; without requiring manual review? The current PRD requires admins to open and publish each draft model (CDC-4, CDC-5), but admins who don&#39;t need to customize may want a hands-off path all the way through to publish. This would change the review-before-publish requirement. (Raised by RBC)</td>
+<td>PM + Engineering</td>
+<td>Open</td>
+</tr>
+<tr>
+<td>OQ-10</td>
+<td>Should the table selection list be limited to a FQ-curated subset (only tables with pre-defined Source-to-Target mappings), or should admins have visibility into the full Fivetran catalog? The current assumption is FQ-curated only — but this limits flexibility for power users who may want tables FQ hasn&#39;t mapped yet. (Raised by RBC)</td>
+<td>PM + Engineering</td>
+<td>Open</td>
+</tr>
+<tr>
+<td>OQ-9</td>
+<td>Should advanced table selection / configuration be gated as a premium feature? Need to consider access control for who can perform self-serve table selection vs. standard-only setup. (Raised by RBC)</td>
+<td>PM + Product Strategy</td>
+<td>Open</td>
+</tr>
+<tr>
+<td>OQ-7</td>
+<td>For CAS customers (Client Accounting Services firms managing 30+ client entities, each with their own connection), what should the default model naming convention be? A CAS admin will have a high volume of auto-created draft models across entities — the naming convention needs to make Catalog navigable at scale. Proposed: <code>[Connection Name] — [FQ Model Name]</code>, assuming admins name connections after their client entities. <strong>RBC flag:</strong> Do we need to dictate this, or can it just be whatever the customer wants to call it? May not need a prescribed convention if admins can rename freely.</td>
+<td>PM + UX</td>
+<td>Open</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Gaps</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Gap</th>
+<th>Severity</th>
+<th>Owner</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>G4</td>
+<td>No mechanism exists for linking tables together via primary and foreign keys. When multiple tables are selected for a connection, admins will need a way to define relationships between them (e.g., designating primary keys and foreign keys). This is a prerequisite for multi-table models and joins. May require its own story or PRD. (Raised by RBC on CDC-4)</td>
+<td>High</td>
+<td>PM + Engineering</td>
+</tr>
+<tr>
+<td>G1</td>
+<td>The FQ-supported table list per source is not defined. The self-serve table selection experience depends on pre-defined Source-to-Target mappings existing for each table offered to admins. This list needs to be owned, defined, and maintained. <strong>RBC note:</strong> There is already a standard set of tables configured today in Fivetran for NetSuite, Intacct, and Workday — start there as a baseline.</td>
+<td>High</td>
+<td>PM + Engineering to align on ownership and initial table list per supported source before this PRD is finalized</td>
+</tr>
+<tr>
+<td>G2</td>
+<td>Notification delivery (in-app vs. email vs. Slack) for initial data load completion is not defined.</td>
+<td>Medium</td>
+<td>PM + Engineering</td>
+</tr>
+<tr>
+<td>G3</td>
+<td>It&#39;s unclear whether connections support pause/resume behavior. If an admin needs to temporarily stop a connection, the expected behavior in Data Studio is undefined.</td>
+<td>Medium</td>
+<td>Engineering to confirm</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>References</h2>
+<ul>
+<li><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4464869409/Definitions+Terms+Data+Studio">Definitions &amp; Terms (Data Studio)</a></li>
+<li><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4470800387/Merging+Catalog+Lineage+Tabs+DRAFT">Merging Catalog &amp; Lineage Tabs (DRAFT)</a></li>
+<li><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4476731473/Catalog+-+Search+and+Filter+DRAFT">Catalog — Search and Filter (DRAFT)</a></li>
+<li><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4450189505/Lineage+Creation+1+of+4+Model+Creation+Source+Configuration+DRAFT">Model Creation &amp; Source Configuration — Sub-PRD 1 of 4 (DRAFT)</a></li>
+<li><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4449468593/Lineage+Creation+3+of+4+Testing+Publishing+DRAFT">Testing &amp; Publishing — Sub-PRD 3 of 4 (DRAFT)</a></li>
+<li><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4447568254/QBO+Endpoint+Handling+DRAFT">QBO Endpoint Handling (DRAFT)</a> — reference for connection setup wizard pattern</li>
+</ul>
+

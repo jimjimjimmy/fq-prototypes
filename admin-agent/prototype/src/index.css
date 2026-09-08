@@ -1,0 +1,51 @@
+@import "tailwindcss/theme";
+@import "tailwindcss/utilities";
+
+/* Reset button browser defaults — Tailwind v4 without preflight doesn't reset these. */
+button {
+  color: inherit;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+/* Ensure Radix popper content (DropdownPanel) appears above Flow UI Modal overlay */
+[data-radix-popper-content-wrapper] {
+  z-index: 10000 !important;
+}
+
+/* Suppress AG Grid cell focus ring */
+.ag-cell-focus {
+  border-color: transparent !important;
+  outline: none !important;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* Admin users grid — sticky header (admin-lite AG Grid profile). */
+.admin-grid .ag-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.admin-grid .ag-root-wrapper {
+  border-left: none;
+  border-right: none;
+}
+/* Uppercase, letter-spaced column headers per Figma (node 2198:6664). */
+.admin-grid .ag-header-cell-text {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 11px;
+  color: #6b7280; /* muted */
+}

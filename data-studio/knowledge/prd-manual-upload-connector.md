@@ -1,0 +1,455 @@
+# Data Studio: Manual Upload Connector (DRAFT)
+
+| | |
+| --- | --- |
+| **Target release** | TBD |
+| **Epic** | _(TBD)_ |
+| **Document status** | DRAFT |
+| **Document owner** | Alex Kearns |
+| **Designer** | _(assign)_ |
+| **Tech lead** | _(assign)_ |
+| **Technical writers** | _(assign)_ |
+| **QA** | _(assign)_ |
+| **Depends on** | Connectors tab must be live and functional; [Model Creation & Source Configuration (Sub-PRD 1 of 4)](https://floqast.atlassian.net/wiki/spaces/Data/pages/4450189505) is downstream (datasets must be available before models can be configured) |
+| **Related PRDs** | [CDC Connection Setup (DRAFT)](https://floqast.atlassian.net/wiki/spaces/Data/pages/4462575617) · [Lineage Creation — 1 of 4: Model Creation & Source Configuration](https://floqast.atlassian.net/wiki/spaces/Data/pages/4450189505) |
+
+---
+
+## Objective
+
+Manual data upload exists today in a limited form outside of Data Studio: admins can upload certain Journal Entry data, but the experience offers minimal validation feedback and covers only a narrow set of data types. There is no path for manual upload within Data Studio's connector framework.
+
+This PRD defines **Manual Upload as a new connector type within Data Studio**, delivering four new capabilities:
+
+1. **Define a Manual Upload connector** — admins can create a named Manual Upload connector from the Connectors tab, establishing a persistent upload endpoint for a given dataset type
+2. **Upload data files** — supported formats include Excel (.xlsx) and CSV (.csv)
+3. **Rich validation feedback** — uploaded files are validated before processing, surfacing failures, data type mismatches, missing required fields, and other errors in a clear, actionable interface
+4. **Pipeline trigger** — once validation passes, the upload kicks off the data platform pipeline, making the data available for model configuration downstream
+
+The result: a FQ Admin can manually upload any supported dataset type, see exactly what's wrong before committing it, and initiate processing — all within Data Studio.
+
+---
+
+## Why This Is Important
+
+Data Studio is FloQast's new self-service data integration platform, designed to reduce implementation timelines and minimize engineering involvement in getting customers live. For that transition to succeed, other business units and customers need a reason to move — they need to see that the new platform handles the full range of scenarios they face today.
+
+Manual data upload is one of those scenarios. Not every customer can or should automate every data transmission. Some datasets are too infrequent to justify an automated connection. Some customers hit errors on their end and need a one-time fallback. Some initial data loads are best handled by a direct file drop. Today, there is no supported path for any of this within Data Studio.
+
+The existing manual upload capability lives outside of Data Studio, covers only a narrow set of data types (primarily Journal Entries), and provides minimal validation feedback — leaving admins with little visibility into why an upload failed. The current workaround for customers without a self-serve path is using tools like Filezilla or WinSCP to push files over FTP — a technical barrier that most admins shouldn't need to clear.
+
+Customer feedback reinforces the gap: Twilio has explicitly requested the ability to manually upload transaction files without relying on SFTP.
+
+**Why now:** Today, most business units manage their own data integrations independently — each maintaining separate, ad-hoc connections to external systems. Data Studio is FloQast's answer to that fragmentation: a centralized data integration platform that all BUs can rely on. As Data Studio is being stood up and BUs begin evaluating the transition, manual upload is a foundational capability that removes a key blocker. Any BU or customer with datasets that don't fit an automated integration pattern needs a supported fallback — without it, there's a concrete reason to stay on their current DIY approach rather than migrate.
+
+> **Note:** Quantitative data on support ticket volume and legacy manual upload usage is not yet available. This should be gathered before the PRD is finalized to strengthen the business case.
+
+---
+
+## Key Benefits
+
+| Benefit | Who It Helps |
+| --- | --- |
+| Upload data files (Excel or CSV) directly in Data Studio without needing SFTP, FTP tools, or engineering involvement | FQ Admin |
+| Rich validation feedback surfaces failures, data type mismatches, and missing fields before data is committed — reducing guesswork and back-and-forth | FQ Admin |
+| A supported, repeatable upload path for datasets that don't warrant an automated integration | FQ Admin |
+| Manual upload as a fallback when automated transmission fails (e.g., customer-side errors) keeps data flowing without waiting on a fix | FQ Admin |
+| FQ Implementation Team can use manual upload to load initial customer data during onboarding — the goal is for customers to take over this flow themselves once live | FQ Implementation Team |
+| A complete Data Studio feature set — including manual upload — removes a key gap that would otherwise force BUs to maintain separate DIY integrations rather than transition to the centralized platform | Business Units |
+
+---
+
+## Use Cases
+
+| # | Persona | Scenario | Expected Outcome |
+| --- | --- | --- | --- |
+| 1 | FQ Admin | Setting up a Manual Upload connector for the first time — uploads a sample file to define the expected schema | FQ infers column names and data types from the sample; admin reviews, manually overrides any types if needed, and saves the connector definition |
+| 2 | FQ Admin | Uploading a data file to an existing Manual Upload connector | Admin navigates to the connector, uploads a file, validation runs against the defined schema — if checks pass, data loads and pipeline is triggered automatically |
+| 3 | FQ Admin | Uploaded file fails validation — column types don't match the defined schema | Admin sees rich validation feedback identifying which fields failed and why; admin corrects the source file, re-uploads, and proceeds |
+| 4 | FQ Admin | Automated transmission fails (e.g., SFTP error on customer's side) — admin uses manual upload as a one-time fallback | Admin uploads the file directly, validation passes, pipeline runs — no engineering involvement required |
+| 5 | FQ Admin / FQ Implementation Team | Customer is newly onboarded — admin uses manual upload to load initial data before automation is configured | Initial dataset is uploaded, validated, and loaded; data is available for source-to-target mapping in the next step |
+
+---
+
+## Assumptions — Established
+
+* Manual Upload is a new connector type within the Connectors tab in Data Studio — it appears alongside CDC, SFTP, and API connector types.
+* Supported file formats are Excel (.xlsx) and CSV (.csv).
+* A single Manual Upload connector can contain multiple dataset schemas — each schema defines the expected columns and data types for a distinct dataset type.
+* Schema is defined by uploading a sample file; FQ infers column names and data types from the sample. Admins can manually override inferred types.
+* Validation runs automatically on file upload, checking the uploaded file against the connector's defined schema. The pipeline is triggered automatically when validation passes.
+* All upload actions are audited — the system records who uploaded a file and when.
+* The existing manual upload capability (outside Data Studio) is not being migrated as part of this PRD — this defines a new capability within Data Studio.
+
+---
+
+## Open Items to Confirm
+
+| # | Open Item | Owner | Status |
+| --- | --- | --- | --- |
+| OI-1 | What is the maximum file size supported for manual uploads? | PM + Engineering | Open |
+| OI-2 | Does a manually uploaded file flow through the same data pipeline as CDC/SFTP transmissions, or is there a separate processing path? | PM + Engineering | Open |
+| OI-3 | "Manual Upload" is listed as a Transmission Type in the [Definitions & Terms glossary](https://floqast.atlassian.net/wiki/spaces/Data/pages/4464869409) but is not fully defined — glossary should be updated before this PRD is finalized | PM | Open |
+| OI-4 | Quantitative data on current manual upload usage (support ticket volume, number of affected customers) is not yet available — should be gathered to strengthen the business case | PM | Open |
+| OI-5 | What happens to an uploaded file if validation partially passes — e.g., some rows are valid and some are not? Does the whole file fail, or does the system load clean rows and flag failures? | PM + Engineering | Open |
+| OI-6 | Should schema management (editing or deleting schema definitions on an existing Manual Upload connector) be in scope for this PRD? | PM | Open |
+| OI-7 | How does the as-of date on a manual upload interact with the pipeline — specifically, does it behave like Effective Date in the Lineage PRDs (triggering historical reprocessing), and what are the downstream implications of uploading data with a past as-of date? | PM + Engineering | Open |
+
+---
+
+## Scope
+
+### In Scope
+
+* Creating a Manual Upload connector from the Connectors tab
+* Defining dataset schemas within a connector — via sample file upload with FQ-inferred types and manual override
+* Support for multiple dataset schemas within a single Manual Upload connector
+* Uploading data files (Excel .xlsx and CSV .csv) to an existing Manual Upload connector
+* Validation of uploaded files against the connector's defined schema — surfacing failures, data type mismatches, and missing required fields
+* Auto-triggering the data pipeline when validation passes
+* A "Load" confirmation step between validation pass and pipeline trigger
+* Audit logging of all upload actions (who uploaded, when)
+
+### Out of Scope
+
+* Deprecating or retiring the existing manual upload capability outside of Data Studio — that is a separate decision
+* Manual upload as a fallback for other connector types (SFTP, CDC, API) — future consideration
+* Permissions and access control for upload actions — who is allowed to upload is not defined in this PRD
+* Source-to-target field mapping — covered in [Lineage Creation Sub-PRD 2 of 4: Field Mapping](https://floqast.atlassian.net/wiki/spaces/Data/pages/4449927443)
+* Schema management after connector setup (editing or deleting existing schema definitions) — flagged as an open question; may be brought into scope _(see OQ-6)_
+
+---
+
+## Definitions & Terms
+
+See [Definitions & Terms (Data Studio)](https://floqast.atlassian.net/wiki/spaces/Data/pages/4464869409) for the canonical glossary.
+
+> **Open item:** "Manual Upload" is listed as a Transmission Type in the glossary but is not yet fully defined. The glossary should be updated to include a complete definition before this PRD is finalized.
+
+---
+
+## Requirements
+
+### Quick Reference
+
+| # | Story | Importance |
+| --- | --- | --- |
+| MU-1 | Create a Manual Upload Connector | High |
+| MU-2 | Upload a Data File | High |
+| MU-3 | View and Resolve Validation Failures | High |
+| MU-4 | Audit Log of Upload Actions | Medium |
+| MU-5 | Delete Uploaded Data | Medium |
+
+---
+
+### MU-1 — Create a Manual Upload Connector
+
+**User Story:** As a FQ Admin, I want to create a Manual Upload connector so that I have a defined, repeatable upload endpoint for a specific dataset type.
+
+**Importance:** High
+
+**Details:** From the Connectors tab, the admin creates a new connector and selects "Manual Upload" as the type. They provide a connector name, then upload a sample file — FQ infers column names and data types from the sample. The admin reviews the inferred schema, manually overrides any types if needed, and saves. A single connector can contain multiple dataset schemas.
+
+**Acceptance Criteria:**
+
+**AC-MU1-01 — Admin can initiate a Manual Upload connector from the Connectors tab**
+* **Given** I am on the Connectors tab in Data Studio
+* **When** I click "Create Connector" and select "Manual Upload" as the type
+* **Then** I am taken into the Manual Upload connector setup flow
+
+**AC-MU1-02 — Schema is inferred from a sample file upload**
+* **Given** I am in the connector setup flow
+* **When** I upload a sample file (.xlsx or .csv)
+* **Then** FQ infers column names and data types from the sample
+* **And** the inferred schema is displayed for my review before saving
+
+**AC-MU1-03 — Admin can manually override inferred data types**
+* **Given** the inferred schema is displayed
+* **When** I change the data type for one or more columns
+* **Then** the override is applied and saved with the connector definition
+
+**AC-MU1-04 — A connector can contain multiple dataset schemas**
+* **Given** I have an existing Manual Upload connector
+* **When** I add an additional dataset schema to that connector
+* **Then** both schemas are saved under the same connector
+* **And** each schema is distinctly labeled
+
+**AC-MU1-05 — Admin can add additional schemas to an existing connector after setup**
+* **Given** I have an existing Manual Upload connector with at least one schema defined
+* **When** I navigate to the connector detail view and add a new schema
+* **Then** I can upload a new sample file, review the inferred schema, name it, and save it alongside the existing schemas
+
+**AC-MU1-06 — Connector appears on the Connectors tab after creation**
+* **Given** I have completed the connector setup
+* **When** I return to the Connectors tab
+* **Then** the new Manual Upload connector appears with type "Manual Upload" and status "Connected"
+
+---
+
+### MU-2 — Upload a Data File
+
+**User Story:** As a FQ Admin, I want to upload a data file to an existing Manual Upload connector so that the data is validated and loaded into the pipeline.
+
+**Importance:** High
+
+**Details:** The admin navigates to an existing Manual Upload connector, selects the target dataset schema, and uploads a file. The file is validated against the schema. If validation passes, a load confirmation is shown and the pipeline is triggered automatically.
+
+**Acceptance Criteria:**
+
+**AC-MU2-00 — Admin must provide an as-of date when uploading a file**
+* **Given** I am uploading a file to a Manual Upload connector
+* **When** I initiate the upload
+* **Then** I am required to provide an as-of date representing the date the data covers (e.g., March 31, 2026)
+* **And** the upload cannot be submitted without an as-of date
+
+**AC-MU2-01 — Admin can upload a file from within a Manual Upload connector**
+* **Given** I am viewing an existing Manual Upload connector
+* **When** I select a dataset schema and upload a file
+* **Then** the file is accepted and validation begins
+
+**AC-MU2-02 — Supported file formats are Excel and CSV**
+* **Given** I am uploading a file
+* **When** I attempt to upload a file that is not .xlsx or .csv
+* **Then** the upload is rejected with an error indicating the supported formats
+
+**AC-MU2-03 — Pipeline is triggered automatically when validation passes**
+* **Given** an uploaded file has passed all validation checks
+* **When** validation completes
+* **Then** a load confirmation is shown to the admin
+* **And** the data pipeline is triggered automatically without further action required
+
+**AC-MU2-04 — Raw data preview is available before load**
+* **Given** a file has been uploaded and validation has passed
+* **When** I view the file within the connector
+* **Then** I can preview the raw data before it is committed to the pipeline
+
+---
+
+### MU-3 — View and Resolve Validation Failures
+
+**User Story:** As a FQ Admin, I want to see clear validation feedback when an uploaded file fails checks so that I know exactly what to fix before re-uploading.
+
+**Importance:** High
+
+**Details:** When a file fails validation, the admin sees a detailed error report — identifying which rows and columns failed, the type of failure (e.g., data type mismatch, missing required field, unexpected column), and actionable guidance. Repeated errors across many rows are grouped and summarized rather than listed individually. The admin corrects the source file and re-uploads.
+
+**Acceptance Criteria:**
+
+**AC-MU3-01 — Validation failures are surfaced with row and column-level detail**
+* **Given** an uploaded file has failed one or more validation checks
+* **When** validation completes
+* **Then** I see a list of failures identifying the affected rows, columns, and failure type for each
+
+**AC-MU3-02 — Failure types are clearly labeled**
+* **Given** validation failures are displayed
+* **Then** each failure is labeled with its type (e.g., data type mismatch, missing required field, unrecognized column)
+* **And** each failure includes a description of what was expected vs. what was found
+
+**AC-MU3-03 — Repeated errors across multiple rows are grouped and summarized**
+* **Given** the same validation error occurs across multiple rows (e.g., a data type mismatch in the same column across every row)
+* **When** validation results are displayed
+* **Then** the repeated error is shown as a single grouped entry with a count of affected rows (e.g., "Column 'Amount': data type mismatch — 1,432 rows affected")
+* **And** the admin is not shown an individual failure entry per row
+
+**AC-MU3-04 — Admin can re-upload after fixing the source file**
+* **Given** validation has failed
+* **When** I upload a corrected file
+* **Then** validation runs again on the new file
+* **And** prior failure results are replaced by the new validation output
+
+**AC-MU3-05 — A file that fails validation does not trigger the pipeline**
+* **Given** an uploaded file has failed validation
+* **Then** the data pipeline is not triggered
+* **And** no data from the failed file is loaded
+
+---
+
+### MU-4 — Audit Log of Upload Actions
+
+**User Story:** As a FQ Admin, I want to see a record of who uploaded files and when so that I can track activity and troubleshoot issues.
+
+**Importance:** Medium
+
+**Details:** All upload actions are recorded — successful uploads, failed validations, and re-uploads. The audit log is accessible from within the connector and shows the uploader, timestamp, file name, and outcome.
+
+**Acceptance Criteria:**
+
+**AC-MU4-01 — All upload actions are logged**
+* **Given** any upload action occurs (successful or failed)
+* **Then** the action is recorded with: uploader name, timestamp, file name, and outcome (passed / failed validation)
+
+**AC-MU4-02 — Audit log is accessible from within the connector**
+* **Given** I am viewing a Manual Upload connector
+* **When** I navigate to the upload history or log
+* **Then** I see a list of all past upload actions for that connector in reverse chronological order
+
+**AC-MU4-03 — Upload history can be filtered**
+* **Given** I am viewing the upload history for a connector
+* **When** I apply one or more filters
+* **Then** the results are filtered by the selected dimensions: date range, uploader, outcome (pass/fail), and dataset schema
+
+---
+
+### MU-5 — Delete Uploaded Data
+
+**User Story:** As a FQ Admin, I want to delete uploaded data so that I can correct mistakes or remove data that should not have been loaded.
+
+**Importance:** Medium
+
+**Details:** Deletion is a soft delete — the data is marked as deleted and is no longer active, but the record is preserved for audit purposes. Deletion is available both before a file has loaded (pre-pipeline) and after data has already been loaded (post-pipeline). All deletion actions are audited.
+
+**Acceptance Criteria:**
+
+**AC-MU5-01 — Admin can soft-delete an uploaded file before it loads**
+* **Given** a file has been uploaded but the pipeline has not yet run
+* **When** I delete the upload
+* **Then** the file is marked as deleted and does not proceed to the pipeline
+* **And** the deletion is recorded in the audit log with uploader name, timestamp, and reason (if provided)
+
+**AC-MU5-02 — Admin can soft-delete data that has already been loaded**
+* **Given** a file has already been loaded and the pipeline has run
+* **When** I delete the upload
+* **Then** the data is marked as deleted and is no longer active in the pipeline
+* **And** the underlying record is preserved for audit purposes and is not permanently destroyed
+
+**AC-MU5-03 — Deleted uploads are visually indicated in the upload history**
+* **Given** an upload has been soft-deleted
+* **When** I view the upload history
+* **Then** the deleted upload is visible with a clear "Deleted" indicator and the deletion metadata (who deleted it, when)
+
+---
+
+## UX Requirements
+
+### Connector Setup Wizard
+
+Manual Upload connector setup follows the same wizard pattern as CDC (aligned with the [Create CDC Connector Figma file](https://www.figma.com/design/L9KjeR2dzXrNAtfywAdHs4/Create-CDC-Connector)), but with two steps instead of four — no credentials or provision steps are needed.
+
+```
+Connectors tab → "Create Connector" → Select Type: Manual Upload
+  → Step 1: Name
+  → Step 2: Define Schema
+```
+
+#### Step 1: Name
+* Admin enters a connector name
+* Placeholder text shows naming convention (e.g., "e.g. Acme Corp — Manual Transactions")
+* "Next" is disabled until a name is entered
+
+#### Step 2: Define Schema
+* Admin uploads a sample file (.xlsx or .csv) to define the first schema
+* FQ infers column names and data types from the sample and displays them in a reviewable schema table
+* Each row shows: column name, inferred data type, and an override control to change the type
+* Admin must name the schema (e.g., "Transactions", "Balances") to distinguish it from others added later
+* "Save" is disabled until at least one schema has been named and confirmed
+* Additional schemas can be added after setup from the connector detail view — not required during initial setup
+
+---
+
+### Connectors Tab — Post-Setup State
+
+After setup, the Manual Upload connector appears in the Connectors tab table with:
+* **Connector Name** — admin-defined name
+* **Type** — "Manual Upload"
+* **Status** — "Connected"
+* **Files** — count of uploaded files
+* **Date Added**
+
+---
+
+### Connector Detail View
+
+When an admin opens a Manual Upload connector, the detail view includes:
+
+* **Schema definitions** — list of defined dataset schemas, each with column names and types. Admin can add a new schema at any time by uploading an additional sample file and naming it.
+* **Upload action** — primary CTA to upload a new file
+* **Upload history** — list of past uploads in reverse chronological order, with filters for: date range, uploader, outcome (pass/fail), and dataset schema
+* Each upload history row shows: file name, dataset schema, as-of date, uploader, timestamp, outcome, and status (including "Deleted" for soft-deleted records)
+
+---
+
+### Upload Flow
+
+```
+Upload CTA → Select dataset schema → Enter as-of date → Select file → Validate → Load
+```
+
+1. **Select dataset schema** — if the connector has multiple schemas, admin selects which schema applies to this file
+2. **Enter as-of date** — required date picker; represents the date the data covers
+3. **Select file** — file picker accepting .xlsx and .csv only; unsupported formats are rejected immediately with an inline error
+4. **Validation** — runs automatically on upload; admin sees a loading state while validation runs
+5. **On pass** — load confirmation shown; pipeline triggers automatically
+6. **On fail** — validation results shown (see below)
+
+---
+
+### Validation Results — Failure State
+
+* Failures are grouped by error type and column — not listed row by row
+* Each grouped entry shows: column name, failure type, expected value/type, and count of affected rows (e.g., _"Column 'Amount': data type mismatch — 1,432 rows affected"_)
+* A summary banner at the top shows total error count and total rows affected
+* Admin can re-upload a corrected file directly from the failure state without navigating away
+
+---
+
+### Key UX Questions for Designer
+
+* How is the schema review table presented after sample file inference — inline editable rows, or a side panel?
+* How are multiple schemas within one connector organized — tabs, a list, or accordion?
+* How is the as-of date captured — inline with the file picker, or a distinct step in the upload flow?
+* What does the "load confirmation" look like after validation passes — a modal, an inline banner, or an auto-advance to a success state?
+* How are soft-deleted uploads visually indicated in the upload history — strikethrough, muted row, or a status badge?
+* How does the admin add a new schema to an existing connector — a dedicated "Add Schema" CTA within the connector detail view, or inline within the schema list?
+
+---
+
+## Open Questions
+
+| # | Question | Owner | Status |
+| --- | --- | --- | --- |
+| OQ-1 | What is the maximum file size supported for manual uploads? | PM + Engineering | Open |
+| OQ-2 | Does a manually uploaded file flow through the same data pipeline as CDC/SFTP transmissions, or is there a separate processing path? | PM + Engineering | Open |
+| OQ-3 | What happens when a file partially passes validation — e.g., some rows are valid and some are not? Does the whole file fail, or does the system load clean rows and flag failures separately? | PM + Engineering | Open |
+| OQ-4 | How does the as-of date on a manual upload interact with the pipeline — does it behave like Effective Date in the Lineage PRDs, potentially triggering historical reprocessing? What are the downstream implications of uploading data with a past as-of date? | PM + Engineering | Open |
+| OQ-5 | When an admin soft-deletes data that has already been loaded, what happens downstream — are models and pipeline outputs that relied on that data affected? Is there a reprocessing step? | PM + Engineering | Open |
+| OQ-6 | Should admins receive a notification (in-app, email, or otherwise) when a manual upload load completes or fails? | PM + Engineering | Open |
+| OQ-7 | Should schema management (editing or deleting schema definitions on an existing connector) be in scope for this PRD? | PM | Open |
+| OQ-8 | "Manual Upload" is listed as a Transmission Type in the [Definitions & Terms glossary](https://floqast.atlassian.net/wiki/spaces/Data/pages/4464869409) but is not fully defined — glossary should be updated before this PRD is finalized | PM | Open |
+
+---
+
+## Gaps
+
+| # | Gap | Impact | Proposed Resolution |
+| --- | --- | --- | --- |
+| G1 | Manual upload as a fallback for other connector types (SFTP, CDC, API) is explicitly out of scope for this PRD, but customer demand exists (e.g., Twilio). The ability to manually upload data when an automated transmission fails has no supported path beyond what this PRD defines. | Medium | Assign to a future PRD. Flag as a follow-on to this work once Manual Upload connector is stable. |
+| G2 | Permissions and access control for upload actions — who is allowed to upload, view history, or delete data — is not defined in this PRD. All FQ Admins with connector access are implicitly able to upload. | Medium | Assign to a future PRD or address as part of a broader Data Studio permissions model. |
+| G3 | Schema management (editing or deleting schema definitions on an existing Manual Upload connector) is currently out of scope. If a schema needs to change after setup, there is no supported self-serve path. | Medium | See OQ-7 — determine whether to bring into scope for this PRD or assign as a fast-follow. |
+| G4 | The existing manual upload capability outside of Data Studio (currently used for Journal Entries) is not being retired as part of this PRD. Until it is deprecated, two parallel upload paths will exist — creating potential confusion for admins. | Medium | Deprecation decision and timeline should be addressed in a separate workstream; a link to that work should be added here when available. |
+| G5 | Notification behavior (in-app, email, or otherwise) for load completion and failure is unowned and undefined. Admins have no way to know a load has completed or failed without manually checking the connector. | Low–Medium | See OQ-6 — align with Engineering on notification delivery before this PRD is finalized. |
+
+---
+
+## Future Considerations
+
+* **Manual upload fallback for any connector type** — allow admins to manually upload data against any connector (SFTP, CDC, API) when automated transmission fails, without requiring a separate Manual Upload connector to be configured.
+* **Regex/pattern-based schema matching** — for customers uploading many files with slight naming variations, allow schema assignment based on filename patterns rather than manual selection at upload time.
+* **Scheduled or recurring upload reminders** — for datasets that are uploaded on a regular cadence (e.g., monthly), surface a reminder or prompt when an expected upload hasn't arrived.
+
+---
+
+## References
+
+### Related PRDs
+* [Data Studio: CDC Connection Setup (DRAFT)](https://floqast.atlassian.net/wiki/spaces/Data/pages/4462575617)
+* [Lineage Creation — 1 of 4: Model Creation & Source Configuration (DRAFT)](https://floqast.atlassian.net/wiki/spaces/Data/pages/4450189505)
+* [Lineage Creation — 2 of 4: Field Mapping](https://floqast.atlassian.net/wiki/spaces/Data/pages/4449927443)
+
+### Design Resources
+* [Create CDC Connector — Figma](https://www.figma.com/design/L9KjeR2dzXrNAtfywAdHs4/Create-CDC-Connector) _(structural reference for connector setup wizard pattern)_
+
+### Glossary
+* [Definitions & Terms (Data Studio)](https://floqast.atlassian.net/wiki/spaces/Data/pages/4464869409)
+
+### Customer Feedback
+* [Slack — Twilio manual upload feedback (Feb 25, 2026)](https://floqast.slack.com/archives/C0AC12PQGE9/p1772069786621649) — customer requested ability to manually upload transaction files without SFTP

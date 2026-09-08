@@ -1,0 +1,115 @@
+@import "tailwindcss/theme";
+@import "tailwindcss/utilities";
+@source "../../_shared";
+
+/* Tailwind v4 without preflight skips box-sizing reset. Restore it
+   so width utilities include padding/border (matches Tailwind default). */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Reset button browser defaults — Tailwind v4 without preflight
+   doesn't reset these. Font-family override is in main.tsx
+   (injected after Theme.apply() for correct source order). */
+button {
+  color: inherit;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  text-align: inherit;
+}
+button:disabled {
+  cursor: default;
+}
+
+/* AG Grid header bottom border — matches FlowUI border color */
+.ag-header {
+  border-bottom: 1px solid var(--flo-sem-color-border-default, #e1e6ef) !important;
+}
+
+/* Suppress AG Grid cell focus ring — row selection only */
+.ag-cell-focus {
+  border-color: transparent !important;
+  outline: none !important;
+}
+
+/* Raise FlowUI Select/Popover portals above modals */
+[data-radix-popper-content-wrapper] {
+  z-index: 9999 !important;
+}
+
+/* AG Grid floating filter row — compact and minimal */
+.ag-floating-filter {
+  border-top: 1px solid var(--flo-sem-color-border-default, #e1e6ef) !important;
+}
+
+.ag-floating-filter-input {
+  font-size: 11px !important;
+  height: 24px !important;
+}
+
+/* AG Grid row hover — slightly more visible */
+.ag-row-hover {
+  background-color: var(--flo-sem-color-success-light, #f0faf4) !important;
+}
+
+/* AG Grid selected row — subtle green left border */
+.ag-row-selected {
+  background-color: #f0fdf4 !important;
+}
+
+/* AG Grid sort indicator arrows */
+.ag-sort-ascending-icon,
+.ag-sort-descending-icon {
+  color: var(--flo-sem-color-success, #00a651) !important;
+}
+
+/* AG Grid column resize handle — visible on hover */
+.ag-header-cell-resize {
+  width: 4px !important;
+}
+.ag-header-cell-resize::after {
+  background-color: transparent !important;
+}
+.ag-header-cell:hover .ag-header-cell-resize::after {
+  background-color: var(--flo-sem-color-border-default, #e1e6ef) !important;
+}
+
+/* AG Grid filter icon — themed green when active */
+.ag-floating-filter-button-button {
+  color: var(--flo-sem-color-text-tertiary, #adb2bb) !important;
+}
+
+/* Smooth row expand/collapse transitions */
+.ag-row {
+  transition: background-color 0.15s ease;
+}
+
+/* Float Radix popovers (FlowUI Select / Tooltip / Popover) above the
+   FlowUI Modal overlay (z-index 9000). Without this rule, a Select
+   dropdown opened inside a Modal renders behind it because the Radix
+   Popper wrapper element has a lower default z-index than the Modal. */
+[data-radix-popper-content-wrapper] {
+  z-index: 9999 !important;
+}
+
+/* Tighten the spacing above the first option in a Select dropdown.
+   FlowUI's Select ships with 2px top padding on the listbox, 2px on
+   each option-row wrapper, AND 10px of internal top padding on the
+   styled SelectOption itself. The first option doesn't need that 10px
+   since the search bar acts as its top boundary — collapse it to 2px
+   so the first option sits flush against the search bar's bottom edge. */
+[data-radix-popper-content-wrapper] [role="listbox"] {
+  padding-top: 0 !important;
+  /* Ensure mouse-wheel scrolling stays inside the listbox and doesn't
+     bubble up to the modal/page. */
+  overscroll-behavior: contain;
+}
+[data-radix-popper-content-wrapper] [role="listbox"] > div:first-child {
+  padding-top: 0 !important;
+}
+[data-radix-popper-content-wrapper] [role="listbox"] > div:first-child > * {
+  padding-top: 2px !important;
+}

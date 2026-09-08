@@ -1,0 +1,13 @@
+<svg preserveAspectRatio="xMidYMid meet" width="24" height="21.12" overflow="visible" style="display: block;" viewBox="0 0 24 21.12" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Branding / Icons / Remind">
+<path id="Path" d="M6.88224 11.0704L1.15441 0.959999L24 1.02357L6.88224 11.0704Z" fill="var(--fill-0, #7ECC46)"/>
+<path id="Path_2" d="M12.4314 20.9863L6.88282 11.0704L0.959999 14.5508L12.4314 20.9863Z" fill="var(--fill-0, #6EB63B)"/>
+<path id="Path_3" d="M12.4581 20.9863L24 1.05721L6.89015 11.0675L12.4581 20.9863Z" fill="url(#paint0_linear_0_122)"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_0_122" x1="20.9703" y1="1.05721" x2="11.3257" y2="19.8984" gradientUnits="userSpaceOnUse">
+<stop stop-color="#B5E192"/>
+<stop offset="1" stop-color="#86D44F"/>
+</linearGradient>
+</defs>
+</svg>

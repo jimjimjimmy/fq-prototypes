@@ -1,0 +1,8 @@
+node_modules/
+dist/
+flowui-cache/
+*.tsbuildinfo
+.vite/
+coverage/
+.DS_Store
+*.local

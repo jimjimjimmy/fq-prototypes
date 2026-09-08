@@ -1,0 +1,493 @@
+# Data Studio: Dimensions (Q3 2026)
+
+| Field | Value |
+|---|---|
+| Target release | 2026-09-30 |
+| Epic | IDEA-2629 |
+| Idea Link | https://floqast.atlassian.net/jira/polaris/projects/IDEA/ideas/view/11291632?selectedIssue=IDEA-2629 |
+| Document status | Q3 DRAFT |
+| Document owner | Alex Kearns |
+| Designer | Natasha Clark & Kristin Johnson |
+| Tech lead | (assign) |
+| Technical writers | (assign) |
+| QA | (assign) |
+| Depends on | Model Creation & Source Config; Versioning & Lifecycle Q3 |
+| Related sub-PRDs | [Versioning Q3](prd-versioning-q3.md) · [Logging & Audit Q3](prd-logging-audit-q3.md) |
+
+---
+
+## 🎯 Objective
+
+This PRD clarifies and refines how dimensions are created and managed in Data Studio, and defines the Dimensions tab as a dedicated management and visibility surface.
+
+Two changes drive this work:
+
+1. **Creation model clarification:** All model creation — including dimension-type models — happens in the Catalog. The Dimensions tab is not a creation surface. If a user wants a standalone dimension, they create a model in Catalog (Type: Dimension). If a linked model defines a new dimension inline ("Define New"), that happens from within the model's Dimensions sub-tab. No dimension creation originates from the Dimensions tab itself.
+
+2. **Dimensions tab purpose:** The Dimensions tab exists to give admins a single management view across all dimensions in their tenant — regardless of how each was created. Clicking into a dimension surfaces its sources, member values, and data flow.
+
+Primary users: Data Studio admins.
+
+---
+
+## 🔤 Definitions
+
+For a complete glossary, see the shared [Data Studio: Definitions & Terms](https://floqast.atlassian.net/wiki/spaces/Data/pages/4464869099) page.
+
+**Dimension** — A reference dataset used to categorize and slice fact data (e.g., Department, Region, Cost Center). Produced by one or more contributing models and referenced by linked models via a key pair.
+
+**Contributing model** — A model whose output produces the member records (key + field name) that populate a dimension. Labeled "Primary" in the Dimensions tab.
+
+**Linked model** — A model that references a dimension's key as a foreign-key lookup. Labeled "Linked" in the Dimensions tab.
+
+**Standalone dimension** — A dimension created by building a model in Catalog with Type: Dimension. Has its own source datasets, field mapping, and full model lifecycle.
+
+**Define New (inline dimension)** — A lightweight dimension created from within a consuming model's Dimensions sub-tab. Source is a mapped field on that model. Key is required; value is optional. Cannot have additional custom fields — this is a permanent structural constraint. Globally visible in the Dimensions tab and linkable into other models.
+
+**Dimension member** — A single record in a dimension: a key value and its associated field name (display label). Auto-inserted members (key = value, other attributes blank) are created when a linked model surfaces a key not present in the dimension.
+
+---
+
+## 🏅 Why This Is Important
+
+Dimensions are fundamentally different from other model types in Data Studio. Where most models have a single source and a clear owner, dimensions can be written to by multiple contributing models simultaneously — and they serve as shared reference tables that many downstream models depend on. This creates two compounding risks:
+
+**Dependency opacity.** As a tenant grows, admins lose track of which models depend on a given dimension. A configuration change or data quality issue in a dimension can cascade silently across multiple downstream models.
+
+**Data quality drift.** Because dimensions standardize categorization (e.g., Department, Region), inconsistent values — such as "US of A" alongside "United States" — propagate errors into every model that references them. Without a dedicated surface to inspect dimension values and flag duplicates, these errors go undetected until they surface in downstream FloQast products.
+
+The Dimensions tab introduces visibility and management for both of these risks for the first time.
+
+---
+
+## 🔐 Value Unlocked
+
+An admin can immediately understand the health and dependency map of any dimension without opening a single model. Before making a configuration change to a dimension's source, they can see exactly which models would be affected and how.
+
+---
+
+## 🗝️ Key Examples
+
+- **Example 1:** An admin navigates to the Dimensions tab and spots two dimensions flagged with warnings — one with a data quality issue, one orphaned with no models using it. They know which dimensions need attention without opening any models.
+- **Example 2:** An admin needs to update how the Department dimension is sourced. Before making the change, they open Department's Data Flow view and see that three models — GL Transactions, Trial Balance, and Accounts — all depend on it. They switch to Fields view to confirm exactly which fields are joined on the dimension key before proceeding.
+- **Example 3:** A new cost center code appears in the GL export. The system auto-inserts it as a new dimension member. The admin sees it flagged in the Values tab as an auto-inserted entry and can review it.
+
+---
+
+## 💡 Key Benefits
+
+- Single table of all dimensions with status, linked model count, value count, and last updated — no model-by-model tracing required
+- Data quality issues (duplicate keys, inconsistent values) surfaced proactively before they propagate downstream
+- Field-level data flow visibility shows exactly how sources feed the dimension and how models join to it
+- Creation model is unambiguous: everything is created in Catalog; the Dimensions tab never confuses admins with overlapping creation affordances
+
+---
+
+## ✅ Use Cases
+
+| # | Persona | Scenario | Expected Outcome |
+|---|---|---|---|
+| 1 | Admin | Wants to assess dimension health across the tenant | Dimensions tab shows all dimensions with status badges — data quality issues and orphaned dimensions immediately visible |
+| 2 | Admin | Investigating a data quality warning on the Department dimension | Clicks into the dimension → Values tab shows "Eng" flagged as a possible duplicate of "Engineering" with 23 records |
+| 3 | Admin | Needs to change a dimension's source configuration safely | Data Flow → Fields mode shows exactly which model fields join on the dimension key before the change is made |
+| 4 | Admin | A linked model surfaces a key value that has no match in the dimension | System auto-inserts the new dimension member; admin is notified and can review it in the Values tab |
+| 5 | Admin | Wants to create a new standalone dimension | Navigates to Catalog → creates a new model → selects Type: Dimension. Does not use the Dimensions tab to create. |
+| 6 | Admin | A consuming model needs a simple inline dimension | Opens the model's Dimensions sub-tab → clicks "Define New" to create a lightweight dimension from a mapped field |
+
+---
+
+## 📊 Success Metrics
+
+| Goal | Metric | Baseline | Target |
+|---|---|---|---|
+| Dimension health visibility | % of admins who can identify a data quality issue in a dimension without opening a model | 0% | TBD |
+| Dependency awareness before changes | % of dimension configuration changes where admin viewed Data Flow before making the change | Unknown | TBD — baseline to establish |
+| Data quality issue resolution | % of dimensions with Data Quality status that are resolved within 30 days of being flagged | Unknown | TBD |
+
+---
+
+## 🤔 Assumptions
+
+**Established**
+- All model creation — including dimension-type models — happens in Catalog. The Dimensions tab is a management surface only.
+- Two creation paths exist, both originating from Catalog:
+  - **Standalone:** Catalog → New Model → Type: Dimension. Has its own source datasets and full model lifecycle.
+  - **Define New (inline):** Consuming model → Dimensions sub-tab → "Define New." Creates a lightweight dimension derived from a mapped field on that model. Key is required; value is optional. **Cannot have additional custom fields** — this is a permanent structural constraint, not a configuration choice.
+- Both creation paths produce a dimension object that appears in the Dimensions tab. The distinction between creation paths is not surfaced to the user in the management view — all dimensions are shown equally.
+- Dimension names must be globally unique within the tenant. Creation is blocked on collision.
+- The Dimensions tab does not introduce a third creation path.
+- Entity is not a dimension and does not appear in this tab.
+- Access is admin-only in v1. Broader role access is future state.
+- **Dimension changes are additive only.** When a contributing model's version changes or a linked model surfaces an unknown key, new members are inserted — existing members are not deleted or modified by the system. See V10 in the Versioning PRD for the full cascade behavior.
+- Publishing a new dimension version does **not** automatically trigger re-runs of linked models — that decision belongs to the admin.
+- "Stale" is not a valid status. Sync recency is not a meaningful health signal for dimensions.
+- Entity and Chart of Accounts are not managed in this tab. Both have dedicated management surfaces.
+
+**Open Items to Confirm**
+- Can a dimension be deleted? If linked models reference it, deletion should be blocked or require resolution per linked model. (OQ-1)
+- When is a dimension Orphaned? Immediately when the last referencing model is unpublished or deleted, or is there a grace period? (OQ-2)
+- What does the record count on the Values tab measure? Total records across all linked models that carry that value, or something else? (OQ-4)
+
+---
+
+## 🗺️ Scope
+
+### 🚗 In Scope
+- **Creation model clarification:** Dimensions tab is management only; Catalog is the single creation surface
+- **Dimensions tab management table:** all dimensions in the tenant, with Name, Linked Models, Unique Values, Last Updated, Status
+- **Four status states:** Draft, Active, Data Quality warning, Orphaned
+- **Empty state** for tenants with no dimensions configured
+- **Dimension detail — Values tab:** member values with record counts, data quality flags, and warning detail
+- **Dimension detail — Data Flow tab:** Overview mode (node-level) and Fields mode (field-level) showing sources, the dimension, and dependent models
+- **Dimension detail — Logs tab:** chronological configuration changes and run events
+- **Data quality detection:** duplicate key values, blank name/value fields
+- **Auto-inserted member visibility:** members created by the system (key = value, other attributes blank) are identifiable in the Values tab
+
+### 🚦 Out of Scope (v1)
+- Dimension deletion — safety story not yet defined
+- Broader role access beyond admin
+- Entity-specific dimensional data scoping
+- "Show orphaned" filtered view
+- Upstream data correction workflows from within the Dimensions tab
+- Dimension hierarchy (parent/child tree structures)
+- Bulk dimension key management
+
+---
+
+## 📋 Requirements — User Stories
+
+### Quick Reference
+
+| # | Story | Importance |
+|---|---|---|
+| DIM-1 | Dimensions tab management table | High |
+| DIM-2 | Dimension status states | High |
+| DIM-3 | Dimension detail — Values tab | High |
+| DIM-4 | Dimension detail — Data Flow tab (Overview) | High |
+| DIM-5 | Dimension detail — Data Flow tab (Fields) | High |
+| DIM-6 | Dimension detail header and navigation | Medium |
+| DIM-7 | Dimension detail — Logs tab | Medium |
+
+---
+
+### DIM-1 — Dimensions Tab Management Table
+
+**User Story:** As an admin, I can see all dimensions in my tenant in a single table so that I can assess their health and dependencies at a glance.
+
+**Importance:** High
+
+**Acceptance Criteria:**
+
+**AC-DIM-1-01 — Table shows all dimensions**
+```
+Given I navigate to the Dimensions tab
+When dimensions exist in my tenant
+Then I see a table with one row per dimension showing:
+  Name, Linked Models (first model name + overflow count), Unique Values count, Last Updated date, and Status
+And rows are sorted alphabetically by Name by default
+```
+
+**AC-DIM-1-02 — Linked model names are hyperlinks**
+```
+Given I am viewing the Dimensions table
+When a dimension has linked models
+Then each model name shown is a hyperlink that navigates to that model's detail view
+And clicking the overflow count (+N more) reveals the remaining linked models, each as a hyperlink
+```
+
+**AC-DIM-1-03 — Empty state when no dimensions exist**
+```
+Given I navigate to the Dimensions tab
+When no dimensions exist in my tenant
+Then I see the empty state with the headline "No dimensions yet", explanatory body copy, and an inline link to Catalog
+```
+
+**AC-DIM-1-04 — No creation entry point in this tab**
+```
+Given I am viewing the Dimensions tab
+When I look for a way to create a new dimension
+Then there is no "New Dimension" or "Create" action in this tab
+And dimensions are created via Catalog (Type: Dimension) or via a model's Dimensions sub-tab (Define New)
+```
+
+---
+
+### DIM-2 — Dimension Status States
+
+**User Story:** As an admin, I can see a clear status on each dimension so that I know which ones need attention.
+
+**Importance:** High
+
+**Acceptance Criteria:**
+
+**AC-DIM-2-01 — Draft status**
+```
+Given a dimension's own model is in Draft state (not yet published)
+When I view it in the table
+Then its Status shows "Draft"
+And the publish state of models that reference this dimension has no effect on its status
+```
+
+**AC-DIM-2-02 — Active status**
+```
+Given a dimension is live and referenced by at least one model
+When I view it in the table
+Then its Status shows "Active"
+```
+
+**AC-DIM-2-03 — Data Quality warning**
+```
+Given a dimension has duplicate key values or blank name/value fields in its source data
+When I view it in the table
+Then its Status shows a "Data Quality" warning
+```
+
+**AC-DIM-2-04 — Orphaned warning**
+```
+Given a dimension has no models referencing it
+When I view it in the table
+Then its Status shows "Orphaned"
+```
+
+**AC-DIM-2-05 — Active takes precedence over Draft when both versions exist**
+```
+Given a dimension has both a published (Active) version and an in-progress Draft version
+When I view it in the table
+Then its Status shows "Active" — the presence of a Draft does not change the displayed status
+```
+
+---
+
+### DIM-3 — Dimension Detail — Values Tab
+
+**User Story:** As an admin, I can inspect the member values of a dimension so that I can verify its contents and identify data quality issues.
+
+**Importance:** High
+
+**Acceptance Criteria:**
+
+**AC-DIM-3-01 — Values tab is the default on detail open**
+```
+Given I click a dimension row in the management table
+When the detail view opens
+Then the Values tab is selected by default
+```
+
+**AC-DIM-3-02 — Values table shows all members**
+```
+Given I am on the Values tab
+When values exist
+Then I see a table of all dimension member values sorted alphabetically by default
+And each row shows the value, its record count, and a relative bar scaled to the highest count
+```
+
+**AC-DIM-3-03 — Data quality warnings are flagged inline**
+```
+Given a dimension value has a data quality issue (e.g., duplicate key, possible duplicate name)
+When I view the Values tab
+Then a warning indicator appears on that row
+And clicking the indicator expands a detail description of the specific issue
+```
+
+**AC-DIM-3-04 — Auto-inserted members are identifiable**
+```
+Given a dimension member was created by the system (auto-inserted because a linked model surfaced an unknown key)
+When I view the Values tab
+Then that member is visually distinguishable from user-defined members
+```
+
+**AC-DIM-3-05 — Show issues only toggle**
+```
+Given data quality issues exist on the Values tab
+When I toggle "Show issues only"
+Then the table filters to flagged rows only
+```
+
+**AC-DIM-3-06 — Search filters values in real time**
+```
+Given I want to find a specific value
+When I type in the search field on the Values tab
+Then the table filters to matching values in real time
+```
+
+---
+
+### DIM-4 — Dimension Detail — Data Flow Tab (Overview)
+
+**User Story:** As an admin, I can see a visual map of a dimension's sources and dependent models so that I can understand its full dependency picture before making changes.
+
+**Importance:** High
+
+**Acceptance Criteria:**
+
+**AC-DIM-4-01 — Overview mode is the default**
+```
+Given I navigate to the Data Flow tab on a dimension's detail view
+When the tab loads
+Then I see Overview mode: source cards on the left, the dimension card in the center, model cards on the right, connected by directional curves
+```
+
+**AC-DIM-4-02 — Model cards show Primary or Linked role**
+```
+Given I am in Overview mode
+When I view a model card
+Then it displays a role badge indicating whether the model is "Primary" (contributing) or "Linked" (referencing)
+```
+
+**AC-DIM-4-03 — Model cards navigate to the model**
+```
+Given I am in Overview mode
+When I click a model card
+Then I am navigated to that model's detail view
+```
+
+**AC-DIM-4-04 — Multiple sources shown as separate cards**
+```
+Given a dimension has multiple contributing sources
+When I view the Overview
+Then all contributing sources are shown as separate cards on the left
+```
+
+---
+
+### DIM-5 — Dimension Detail — Data Flow Tab (Fields)
+
+**User Story:** As an admin, I can see field-level connections between sources, the dimension, and dependent models so that I understand exactly how data flows before making a change.
+
+**Importance:** High
+
+**Acceptance Criteria:**
+
+**AC-DIM-5-01 — Fields mode expands cards to show field connections**
+```
+Given I toggle to Fields mode on the Data Flow tab
+When the view updates
+Then each card expands to show its field-level connections:
+  source fields mapping to the dimension label (left side)
+  dimension key mapping to model fields (right side)
+```
+
+**AC-DIM-5-02 — Source-to-dimension connections**
+```
+Given I am in Fields mode
+When I view the source-to-dimension connections
+Then I see: source field → dimension label for each contributing source
+```
+
+**AC-DIM-5-03 — Dimension-to-model connections**
+```
+Given I am in Fields mode
+When I view the dimension-to-model connections
+Then I see: dimension key → model field for each dependent model
+```
+
+**AC-DIM-5-04 — Role badges and model navigation persist in Fields mode**
+```
+Given I am in Fields mode
+When I view a model card
+Then it still shows its Primary or Linked role badge
+And clicking it navigates to that model's detail view
+```
+
+---
+
+### DIM-6 — Dimension Detail Header and Navigation
+
+**User Story:** As an admin, I have clear context and easy navigation inside a dimension's detail view so that I always know what I'm looking at.
+
+**Importance:** Medium
+
+**Acceptance Criteria:**
+
+**AC-DIM-6-01 — Header shows dimension context**
+```
+Given I am on a dimension's detail view
+When the page loads
+Then the header displays: dimension name, status badge, source connector chip(s), and last updated date
+And each source is shown as a separate chip if the dimension has multiple sources
+```
+
+**AC-DIM-6-02 — Sidebar navigation**
+```
+Given I am on the detail view
+When I view the left sidebar
+Then I see three items: Values, Data Flow, and Logs — with the active section highlighted
+And clicking any item updates the content area without a full page reload
+```
+
+---
+
+### DIM-7 — Dimension Detail — Logs Tab
+
+**User Story:** As an admin, I can see a log of changes and runs for a dimension so that I can audit its history and understand when its data last changed.
+
+**Importance:** Medium
+
+**Acceptance Criteria:**
+
+**AC-DIM-7-01 — Logs tab shows chronological history**
+```
+Given I navigate to the Logs tab on a dimension's detail view
+When log entries exist
+Then I see a chronological list of configuration changes and run events, each referencing the underlying model
+```
+
+**AC-DIM-7-02 — Empty state when no entries exist**
+```
+Given I navigate to the Logs tab
+When no log entries exist yet
+Then I see an appropriate empty state
+```
+
+---
+
+## 😎 Future Considerations
+
+- **Dimension deletion** — requires a defined safety story: what happens to linked models? Block until resolved, or cascade options?
+- **Broader role access** — non-admin roles accessing the Dimensions tab in a future iteration.
+- **Upstream data correction workflows** — admin identifies a data quality issue and can trace and correct it at the source from within Data Studio.
+- **"Show orphaned" filter** — a filtered view of the management table scoped to orphaned dimensions only.
+- **Auto-inserted member enrichment** — auto-inserted members (key = value, other attributes blank) should be enrichable by admins. Blocked on: (1) no dim record viewer today; (2) system needs to track row provenance (auto-inserted vs. user-defined).
+- **Rebuild Define New as standalone** — inline dimensions are permanently constrained to key + value. If an admin later needs custom fields on a dimension that started as Define New, the path is to rebuild it as a standalone dimension in Catalog. A migration path that preserves links to consuming models is a future consideration.
+- **Dimension hierarchy** — parent/child tree structures for dimensions like cost centers.
+
+---
+
+## ❓ Open Questions
+
+| # | Question | Owner | Status | Answer |
+|---|---|---|---|---|
+| OQ-1 | Can a dimension be deleted? If linked models reference it, what is the required resolution — block, warn-and-allow, or per-model choice? | Alex K / Engineering | Open | |
+| OQ-2 | When does a dimension become Orphaned — immediately when the last referencing model is removed, or after a grace period? | Engineering | Open | |
+| OQ-3 | Can a Define New (inline) dimension later have additional contributing models added — gaining attribute richness? Or is it permanently lightweight? | Alex K / Engineering | Resolved | Inline dimensions are permanently limited to key + value (key required, value optional). They cannot have additional custom fields added. Standalone dimensions built via Catalog support additional custom fields beyond key + value. The distinction is structural, not a configuration choice. |
+| OQ-4 | What does the record count on the Values tab measure — total records across all linked models that carry that value, or something else? | Engineering | Open | |
+| OQ-5 | Does data quality detection run in real time (on each sync) or on a separate schedule, meaning status could lag behind actual data state? | Engineering | Open | |
+| OQ-6 | When a contributing model is archived, do its dimension members flip to INACTIVE immediately, or is there a transition period? | Engineering | Open | |
+
+---
+
+## 🚫 Gaps
+
+| # | Gap | Impact | Proposed Resolution |
+|---|---|---|---|
+| G1 | Dimension deletion — safety story not defined | Medium | Needs a defined resolution path before this can be built — see OQ-1 |
+| G2 | Auto-inserted member visibility — no dim record viewer exists today | Medium | Ship linking first; address in a fast-follow once row provenance tracking is confirmed with Engineering |
+| G3 | Define New → standalone migration path not defined | Low | Inline dimensions are permanently constrained (OQ-3 resolved). If an admin needs to upgrade to a standalone, the only current path is rebuilding from scratch — a migration path that preserves consumer links is future work |
+| G4 | Visual design for Data Flow graph at scale (many contributing sources, many linked models) | Medium | Natasha to define — card sizing, curve routing, spacing |
+| G5 | Cross-product references — downstream FQ products (Close, AI Variance, Transform) consume dimension members outside Data Studio; cascade behavior for those external references is not defined here | High | Separate flow needed; likely a cross-product PRD conversation |
+
+---
+
+## 📚 References
+
+### Design Resources
+- Prototype: `playspace/dimensions-prototype.html` — Dimensions tab table + detail (Values, Data Flow)
+- Prototype: `playspace/dimensions-tab/create-custom-dimension-in-shell.html` — Create dimension form (reference only — creation moves to Catalog)
+- User flow: `pm-claude/dimensions-user-flow.md` — Three creation paths overview (FQ Global, Custom Separate File, Custom Embedded)
+- User flow: `pm-claude/dimension-creation-sources-user-flow.md` — Define New vs Link to Existing
+- System flow: `pm-claude/dimension-changes-user-flow.md` — 9 flows for dimension change cascade behavior (background for assumptions)
+- Figma: Lineage Product — https://www.figma.com/design/pF3J27wNhb7TRnCmmJGrB9/Lineage---Product?node-id=1-2
+
+### Prior Work
+- [Dimensions Tab PRD (April 2026)](../../../playspace/dimensions-tab/prd-dimensions-tab.md) — original spec; Stories 1–7 carried forward into this document
+- [Versioning Q3](prd-versioning-q3.md) — V10 covers dimension version cascade behavior

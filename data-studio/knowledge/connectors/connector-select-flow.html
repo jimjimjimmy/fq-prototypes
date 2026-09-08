@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Data Studio — Connector Selection Flow</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --surface: #ffffff;
+      --border: #e4e7ec;
+      --border-strong: #d0d5dd;
+      --text: #101828;
+      --text-muted: #475467;
+      --text-subtle: #667085;
+      --accent: #1a73e8;
+      --accent-soft: #e8f0fe;
+      --warn-soft: #fff4e5;
+      --warn-border: #f59e0b;
+      --ok-soft: #e8f5e9;
+      --ok-border: #4caf50;
+      --code-bg: #f3f4f6;
+      --shadow: 0 1px 3px rgba(16, 24, 40, 0.05), 0 1px 2px rgba(16, 24, 40, 0.06);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 15px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 56px 32px 96px;
+    }
+
+    header.hero {
+      margin-bottom: 40px;
+      padding-bottom: 28px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .eyebrow {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-subtle);
+      margin: 0 0 12px;
+    }
+
+    h1 {
+      font-size: 32px;
+      line-height: 1.2;
+      font-weight: 600;
+      margin: 0 0 12px;
+      letter-spacing: -0.01em;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: var(--text-muted);
+      margin: 0;
+      max-width: 720px;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    section {
+      margin-top: 44px;
+    }
+
+    h2 {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0 0 8px;
+      letter-spacing: -0.005em;
+    }
+
+    h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0 0 6px;
+    }
+
+    p { margin: 0 0 12px; color: var(--text-muted); }
+    p.lede { color: var(--text); }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .card + .card { margin-top: 16px; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0 8px;
+      font-size: 14px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    th {
+      font-weight: 600;
+      color: var(--text);
+      background: #fafbfc;
+      font-size: 13px;
+      letter-spacing: 0.01em;
+    }
+
+    td { color: var(--text-muted); }
+    td strong { color: var(--text); }
+
+    .diagram-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px 24px;
+      box-shadow: var(--shadow);
+      overflow-x: auto;
+    }
+
+    .mermaid {
+      display: flex;
+      justify-content: center;
+      min-width: 600px;
+    }
+
+    .decision {
+      display: grid;
+      grid-template-columns: 32px 1fr;
+      gap: 16px;
+      align-items: start;
+      padding: 18px 20px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      margin-bottom: 12px;
+    }
+
+    .decision .num {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 13px;
+      margin-top: 1px;
+    }
+
+    .decision h3 { margin-bottom: 8px; color: var(--text); }
+    .decision p { margin: 0 0 8px; }
+
+    .tradeoff {
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      gap: 12px;
+      padding: 8px 0;
+      border-top: 1px dashed var(--border);
+      font-size: 14px;
+    }
+    .tradeoff:first-of-type { border-top: none; }
+
+    .tradeoff .label {
+      font-weight: 600;
+      color: var(--text);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding-top: 2px;
+    }
+
+    .tradeoff .label.lean {
+      color: var(--accent);
+    }
+
+    .lean-note {
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: var(--accent-soft);
+      border-left: 3px solid var(--accent);
+      border-radius: 4px;
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    ul.bullets {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--text-muted);
+    }
+    ul.bullets li { margin-bottom: 6px; }
+    ul.bullets li strong { color: var(--text); }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      border: 1px solid var(--border-strong);
+    }
+    .swatch.select { background: var(--accent-soft); border-color: var(--accent); }
+    .swatch.decision-node { background: var(--warn-soft); border-color: var(--warn-border); }
+    .swatch.done { background: var(--ok-soft); border-color: var(--ok-border); }
+
+    footer {
+      margin-top: 64px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--text-subtle);
+    }
+
+    @media (max-width: 720px) {
+      .page { padding: 32px 18px 64px; }
+      h1 { font-size: 26px; }
+      .decision { grid-template-columns: 1fr; }
+      .decision .num { margin-bottom: 4px; }
+      .tradeoff { grid-template-columns: 1fr; gap: 4px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <p class="eyebrow">Data Studio · Connectors</p>
+      <h1>Connector Selection Flow</h1>
+      <p class="subtitle">
+        A single-screen picker showing every connector option on the same tier &mdash; pre-built systems
+        (QBO, NetSuite, Sage Intacct, Salesforce, Workday) sit alongside custom transmission methods
+        (File, API, SFTP) without status hierarchy. Built on the pattern from Kristin's original
+        mockup, minus the "Which Data?" column.
+      </p>
+      <div class="meta">
+        <span class="chip">Scope: entry &rarr; selection</span>
+        <span class="chip">Coverage: pre-built systems · file · API · SFTP</span>
+        <span class="chip">Pattern: single-screen picker, flat tier</span>
+        <span class="chip">Compare: <a href="connector-select-flow-v2.html">V2 (question-driven)</a></span>
+      </div>
+    </header>
+
+    <section>
+      <h2>Framework: single-screen picker, all options equal</h2>
+      <p class="lede">
+        Every connector option appears on a single screen at the same level. No hierarchy,
+        no de-emphasis, no escape hatches &mdash; the user sees everything available and picks
+        what they want. Direct/CDC sources and custom transmission methods are siblings, not
+        parent-child.
+      </p>
+
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 28%;">Group</th>
+              <th style="width: 38%;">Options</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Pre-Built</strong></td>
+              <td>QBO, NetSuite, Sage Intacct, Salesforce, Workday, &hellip;</td>
+              <td>Each presented with its system logo. Adds via source registry as new pre-built integrations come online.</td>
+            </tr>
+            <tr>
+              <td><strong>Custom</strong></td>
+              <td>File (Manual Upload), API, SFTP</td>
+              <td>Same tier as Pre-Built &mdash; no de-emphasis. Designed icons stand in for logos.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p style="margin-top: 12px; font-size: 14px; color: var(--text-subtle);">
+          <em>Pre-Built and Custom are visual groupings on the same tier &mdash; not a hierarchy.
+          The screen shows both groups simultaneously, and every option within a group is an equal
+          sibling.</em>
+        </p>
+      </div>
+    </section>
+
+    <section>
+      <h2>The flow</h2>
+      <p>
+        Both first-time and returning users land on the same selection screen. All options are visible
+        at once, grouped into <strong>Pre-Built</strong> and <strong>Custom</strong>. The two groups
+        sit on the same tier &mdash; one is not subordinate to the other &mdash; and within each group
+        every option is an equal sibling. Only QBO branches further (Basic vs. Enhanced) on a follow-up
+        screen; everything else proceeds straight to its setup wizard.
+      </p>
+
+      <div class="diagram-wrap">
+        <div class="mermaid">
+flowchart TD
+    Start([User enters Data Studio])
+
+    Start --> Branch1{Has connectors?}
+    Branch1 -->|No| Empty["Empty state on Connectors tab<br/><b>'Connect your data'</b> primary CTA"]
+    Branch1 -->|Yes| Populated["Connectors tab populated<br/><b>'+ Add Connector'</b> in toolbar"]
+
+    Empty --> Select
+    Populated --> Select
+
+    Select["<b>Selection screen</b><br/>'What do you want to connect?'<br/><i>All options visible, grouped in UI</i>"]
+
+    Select --> PreBuilt
+    Select --> Custom
+
+    subgraph PreBuilt["Pre-Built"]
+        direction LR
+        QBO[QBO]
+        NS[NetSuite]
+        Sage[Sage Intacct]
+        SF[Salesforce]
+        WD[Workday]
+    end
+
+    subgraph Custom["Custom"]
+        direction LR
+        File["File<br/>(Manual Upload)"]
+        API[API]
+        SFTP[SFTP]
+    end
+
+    QBO --> QBOBranch{Choose QBO path}
+    QBOBranch --> QBOBasic["QBO Basic<br/>Accounts + Balances"]
+    QBOBranch --> QBOEnh["QBO Enhanced<br/>Broader scope"]
+
+    NS --> Done([Selected &mdash; proceed to setup wizard])
+    Sage --> Done
+    SF --> Done
+    WD --> Done
+    File --> Done
+    API --> Done
+    SFTP --> Done
+    QBOBasic --> Done
+    QBOEnh --> Done
+
+    classDef select fill:#e8f0fe,stroke:#1a73e8,stroke-width:2px,color:#101828;
+    classDef decision fill:#fff4e5,stroke:#f59e0b,color:#101828;
+    classDef done fill:#e8f5e9,stroke:#4caf50,color:#101828;
+
+    class Select select;
+    class Branch1,QBOBranch decision;
+    class Done done;
+        </div>
+        <div class="legend">
+          <span class="legend-item"><span class="swatch select"></span> Selection screen</span>
+          <span class="legend-item"><span class="swatch decision-node"></span> Decision point</span>
+          <span class="legend-item"><span class="swatch done"></span> End of selection scope</span>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Decisions to weigh</h2>
+      <p>Structural choices made in the diagram above &mdash; each can be redirected.</p>
+
+      <div class="decision">
+        <span class="num">1</span>
+        <div>
+          <h3>QBO Basic vs. Advanced lives on a sub-screen, not on the main grid</h3>
+          <div class="tradeoff">
+            <span class="label">Sub-screen</span>
+            <span>Clean main list, room to explain the difference. Cost: one extra click for QBO users. <em>(Drawn above.)</em></span>
+          </div>
+          <div class="tradeoff">
+            <span class="label">Two tiles</span>
+            <span>Zero extra steps, but clutters the source list and forces users to understand the distinction up front without context.</span>
+          </div>
+          <div class="lean-note">
+            <strong>Lean:</strong> sub-screen. The Basic/Advanced choice is consequential enough to warrant explanation.
+          </div>
+        </div>
+      </div>
+
+      <div class="decision">
+        <span class="num">2</span>
+        <div>
+          <h3>Naming the QBO paths without surfacing Fivetran</h3>
+          <p>
+            "QBO Direct" / "QBO Sync+" are placeholders. Real candidates: <code>Standard / Advanced</code>,
+            <code>Direct / Real-time</code>, <code>API / Continuous Sync</code>. The name has to convey
+            <em>why</em> a user would pick one over the other &mdash; capability, freshness, and scope &mdash;
+            without leaning on vendor names. Worth a separate naming pass.
+          </p>
+        </div>
+      </div>
+
+      <div class="decision">
+        <span class="num">3</span>
+        <div>
+          <h3>Pre-Built and Custom as side-by-side groups on the same tier</h3>
+          <p>
+            All options live on one screen and the user sees everything at once. Pre-Built and
+            Custom are presented as side-by-side groups &mdash; visually distinct but equal in status.
+            Within each group, every option is a sibling.
+          </p>
+          <p>
+            Considered alternatives:
+          </p>
+          <div class="tradeoff">
+            <span class="label">Single grid</span>
+            <span>All options interleaved with no group labels. Most "flat" feeling. <em>Rejected:</em> File / API / SFTP feel out of place between QBO and NetSuite without context.</span>
+          </div>
+          <div class="tradeoff">
+            <span class="label">Sort order</span>
+            <span>Single grid, ordered by usage / alphabetical / type. <em>Rejected:</em> implicit ranking that may not match intent, and it doesn't help users mentally categorize the options.</span>
+          </div>
+          <div class="lean-note">
+            <strong>Chosen approach:</strong> grouped (reflected in the diagram above). Equivalent to Kristin's mockup pattern, with the second column ("Which Data?") deferred to the wizard.
+          </div>
+        </div>
+      </div>
+
+      <div class="decision">
+        <span class="num">4</span>
+        <div>
+          <h3>Empty state and populated state diverge only in the entry CTA</h3>
+          <p>
+            First-timers get a hero / empty-state moment ("Connect your data" with explanation).
+            Returning users get a quieter <code>+ Add Connector</code> button. Both land on the same
+            selection screen &mdash; same mental model, no separate first-run path.
+          </p>
+        </div>
+      </div>
+
+      <div class="decision">
+        <span class="num">5</span>
+        <div>
+          <h3>Search / filter on the selection screen — deliberately omitted for v1</h3>
+          <p>
+            With ~8 options today, the grid is scannable in a glance. Once the option list crosses
+            ~12, a search input at the top becomes worth adding. The framework supports it without
+            restructure.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Open / future considerations</h2>
+      <p>Flagging, not solving &mdash; out of scope for this pass:</p>
+      <ul class="bullets">
+        <li><strong>Source unavailable / coming soon.</strong> Pattern for sources that are on the roadmap but not yet live.</li>
+        <li><strong>Search-by-source-name.</strong> For when the source list grows past 10&ndash;12.</li>
+        <li><strong>Other sources with Basic/Advanced paths.</strong> The QBO sub-screen pattern should be reusable when another source has equivalent multi-path complexity.</li>
+        <li><strong>Categorization.</strong> If sources span ERPs, CRMs, HRIS, billing systems, etc., the grid may eventually need category groupings.</li>
+      </ul>
+    </section>
+
+    <footer>
+      Branch: <code>data-studio/connector-select-flow</code> &middot; Knowledge folder
+    </footer>
+  </main>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'base',
+      themeVariables: {
+        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+        fontSize: '14px',
+        primaryColor: '#ffffff',
+        primaryBorderColor: '#d0d5dd',
+        primaryTextColor: '#101828',
+        lineColor: '#98a2b3',
+        secondaryColor: '#f7f8fa',
+        tertiaryColor: '#f7f8fa'
+      },
+      flowchart: {
+        curve: 'basis',
+        padding: 16,
+        nodeSpacing: 50,
+        rankSpacing: 60
+      }
+    });
+  </script>
+</body>
+</html>

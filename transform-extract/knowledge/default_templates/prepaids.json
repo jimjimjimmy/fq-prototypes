@@ -1,0 +1,46 @@
+{
+    "invoice_number": {
+        "required": true,
+        "type": "string",
+        "description": "The number of the invoice"
+    },
+    "vendor_name": {
+        "required": true,
+        "type": "string",
+        "description": "The name of the vendor"
+    },
+    "payment_date": {
+        "required": true,
+        "type": "string",
+        "description": "The date the cash left the bank"
+    },
+    "total_prepaid_amount": {
+        "required": true,
+        "type": "number",
+        "description": "The total amount of the prepaid"
+    },
+    "service_start_date": {
+        "required": true,
+        "type": "string",
+        "description": "The start date of the service"
+    },
+    "service_end_date": {
+        "required": true,
+        "type": "string",
+        "description": "The end date of the service"
+    },
+    "currency": {
+        "required": true,
+        "type": "string",
+        "description": "The currency used for the invoice."
+    },
+    "line_items": {
+        "type": "array",
+        "items": {
+            "description": {"type": "string", "description": "The description of the line item.", "required": true},
+            "quantity": {"type": "int", "description": "The number of units purchased.", "required": true},
+            "unit_of_measure": {"type": "string", "description": "The type of units purchased (e.g. 'Subscriptions', 'Licenses', 'Widgets')", "required": false}, 
+            "unit_price": {"type": "float", "description": "The cost per unit of each line item.", "required": true}
+        }
+    }
+}

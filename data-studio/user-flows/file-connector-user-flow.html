@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>File Connector Setup — User Flow</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.6.1/mermaid.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+           background: #F1F5F9; padding: 40px 24px 60px; color: #1E293B; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    header { margin-bottom: 28px; }
+    header h1 { font-size: 22px; font-weight: 700; color: #0F172A; }
+    header p  { font-size: 14px; color: #64748B; margin-top: 4px; }
+    .card { background: white; border-radius: 14px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06);
+            overflow: hidden; margin-bottom: 20px; }
+    .card-header { padding: 16px 24px; border-bottom: 1px solid #F1F5F9;
+                   display: flex; align-items: center; gap: 10px; }
+    .card-header h2 { font-size: 13px; font-weight: 600; color: #475569;
+                      letter-spacing: 0.5px; text-transform: uppercase; }
+    .card-body { padding: 32px 24px; overflow-x: auto; }
+    .mermaid { display: flex; justify-content: center; }
+    .legend { display: flex; flex-wrap: wrap; gap: 16px; padding: 16px 24px;
+              border-top: 1px solid #F1F5F9; background: #FAFAFA; }
+    .legend-item { display: flex; align-items: center; gap: 8px;
+                   font-size: 12px; color: #475569; }
+    .legend-swatch { width: 14px; height: 14px; border-radius: 3px; border: 1.5px solid; }
+    .notes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .note-box { background: white; border-radius: 12px; padding: 20px 22px;
+                box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .note-box h3 { font-size: 13px; font-weight: 700; color: #0F172A;
+                   margin-bottom: 12px; }
+    .note-box ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .note-box li { font-size: 13px; color: #475569; line-height: 1.5;
+                   display: flex; align-items: flex-start; gap: 8px; }
+    .note-box li::before { content: "—"; color: #CBD5E1; flex-shrink: 0; }
+    footer { text-align: center; margin-top: 36px; font-size: 12px; color: #94A3B8; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>File Connector Setup — User Flow</h1>
+      <p>End-to-end journey for an admin configuring a file connector (SFTP or Close Upload) through to a fully configured dataset.</p>
+    </header>
+
+    <div class="card">
+      <div class="card-header"><h2>User Flow Diagram</h2></div>
+      <div class="card-body">
+        <div class="mermaid">
+flowchart TD
+    A([<b>Admin</b><br/>Add dataset / configure file connector]):::entry
+
+    A --> B{<b>Select Transport Type</b>}:::decision
+
+    B -->|SFTP| C[<b>SFTP Credential Setup</b><br/>Enter username &amp; password]:::action
+    B -->|Close Upload| H[<b>Source File Selection</b>]:::screen
+
+    C --> D[<b>System: Provide SFTP Endpoint</b><br/>Host &amp; path shown to admin]:::system
+    D --> E{<b>Optional encryption?</b>}:::decision
+    E -->|PGP| F1[<b>Configure PGP Encryption</b><br/>Paste or upload public key]:::action
+    E -->|SSH key| F2[<b>Upload SSH Key</b>]:::action
+    E -->|Neither| G[<b>System: Validate Credentials</b>]:::system
+    F1 --> G
+    F2 --> G
+
+    G --> G1{<b>Credentials valid?</b>}:::decision
+    G1 -->|No| G2[<b>Credential Error</b><br/>Invalid username, password, or key]:::error
+    G2 --> C
+    G1 -->|Yes| H
+
+    H --> I[<b>Browse Files</b><br/>Transport · username · date landed]:::screen
+    H --> J[<b>Upload Sample File</b><br/>Always available — used for schema definition &amp;<br/>field mapping tester]:::action
+
+    I -->|File selected| K[<b>File Naming Pattern</b><br/>Define pattern to identify incoming files]:::screen
+    J --> K
+
+    K --> L[<b>Schema Definition</b><br/>System infers columns &amp; types from file]:::system
+    L --> L1{<b>Schema valid?</b>}:::decision
+    L1 -->|Error| L2[<b>Schema Error</b><br/>Adjust file or column mapping]:::error
+    L2 --> L
+    L1 -->|Valid| M[<b>Accounting Period Config</b><br/>Derive period from filename or column]:::screen
+
+    M --> N[<b>Entity Config</b><br/>Identify entity from data]:::screen
+    N --> O([<b>Dataset Configured</b><br/>Sample file retained for Field Mapping tester]):::success
+
+    classDef entry    fill:#EFF6FF,stroke:#3B82F6,stroke-width:2px,color:#1E3A5F
+    classDef screen   fill:#EFF6FF,stroke:#93C5FD,stroke-width:1.5px,color:#1E3A5F
+    classDef action   fill:#F0FDF4,stroke:#86EFAC,stroke-width:1.5px,color:#14532D
+    classDef decision fill:#FFF7ED,stroke:#FB923C,stroke-width:2px,color:#7C2D12
+    classDef system   fill:#FEF3C7,stroke:#D97706,stroke-width:2px,color:#92400E
+    classDef success  fill:#DCFCE7,stroke:#16A34A,stroke-width:2.5px,color:#14532D
+    classDef error    fill:#FEF2F2,stroke:#EF4444,stroke-width:1.5px,color:#7F1D1D
+        </div>
+      </div>
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-swatch" style="background:#EFF6FF;border-color:#3B82F6"></div>
+          Entry Point
+        </div>
+        <div class="legend-item">
+          <div class="legend-swatch" style="background:#EFF6FF;border-color:#93C5FD"></div>
+          Screen / View
+        </div>
+        <div class="legend-item">
+          <div class="legend-swatch" style="background:#F0FDF4;border-color:#86EFAC"></div>
+          User Action
+        </div>
+        <div class="legend-item">
+          <div class="legend-swatch" style="background:#FFF7ED;border-color:#FB923C"></div>
+          Decision
+        </div>
+        <div class="legend-item">
+          <div class="legend-swatch" style="background:#FEF3C7;border-color:#D97706"></div>
+          System / Auto
+        </div>
+        <div class="legend-item">
+          <div class="legend-swatch" style="background:#DCFCE7;border-color:#16A34A"></div>
+          Success / Terminal
+        </div>
+        <div class="legend-item">
+          <div class="legend-swatch" style="background:#FEF2F2;border-color:#EF4444"></div>
+          Error / Block
+        </div>
+      </div>
+    </div>
+
+    <div class="notes-grid">
+      <div class="note-box">
+        <h3>&#9888;&#65039; Gaps &amp; Open Questions</h3>
+        <ul>
+          <li><b>Open Q:</b> Can a user have multiple SFTP connections (multiple usernames) under one account? If so, are they managed at the connector level or the dataset level?</li>
+          <li><b>Open Q:</b> Is the sample file stored permanently or only for the duration of the wizard session?</li>
+          <li><b>Open Q:</b> Can Close Upload be the sole long-term transport for a dataset, or is it expected to be a temporary bootstrap until SFTP is configured?</li>
+          <li><b>Open Q:</b> If a dataset has both SFTP and Close Upload files landed, how does the system handle differing naming conventions between the two transport types?</li>
+          <li><b>Open Q:</b> Can the transport type be changed after a dataset is configured (e.g. swap from Close Upload to SFTP once the pipeline is set up)?</li>
+          <li><b>Open Q:</b> For SFTP credential rotation — if a password changes, where does the admin update it? Is there a connector management screen outside the dataset wizard?</li>
+          <li><b>Open Q:</b> PGP/SSH UX specifics — does the admin paste a key, upload a file, or can a key pair be generated within the product?</li>
+          <li><b>Gap:</b> No cancellation path defined — if the admin exits mid-wizard, is partial configuration saved as a draft or discarded?</li>
+          <li><b>Gap:</b> No async/loading state defined for credential validation — what does the UI show while the system is checking SFTP credentials?</li>
+          <li><b>Gap:</b> Permissions not defined — can any admin configure any connector, or is access scoped?</li>
+        </ul>
+      </div>
+      <div class="note-box">
+        <h3>&#128204; Key Concepts</h3>
+        <ul>
+          <li><b>File Connector</b> — The umbrella configuration that defines how a source file gets into Data Studio. Transport type (SFTP or Close Upload) is selected within the connector setup.</li>
+          <li><b>SFTP (Secure File Transfer Protocol)</b> — Automated file delivery to an FQ-provided endpoint. Requires credential setup (username/password) and optionally PGP encryption and/or SSH keys.</li>
+          <li><b>Close Upload</b> — Manual file delivery through the FloQast UI. No credential setup required. Treated identically to SFTP after delivery — still requires file naming pattern, accounting period config, and entity config.</li>
+          <li><b>Sample File</b> — A file uploaded manually when no pipeline files have landed yet. Dual-purpose: used for schema definition during wizard setup AND available as a test data source in Field Mapping (Test with Sample Data vs Test with Real Data).</li>
+          <li><b>File Naming Pattern</b> — A pattern (e.g. regex or token-based) that the system uses to identify which incoming files belong to this dataset. Required for both SFTP and Close Upload since both are recurring delivery methods.</li>
+          <li><b>Accounting Period Config</b> — Defines how the system derives which accounting period an incoming file belongs to — from the filename or from a column inside the file. Cannot be inferred from transport type alone. <em>Changes to this step are covered in a separate PRD — out of scope here.</em></li>
+          <li><b>Entity Config</b> — Defines how the system identifies which FloQast entity each row or file belongs to. Cannot be inferred from transport type alone. <em>Changes to this step are covered in a separate PRD — out of scope here.</em></li>
+          <li><b>Schema Definition</b> — The process of inferring column names and data types from a source file. Admin reviews and confirms before proceeding. <em>Changes to this process are covered in a separate PRD — out of scope here.</em></li>
+          <li><b>PGP Encryption</b> — Optional file encryption layer for SFTP. Admin provides a public key; the sender encrypts files before delivery.</li>
+          <li><b>SSH Key</b> — Optional authentication method for SFTP connections as an alternative or supplement to username/password.</li>
+        </ul>
+      </div>
+    </div>
+
+    <footer>Generated April 2026 — File Connector Setup Flow · Data Studio</footer>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true, theme: 'default',
+      flowchart: { curve: 'basis', padding: 24, nodeSpacing: 40,
+                   rankSpacing: 56, htmlLabels: true },
+      themeVariables: {
+        fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+        fontSize: '13px'
+      }
+    });
+  </script>
+</body>
+</html>

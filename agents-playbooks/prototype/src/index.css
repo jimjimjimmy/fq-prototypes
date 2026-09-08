@@ -1,0 +1,75 @@
+@import "tailwindcss/preflight" layer(base);
+@import "tailwindcss/theme";
+@import "tailwindcss/utilities";
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #F8FAFC;
+}
+
+#root {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Playbook document styles */
+.playbook-content h1 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1D2433;
+  margin: 20px 0 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #E4E9F2;
+}
+
+.playbook-content h2 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1D2433;
+  margin: 14px 0 6px;
+}
+
+.playbook-content p {
+  margin: 0 0 10px;
+  color: #3A4A6B;
+}
+
+.playbook-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0 16px;
+  font-size: 12px;
+}
+
+.playbook-content th {
+  background: #F8FAFC;
+  border: 1px solid #E4E9F2;
+  padding: 7px 10px;
+  text-align: left;
+  font-weight: 600;
+  color: #4A556A;
+}
+
+.playbook-content td {
+  border: 1px solid #E4E9F2;
+  padding: 7px 10px;
+  color: #1D2433;
+  vertical-align: top;
+}
+
+.playbook-content a {
+  color: #1FAC76;
+  text-decoration: none;
+}
+
+.playbook-content a:hover {
+  text-decoration: underline;
+}

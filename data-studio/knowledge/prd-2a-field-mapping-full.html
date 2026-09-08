@@ -1,0 +1,556 @@
+<h1>Model Creation — 2a of 4: Field Mapping — Visual Refresh + AI-Suggested Mappings (DRAFT)</h1>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Source</strong></td>
+<td><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4449927443">Confluence — 2 of 4</a></td>
+</tr>
+<tr>
+<td><strong>Status</strong></td>
+<td>DRAFT</td>
+</tr>
+<tr>
+<td><strong>Last updated</strong></td>
+<td>Mar 19, 2026</td>
+</tr>
+<tr>
+<td><strong>Owner</strong></td>
+<td>Alex Kearns</td>
+</tr>
+<tr>
+<td><strong>Target release</strong></td>
+<td>2026-06-30</td>
+</tr>
+<tr>
+<td><strong>Related sub-PRDs</strong></td>
+<td>1 of 4: Model Creation &amp; Source Configuration (6/30) · 2b of 4: AI-Assisted Transformation Functions (9/30) · 3 of 4: Testing &amp; Publishing (6/30) · 4 of 4: Versioning &amp; Lifecycle (6/30)</td>
+</tr>
+<tr>
+<td><strong>Related PRDs</strong></td>
+<td><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4484530409/QBO+Transformation+Functions+DRAFT">QBO Transformation Functions (RBC)</a></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Objective</h2>
+<p>Model Lineage (also called &quot;Model&quot;) is the source-to-target mapping capability within Data Studio. It enables admins and implementation team members to bring in external datasets, map fields to FQ&#39;s normalized format, and publish so downstream products (Close, Flux, Compliance, Consolidation) can consume the data. This PRD covers the Field Mapping step — the highest-effort, highest-risk step in Model configuration. Errors here propagate silently into downstream FQ products.</p>
+<p>This PRD has been split into two releases. This document (PRD 2a, target 6/30) covers the field mapping page redesign, AI-suggested source-to-target mappings, many-to-one mapping, custom fields, and field-level validation. Transformation logic definition (function-based and AI-assisted rule authoring via AI Chat Modal) is covered in PRD 2b: AI-Assisted Transformation Functions (target 9/30). See also QBO Transformation Functions (RBC) at <a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4484530409/QBO+Transformation+Functions+DRAFT">https://floqast.atlassian.net/wiki/spaces/Data/pages/4484530409/QBO+Transformation+Functions+DRAFT</a></p>
+<p>The Field Mapping page is where the admin defines how each source field maps to each FQ target field. AI-suggested mappings are provided on first load, but always require user confirmation. Many-to-one source field mapping enables customers with complex schemas to map multiple source fields to a single FQ target field. Custom fields allow admins to extend the target schema beyond the mandatory FQ fields.</p>
+<hr>
+<h2>Why This Is Important</h2>
+<p>Model creation currently requires significant engineering involvement from both FQ implementation team and customer IT. The field mapping step is the most time-consuming and error-prone part of this process. AI-native, self-service field mapping will reduce time from contract to first data in FQ products.</p>
+<p><strong>Current experience limitations:</strong></p>
+<p>The current field mapping experience uses a 1-to-1 &quot;Actions&quot; lightning bolt pattern that is unintuitive and slow. Field mappings are defined one at a time, with no AI assistance, and there is no visual feedback about progress or completion.</p>
+<p><strong>This experience does not include some critical functionality such as:</strong></p>
+<ul>
+<li><strong>Many-to-one source field mapping</strong> — customers with complex schemas (e.g., first name + last name → full name) cannot map multiple source fields to a single FQ target field today</li>
+<li><strong>Transformation logic definition (functions)</strong> — admins cannot define transformation rules (e.g., To_Upper, date parsing, conditional logic) as part of the field mapping workflow <em>(targeted for 9/30 in PRD 2b: AI-Assisted Transformation Functions)</em></li>
+<li><strong>AI-assisted transformation authoring</strong> — admins cannot describe a transformation in natural language and have AI generate the expression <em>(targeted for 9/30 in PRD 2b: AI-Assisted Transformation Functions)</em></li>
+</ul>
+<hr>
+<h2>Key Benefits</h2>
+<ul>
+<li><strong>Zero-engineering field mapping</strong> — admins can configure field mappings without FQ engineering involvement</li>
+<li><strong>AI-native mapping (hours to minutes)</strong> — AI suggests source-to-target mappings on first load, dramatically reducing time spent on initial configuration</li>
+<li><strong>Many-to-one mapping support</strong> — unblocks customer schemas that were previously unsupported (e.g., 200+ file customers with split fields)</li>
+<li><strong>AI-assisted normalization/mapping logic</strong> — AI helps with data format normalization and mapping logic definition <em>(target: 9/30 — see PRD 2b)</em></li>
+</ul>
+<hr>
+<h2>Use Cases</h2>
+<h3>UC1 — First-time field mapping for a new model</h3>
+<p>An admin creates a new model, links source datasets, and navigates to the Field Mappings tab. AI analyzes the linked source schema and suggests source-to-target mappings. The admin reviews each suggestion, confirms or overrides, and saves.</p>
+<h3>UC2 — Mapping source fields to mandatory FQ target fields</h3>
+<p>An admin sees all mandatory FQ target fields pre-populated in the field mapping grid. Unmapped mandatory fields are visually distinguished. The admin maps each mandatory field and sees a progress indicator showing completion.</p>
+<h3>UC3 — Many-to-one source field mapping (e.g., first name + last name → full name)</h3>
+<p>An admin needs to map multiple source fields to a single FQ target field. They select multiple source fields for the target field, and the UI clearly represents the multi-field selection.</p>
+<blockquote>
+<p><strong>Note:</strong> The selection of multiple source fields for a single target is in scope for the 6/30 release. The concatenation/combination logic definition (e.g., how first name and last name are combined into full name) is covered in PRD 2b: AI-Assisted Transformation Functions (target 9/30).</p>
+</blockquote>
+<h3>UC4 — Adding a custom field</h3>
+<p>An admin needs to map a source field that does not correspond to any mandatory FQ target field. They add a custom field, define its data type, and map it to the source field.</p>
+<h3>UC5 — Date parsing transformation (e.g., &quot;MM/DD/YYYY&quot; → &quot;YYYY-MM-DD&quot;)</h3>
+<p>An admin needs to define a transformation rule that parses dates from the source format into the FQ target format.</p>
+<blockquote>
+<p><strong>Note:</strong> This use case is moved to PRD 2b: AI-Assisted Transformation Functions (target 9/30). The transformation logic editor required for date parsing is out of scope for the 6/30 release.</p>
+</blockquote>
+<h3>UC6 — Reviewing and adjusting AI-suggested mappings</h3>
+<p>An admin reviews the AI-suggested mappings, confirms correct suggestions, and overrides incorrect ones. The admin can also clear a suggestion and manually select a different source field.</p>
+<hr>
+<h2>Assumptions</h2>
+<ul>
+<li>AI suggestions are generated once on initial Draft creation only (pending confirmation — see OQ-3)</li>
+<li>Standard Models bypass AI and use pre-defined default mappings</li>
+<li>Source selector for custom fields is populated exclusively from Linked Datasets</li>
+<li>Autosave is the only save mechanism (no manual Save button)</li>
+<li>Tab is not accessible until source datasets are linked (Sub-PRD 1 dependency)</li>
+<li>Field mappings are per-model, not shared across models</li>
+</ul>
+<hr>
+<h2>Milestones</h2>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Description</th>
+<th>Target</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Phase 1</td>
+<td>Natural Language Transformation Authoring (AI Chat Modal)</td>
+<td>9/30 — Moved to PRD 2b</td>
+</tr>
+<tr>
+<td>Phase 2</td>
+<td>Field Mapping Grid Redesign + AI-Suggested Mappings</td>
+<td>6/30</td>
+</tr>
+<tr>
+<td>Phase 3</td>
+<td>Many-to-One Mapping + Custom Fields + Validation</td>
+<td>6/30</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Scope</h2>
+<h3>In Scope (6/30)</h3>
+<ul>
+<li>Field mapping grid redesign (visual refresh)</li>
+<li>AI-suggested source-to-target mappings on first draft</li>
+<li>Many-to-one source field mapping (selection UI)</li>
+<li>Custom field creation and mapping</li>
+<li>Autosave with visual indicator</li>
+<li>Progress indicator (mapped vs total required)</li>
+<li>Unmapped mandatory field visual distinction</li>
+<li>Field mapping validation and error handling (FM6-LC)</li>
+</ul>
+<h3>Out of Scope</h3>
+<ul>
+<li>Field rule logic definition — manual (functions) and AI-assisted (moved to PRD 2b: AI-Assisted Transformation Functions, target 9/30)</li>
+<li>AI Chat Modal for natural language transformation authoring (moved to PRD 2b)</li>
+<li>Transformation function library / syntax definition (moved to PRD 2b)</li>
+<li>Entity Mapping tab behavior (unowned — see Overview PRD)</li>
+<li>Data Preview tab (Sub-PRD 5)</li>
+</ul>
+<hr>
+<h2>Requirements Quick Reference</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FM1-LC</td>
+<td>Field Mapping List — AI-Assisted</td>
+<td>High</td>
+</tr>
+<tr>
+<td>FM2-LC</td>
+<td>AI Draft of Field Mappings</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>FM3-LC</td>
+<td>Many-to-One Source Field Mapping</td>
+<td>High</td>
+</tr>
+<tr>
+<td>FM4-LC</td>
+<td>Add Custom Fields</td>
+<td>High</td>
+</tr>
+<tr>
+<td>FM6-LC</td>
+<td>Field Mapping Validation &amp; Error Handling</td>
+<td>High</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>Note:</strong> FM5-LC (Define Transformation Logic — AI &amp; Functions) has been moved to PRD 2b: AI-Assisted Transformation Functions (target 9/30).</p>
+</blockquote>
+<hr>
+<h2>Detailed Requirements</h2>
+<h3>FM1-LC — Field Mapping List — AI-Assisted</h3>
+<p><strong>User Story:</strong> As an admin, I want to see all mandatory FQ target fields pre-populated in the field mapping grid so that I know exactly which fields need to be mapped.</p>
+<p><strong>Importance:</strong> High</p>
+<p><strong>Details:</strong> When the admin navigates to the Field Mappings tab, all mandatory FQ target fields for the selected domain are pre-populated in a grid. Each row shows the field name, data type, and current mapping status. Unmapped mandatory fields are visually distinguished from mapped fields. A progress indicator shows mapped vs total required fields. The tab is not accessible until source datasets are linked (Sub-PRD 1).</p>
+<p><strong>Acceptance Criteria:</strong></p>
+<p><strong>AC-FM1-01 — Mandatory fields pre-populated</strong></p>
+<ul>
+<li>Given I navigate to the Field Mappings tab</li>
+<li>When source datasets have been linked</li>
+<li>Then all mandatory FQ target fields for the selected domain are displayed as rows in the grid</li>
+</ul>
+<p><strong>AC-FM1-02 — Row displays field metadata</strong></p>
+<ul>
+<li>Given I am on the Field Mappings tab</li>
+<li>When I view a field mapping row</li>
+<li>Then I see the target field name, data type, and current mapping status (unmapped, AI suggested, confirmed, custom)</li>
+</ul>
+<p><strong>AC-FM1-03 — Unmapped fields visually distinguished</strong></p>
+<ul>
+<li>Given mandatory FQ target fields exist that are not yet mapped</li>
+<li>When I view the field mapping grid</li>
+<li>Then unmapped mandatory fields are visually distinguished from mapped fields (e.g., highlighted, icon, badge)</li>
+</ul>
+<p><strong>AC-FM1-04 — Progress indicator</strong></p>
+<ul>
+<li>Given I am on the Field Mappings tab</li>
+<li>When I have mapped some but not all mandatory fields</li>
+<li>Then a progress indicator shows the count and/or percentage of mapped vs total required fields</li>
+</ul>
+<p><strong>AC-FM1-05 — Tab gated on source datasets</strong></p>
+<ul>
+<li>Given I have not linked any source datasets</li>
+<li>When I attempt to navigate to the Field Mappings tab</li>
+<li>Then the tab is disabled or shows a zero-state directing me to link source datasets first</li>
+</ul>
+<hr>
+<h3>FM2-LC — AI Draft of Field Mappings</h3>
+<p><strong>User Story:</strong> As an admin, I want AI to analyze my linked source schema and suggest source-to-target field mappings so that I can start from an intelligent draft rather than mapping from scratch.</p>
+<p><strong>Importance:</strong> Medium</p>
+<p><strong>Details:</strong> When the admin first opens the Field Mappings tab on a new Draft, AI analyzes the linked source datasets&#39; schemas and suggests source-to-target mappings. Suggestions are displayed inline on each row, labeled &quot;AI suggested.&quot; Suggestions require user confirmation — they are not auto-applied. For Standard Models, AI is bypassed and pre-defined default mappings are used instead. A loading state is shown during AI analysis.</p>
+<p><strong>Acceptance Criteria:</strong></p>
+<p><strong>AC-FM2-01 — AI generates suggestions on first load</strong></p>
+<ul>
+<li>Given I navigate to the Field Mappings tab for the first time on a new Draft</li>
+<li>When source datasets are linked</li>
+<li>Then AI analyzes the source schema and suggests source-to-target mappings for each mandatory FQ target field</li>
+</ul>
+<p><strong>AC-FM2-02 — Suggestions displayed inline</strong></p>
+<ul>
+<li>Given AI has generated mapping suggestions</li>
+<li>When I view the field mapping grid</li>
+<li>Then each suggested mapping is displayed inline on the corresponding row, labeled &quot;AI suggested&quot;</li>
+</ul>
+<p><strong>AC-FM2-03 — Suggestions require confirmation</strong></p>
+<ul>
+<li>Given AI has suggested a mapping for a target field</li>
+<li>When I review the suggestion</li>
+<li>Then I can confirm, override, or clear the suggestion</li>
+<li>And no suggestion is applied without my explicit confirmation</li>
+</ul>
+<p><strong>AC-FM2-04 — Standard Models use defaults</strong></p>
+<ul>
+<li>Given I am creating a Standard Model (not custom)</li>
+<li>When I navigate to the Field Mappings tab</li>
+<li>Then pre-defined default mappings are used instead of AI suggestions</li>
+</ul>
+<p><strong>AC-FM2-05 — Loading state during AI analysis</strong></p>
+<ul>
+<li>Given AI is analyzing the source schema</li>
+<li>When I am on the Field Mappings tab</li>
+<li>Then a loading state is displayed indicating that AI is generating suggestions</li>
+</ul>
+<hr>
+<h3>FM3-LC — Many-to-One Source Field Mapping</h3>
+<p><strong>User Story:</strong> As an admin, I want to select multiple source fields for a single FQ target field so that I can handle schemas where target data spans multiple source columns.</p>
+<p><strong>Importance:</strong> High</p>
+<p><strong>Details:</strong> Admins can select multiple source fields from linked datasets for a single FQ target field. The UI clearly represents multi-field selections (e.g., chips, tags). Existing 1-to-1 mappings are unaffected.</p>
+<p><strong>Notes:</strong> This is a net-new capability that unblocks customer schemas that were previously unsupported. Transformation logic for defining how multiple source fields are combined will be covered in PRD 2b (9/30). At 6/30, the selection UI is delivered but complex combination logic (concatenation, coalescing, conditional) requires PRD 2b.</p>
+<p><strong>Acceptance Criteria:</strong></p>
+<p><strong>AC-FM3-01 — Select multiple source fields</strong></p>
+<ul>
+<li>Given I am mapping a source field to an FQ target field</li>
+<li>When I open the source field selector</li>
+<li>Then I can select multiple source fields from the linked datasets</li>
+</ul>
+<p><strong>AC-FM3-02 — Multi-field selection UI</strong></p>
+<ul>
+<li>Given I have selected multiple source fields for a target field</li>
+<li>When I view the field mapping row</li>
+<li>Then the selected source fields are clearly represented (e.g., chips, tags, comma-separated list)</li>
+</ul>
+<blockquote>
+<p><strong>Note:</strong> At 6/30, the transformation logic editor for multi-field mappings shows a placeholder state indicating that transformation functions are coming in the 9/30 release (PRD 2b).</p>
+</blockquote>
+<p><strong>AC-FM3-03 — Existing 1-to-1 unaffected</strong></p>
+<ul>
+<li>Given I have existing 1-to-1 field mappings</li>
+<li>When many-to-one is enabled</li>
+<li>Then my existing 1-to-1 mappings continue to work without change</li>
+</ul>
+<hr>
+<h3>FM4-LC — Add Custom Fields</h3>
+<p><strong>User Story:</strong> As an admin, I want to add custom fields to the field mapping grid so that I can map source fields that do not correspond to mandatory FQ target fields.</p>
+<p><strong>Importance:</strong> High</p>
+<p><strong>Details:</strong> Admins can add custom target fields to the grid beyond the mandatory FQ fields. The source selector is populated exclusively from Linked Datasets. Custom fields are visually distinguished from mandatory fields. The admin defines the data type for each custom target field.</p>
+<p><strong>Acceptance Criteria:</strong></p>
+<p><strong>AC-FM4-01 — Add custom field</strong></p>
+<ul>
+<li>Given I am on the Field Mappings tab</li>
+<li>When I click &quot;Add Custom Field&quot; (or equivalent action)</li>
+<li>Then a new row is added to the grid for the custom target field</li>
+</ul>
+<p><strong>AC-FM4-02 — Source selector from linked datasets</strong></p>
+<ul>
+<li>Given I am adding or editing a custom field mapping</li>
+<li>When I open the source field selector</li>
+<li>Then available source fields are populated exclusively from Linked Datasets</li>
+</ul>
+<p><strong>AC-FM4-03 — Custom fields visually distinguished</strong></p>
+<ul>
+<li>Given I have added custom fields</li>
+<li>When I view the field mapping grid</li>
+<li>Then custom fields are visually distinguished from mandatory FQ target fields (e.g., different icon, label, or section)</li>
+</ul>
+<p><strong>AC-FM4-04 — Define data type for custom field</strong></p>
+<ul>
+<li>Given I am adding a custom target field</li>
+<li>When I configure the field</li>
+<li>Then I must define the data type for the custom target field</li>
+</ul>
+<blockquote>
+<p><strong>Note:</strong> Transformation logic for custom fields will be fully available in PRD 2b (9/30). At 6/30, custom fields support 1:1 source-to-target mapping without transformation.</p>
+</blockquote>
+<hr>
+<h3>FM5-LC — Define Transformation Logic (AI &amp; Functions) — MOVED TO PRD 2b</h3>
+<blockquote>
+<p>This story and all its acceptance criteria (AC-FM5-01 through AC-FM5-05) have been moved to PRD 2b: AI-Assisted Transformation Functions (target 9/30). See that document for full details.</p>
+<p>Cross-ref: <a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4484530409/QBO+Transformation+Functions+DRAFT">QBO Transformation Functions (RBC)</a> defines the QBO-specific function set that serves as the foundation for the function library.</p>
+</blockquote>
+<hr>
+<h3>FM6-LC — Field Mapping Validation &amp; Error Handling</h3>
+<p><strong>User Story:</strong> As an admin, I want the system to validate my field mappings and surface errors inline so that I can fix issues before publishing.</p>
+<p><strong>Importance:</strong> High</p>
+<p><strong>Details:</strong> Validation runs on save/autosave and on publish attempt. Errors are surfaced inline on affected rows. Publish is blocked if any mandatory FQ target fields are unmapped or if there are blocking validation errors. This is critical because type mismatches and mapping errors may not be caught by schema-level checks alone — runtime data errors (e.g., row 55 has a text value in a numeric target) are caught during testing (Sub-PRD 3, TP4).</p>
+<p><strong>Acceptance Criteria:</strong></p>
+<p><strong>AC-FM6-01 — Publish blocked on unmapped mandatory fields</strong></p>
+<ul>
+<li>Given I attempt to publish (Sub-PRD 3)</li>
+<li>When one or more mandatory FQ target fields have no source mapping defined</li>
+<li>Then publish is blocked</li>
+<li>And I see a clear error indicating which specific fields are unmapped</li>
+</ul>
+<p><strong>AC-FM6-02 — Data type mismatches flagged inline</strong></p>
+<ul>
+<li>Given I map a source field to an FQ target field</li>
+<li>When the source field data type is incompatible with the target field data type (e.g., text to numeric)</li>
+<li>Then a warning is displayed inline on that mapping row</li>
+<li>And the warning explains the type mismatch</li>
+</ul>
+<p><strong>AC-FM6-03 — Validation runs on save/autosave and publish</strong></p>
+<ul>
+<li>Given I am on the Field Mappings tab</li>
+<li>When mappings are autosaved or I attempt to publish</li>
+<li>Then validation runs against all mapping rows</li>
+<li>And errors are surfaced inline on affected rows, not just as a generic banner</li>
+</ul>
+<p><strong>AC-FM6-04 — Duplicate mapping warning</strong></p>
+<ul>
+<li>Given a source field is mapped to multiple target fields</li>
+<li>When this may be unintentional</li>
+<li>Then a warning is displayed indicating the duplicate</li>
+<li>And the warning does not block publish (it is informational)</li>
+</ul>
+<p><strong>AC-FM6-05 — Invalid many-to-one combinations flagged</strong></p>
+<ul>
+<li>Given I have selected multiple source fields for a single target field</li>
+<li>When the selected source fields have incompatible data types</li>
+<li>Then an error is displayed on that mapping row</li>
+<li>And I cannot publish until the error is resolved</li>
+</ul>
+<p><strong>AC-FM6-06 — All blocking errors must be resolved before publish</strong></p>
+<ul>
+<li>Given one or more blocking validation errors exist</li>
+<li>When I attempt to publish</li>
+<li>Then publish is blocked</li>
+<li>And each blocking error is clearly indicated with a path to resolution</li>
+</ul>
+<hr>
+<h2>User Flow Reference</h2>
+<p>The Field Mapping workflow spans Steps 13–18 of the overall Lineage Creation user flow:</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Step 13</td>
+<td>Navigate to Field Mappings tab</td>
+</tr>
+<tr>
+<td>Step 14</td>
+<td>AI analyzes source schema and suggests mappings (loading state)</td>
+</tr>
+<tr>
+<td>Step 15</td>
+<td>Review mandatory FQ target fields — confirm or override AI suggestions</td>
+</tr>
+<tr>
+<td>Step 16</td>
+<td>Add custom fields and map source fields</td>
+</tr>
+<tr>
+<td>Step 17</td>
+<td><del>Define Transformation Logic</del> (moved to PRD 2b)</td>
+</tr>
+<tr>
+<td>Step 18</td>
+<td>Autosave — mappings are saved automatically</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>User Interaction &amp; Design</h2>
+<h3>Key Design Questions</h3>
+<ul>
+<li>How are AI suggestions visually distinguished from user-confirmed mappings?</li>
+<li>What does the source field selector look like for many-to-one mapping?</li>
+<li>How is the progress indicator displayed (badge, bar, percentage)?</li>
+<li>What is the zero-state when no source datasets are linked?</li>
+<li>How are custom fields visually distinguished from mandatory fields?</li>
+<li>What does the autosave indicator look like?</li>
+</ul>
+<blockquote>
+<p><strong>Note:</strong> The following design questions are now PRD 2b scope:</p>
+<ul>
+<li>What does the transformation logic editor look like?</li>
+<li>How is the AI transformation assistant invoked?</li>
+</ul>
+</blockquote>
+<h3>Key Design Decisions</h3>
+<ul>
+<li><strong>Directed inline flow</strong> is the primary AI interaction model for the 6/30 release — AI suggests source-to-target mappings inline, user reviews/confirms per row</li>
+<li><strong>Vertical left nav</strong> replaces old sub-navigation under &quot;Lineage&quot;</li>
+<li><strong>Actions lightning bolt removed</strong> — replaced by inline mapping UX</li>
+<li><strong>Autosave with visual indicator</strong> — no manual Save button</li>
+</ul>
+<hr>
+<h2>UI Changes</h2>
+<table>
+<thead>
+<tr>
+<th>Change</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Field Mapping grid redesign</td>
+<td>New grid layout with field name, data type, mapping status, source field selector per row</td>
+</tr>
+<tr>
+<td>AI suggestion labels</td>
+<td>&quot;AI suggested&quot; label/badge on rows with AI-generated mappings</td>
+</tr>
+<tr>
+<td>Many-to-one chip UI</td>
+<td>Multi-select chips/tags for rows with multiple source fields</td>
+</tr>
+<tr>
+<td>Custom field section</td>
+<td>Visually distinguished section or styling for custom fields</td>
+</tr>
+<tr>
+<td>Progress indicator</td>
+<td>Mapped vs total required fields indicator</td>
+</tr>
+<tr>
+<td>Autosave indicator</td>
+<td>Visual indicator for autosave status</td>
+</tr>
+<tr>
+<td>Vertical left nav</td>
+<td>Replaces old sub-navigation</td>
+</tr>
+<tr>
+<td>Actions lightning bolt removed</td>
+<td>Old pattern replaced by inline mapping UX</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>Note:</strong> &quot;AI Chat Modal introduced&quot; is now PRD 2b scope. The conversational AI interaction pattern for transformation authoring is not part of the 6/30 release.</p>
+</blockquote>
+<hr>
+<h2>Future Considerations</h2>
+<ul>
+<li>Transformation logic definition via function library and AI Chat Modal (PRD 2b, 9/30)</li>
+<li>Bulk operations (map/unmap multiple fields at once)</li>
+<li>Field mapping templates (reuse mappings across models)</li>
+<li>Source schema change detection and mapping update suggestions</li>
+<li>Mapping validation against sample data (preview before publish)</li>
+</ul>
+<hr>
+<h2>Open Questions</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Question</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>OQ-1</td>
+<td>Is adding a custom field a change requiring new version?</td>
+<td>Resolved — Yes, adding a custom field creates a new Draft</td>
+</tr>
+<tr>
+<td>OQ-2</td>
+<td>Loading state for AI suggestion — design + timing?</td>
+<td>Open</td>
+</tr>
+<tr>
+<td>OQ-3</td>
+<td>Does AI auto-suggestion run only once on initial draft? Product decision or technical constraint?</td>
+<td>Open</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Gaps</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Gap</th>
+<th>Impact</th>
+<th>Owner / Next Step</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>G1</td>
+<td>Behavior when AI can&#39;t suggest mappings is undefined. What does the user see? Fallback to manual? Error state?</td>
+<td>High</td>
+<td>Product to define fallback UX</td>
+</tr>
+<tr>
+<td>G2</td>
+<td>Autosave failure behavior is undefined. What happens if autosave fails? Does the user see an error? Can they retry?</td>
+<td>High</td>
+<td>Engineering + Product to define</td>
+</tr>
+<tr>
+<td>G3</td>
+<td>The supported function library and syntax for transformation logic is undefined. <strong>UPDATE: This gap is now owned by PRD 2b (target 9/30) and is no longer blocking the 6/30 release.</strong> Engineering must define this before the transformation editor in PRD 2b can be fully designed or built.</td>
+<td><del>Blocking</del> Resolved for 6/30</td>
+<td>Engineering to publish the function library spec for PRD 2b.</td>
+</tr>
+<tr>
+<td>G6</td>
+<td>Custom fields cannot use many-to-one mapping with transformation logic until PRD 2b delivers the transformation editor. At 6/30, custom fields support 1:1 mapping only.</td>
+<td>High</td>
+<td>Blocked on PRD 2b (9/30)</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>References</h2>
+<ul>
+<li><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4444455089">Overview &amp; Index</a></li>
+<li><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4450189505">1 of 4: Model Creation &amp; Source Configuration</a></li>
+<li><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4449927443">2 of 4: Field Mapping (original, pre-split)</a></li>
+<li>2b of 4: AI-Assisted Transformation Functions (9/30)</li>
+<li><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4449468593">3 of 4: Testing &amp; Publishing</a></li>
+<li><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4443013309">4 of 4: Versioning &amp; Lifecycle</a></li>
+<li><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4464869409">Definitions &amp; Terms</a></li>
+<li><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4484530409/QBO+Transformation+Functions+DRAFT">QBO Transformation Functions (RBC)</a> — <a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4484530409/QBO+Transformation+Functions+DRAFT">https://floqast.atlassian.net/wiki/spaces/Data/pages/4484530409/QBO+Transformation+Functions+DRAFT</a></li>
+<li><a href="https://floqast.atlassian.net/jira/polaris/projects/IDEA/ideas/view/11291632?selectedIssue=IDEA-2412">Jira Idea IDEA-2412</a></li>
+</ul>
+

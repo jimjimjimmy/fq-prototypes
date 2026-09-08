@@ -1,0 +1,436 @@
+# Data Studio: Platform Features — Error Patterns & Handling (DRAFT)
+
+| Field | Value |
+|---|---|
+| Target release | TBD |
+| Epic | IDEA-2487 — Multi-File Handling & Global Dimensions; IDEA-2488 — Data Studio: Platform Features |
+| Idea Link | https://floqast.atlassian.net/jira/polaris/projects/IDEA/ideas/view/11291632 |
+| Document status | DRAFT |
+| Document owner | Alex Kearns |
+| Designer | Natasha Clark |
+| Tech lead | (assign) |
+| Technical writers | (assign) |
+| QA | (assign) |
+| Depends on | All Data Studio PRDs — error patterns apply platform-wide |
+| Related sub-PRDs | [Scheduling](prd-scheduling.md) · [On-demand Refresh](prd-on-demand-refresh.md) · [Logging & Audit](prd-logging-audit.md) |
+
+---
+
+## 🎯 Objective
+
+This PRD defines the error taxonomy, user-facing error messages, and recovery paths for Data Studio across both IDEA-2487 (Multi-File Handling & Global Dimensions) and IDEA-2488 (Platform Features). It establishes platform-wide standards for how errors are surfaced, what language is used, where they appear in the UI, and how users recover.
+
+This PRD does NOT define internal logging or monitoring infrastructure (see Logging & Audit PRD), retry logic (out of scope for v1), or engineering-facing error codes and stack traces (internal only).
+
+Primary users: Data Studio admins configuring models and managing runs; compliance administrators reviewing error logs.
+
+---
+
+## 🔤 Definitions
+
+For a complete glossary of terms used across this series, see the shared [Data Studio: Definitions & Terms](https://floqast.atlassian.net/wiki/spaces/Data/pages/4464869099) page.
+
+---
+
+## 🏅 Why This Is Important
+
+Error states in Data Studio today are handled inconsistently — some failures surface cryptic system messages, others fail silently. When an admin can't tell what went wrong or how to fix it, the result is a support escalation, a delayed close, or loss of confidence in the data platform. Consistent, plain-language, actionable error messaging is foundational to a trustworthy product.
+
+This is especially critical for a platform that sits upstream of the accounting close. A silent failure or an unintelligible error message at the data collection layer can cascade into incorrect reconciliations, missed close deadlines, and compliance risk.
+
+---
+
+## 🔐 Value Unlocked
+
+Admins can independently diagnose and recover from configuration errors and run failures without filing a support ticket or waiting for engineering. Error messages tell them specifically what broke, where it broke, and what to do next — reducing mean time to recovery and reducing support burden on FloQast engineering.
+
+---
+
+## 🗝️ Key Examples
+
+- **Example 1:** An admin configures a join key in a multi-file merge, but the field name has a typo. Instead of a silent failure on next run, they see inline: "The field 'account_idd' wasn't found in Chase Bank Transactions.csv. Check that this field exists and is spelled correctly." They fix it before saving.
+- **Example 2:** A nightly scheduled run fails because the QuickBooks OAuth token expired. The admin receives an in-app notification: "Your QuickBooks Online connection needs to be re-authorized. Go to Connections and sign in again." They re-auth and trigger an on-demand re-run.
+- **Example 3:** A transform function has a syntax error in a field mapping. On publish attempt, the admin sees inline on the affected row: "The formula in 'Net Amount' has an error: Missing closing parenthesis. Fix the formula before publishing." They correct it without needing to contact support.
+
+---
+
+## 💡 Key Benefits
+
+- Plain-language, actionable error messages reduce support escalations and unblocks admins to self-serve
+- Inline errors caught at configuration time prevent failures from reaching production runs
+- Consistent error placement (inline vs. banner vs. notification vs. log) sets clear user expectations across the platform
+- Internal vs. external error separation protects technical detail from end users while preserving it for engineering diagnostics
+
+---
+
+## ✅ Use Cases
+
+| # | Persona | Scenario | Expected Outcome |
+|---|---|---|---|
+| 1 | Admin | Specifies a join key field that doesn't exist in the source file | Inline error on the join key selector with the field name and instructions to fix |
+| 2 | Admin | Scheduled run fails due to expired OAuth token | In-app notification + model page banner directing them to re-authorize in Connections |
+| 3 | Admin | Writes an invalid transform function in field mapping | Inline error on the field row identifying the specific syntax issue before publish |
+| 4 | Admin | Uploads a password-protected or corrupted file | Inline error at upload step with instructions to upload a valid file |
+| 5 | Admin | Scheduled run hits an API rate limit | Run history log entry with user-facing explanation; no cryptic 429 code shown |
+
+---
+
+## 📊 Success Metrics
+
+| Goal | Metric | Baseline | Target |
+|---|---|---|---|
+| Reduce support escalations from error states | # of support tickets attributed to unclear error messages | Unknown | Reduction TBD post-launch |
+| Self-service recovery | % of run failures where admin takes a recovery action without support contact | Unknown | TBD |
+| Error catch rate at config time | % of configuration errors caught inline (pre-save) vs. at run time | Unknown | TBD |
+
+---
+
+## 🤔 Assumptions
+
+**Established**
+- Technical error detail (stack traces, error codes) is logged internally for engineering and never surfaced to customers
+- Every user-facing error message includes what went wrong AND what to do next
+- Errors are scoped to the specific field, file, or model causing the issue — not generic "an error occurred" messages
+- Error placement is determined by where the error originates (inline for config errors, banner/notification for run failures)
+
+**Known production terminology violations (must be fixed before Beta):**
+
+| What production shows | What users should see | Where it appears |
+|---|---|---|
+| "Teardown completed successfully" | "Data processing completed" or "Historical data load completed" | Run logs |
+| `PIPELINE_CONTROLLER_FAILED` | Plain-language failure description (e.g., "The data pipeline failed to start. Contact support if this continues.") | Run logs — red chip |
+| `INGESTION_EVENT_PROCESSOR_ERROR` | Plain-language failure description (e.g., "An error occurred while processing incoming data.") | Run logs — red chip |
+| "Projection Label" | "Data Source" | Field mapping source picker modal |
+
+These are engineering-internal terms currently exposed directly to customers in the production UI. Each requires a user-facing translation before Beta launch.
+
+**Open Items to Confirm**
+- Should partial run failures (some records processed, some failed) trigger the same in-app notification as full failures, or a separate "warning" level notification?
+- Should connection/auth error banners on the model page persist until resolved, or dismiss after the user views them?
+- Is there a customer-facing error log export (CSV download) for compliance or support purposes?
+
+---
+
+## 🌟 Milestones
+
+| Milestone | Owner | Target Date |
+|---|---|---|
+| Phase 1: Inline config error messages (IDEA-2487 — join key, merge, file upload) | (assign) | TBD |
+| Phase 2: Run failure messages + in-app notifications (IDEA-2488 — connection, auth, rate limit) | (assign) | TBD |
+| Phase 3: Field mapping error messages (invalid function, missing source field) | (assign) | TBD |
+
+---
+
+## 🗺️ Scope
+
+### 🚗 In Scope
+- User-facing error message catalog for all error categories in IDEA-2487 and IDEA-2488
+- Placement guidelines: inline (config errors), banner (model-level persistent errors), notification (run failures), log entry (all run events)
+- Inline error messages for: invalid join key, join key type mismatch, ambiguous column name, empty file, file format error, invalid transform function, missing source field
+- Run failure messages for: connection failure, auth/credential expiry, rate limit exceeded, partial run failure
+- In-app failure notifications for run failures
+- Error severity classification (High / Medium)
+
+### 🚦 Out of Scope
+- Email or Slack error notifications (in-app only for v1)
+- User-facing error codes
+- Automated error correction or AI-suggested fixes
+- Retry logic (see Scheduling PRD — out of scope for v1)
+- Internal monitoring and alerting infrastructure (see Logging & Audit PRD)
+
+---
+
+## 📋 Requirements — User Stories
+
+### Quick Reference
+
+| # | Story | Importance |
+|---|---|---|
+| EP1 | Invalid join key — inline error | High |
+| EP2 | Join key type mismatch — inline error | High |
+| EP3 | Ambiguous column name — inline error | Medium |
+| EP4 | Empty file / file format error — inline error | High |
+| EP5 | Connection failure at run time | High |
+| EP6 | Auth / credential expiry | High |
+| EP7 | Invalid transform function — inline error | High |
+| EP8 | Source field no longer exists | High |
+| EP9 | Rate limit exceeded | Medium |
+| EP10 | Partial run failure | Medium |
+
+---
+
+### EP1 — Invalid Join Key
+
+**User Story:** As an admin, I can see a clear inline error when I specify a join key field that doesn't exist in the source file so that I can fix the configuration before saving.
+
+**Importance:** High
+
+**Acceptance Criteria:**
+
+**AC-EP1-01 — Inline error on invalid join key**
+```
+Given I select a field as a join key that doesn't exist in one of the source files
+When I attempt to save or the field is validated
+Then an inline error appears on the join key selector: "The field '[field name]' wasn't found in [source file name]. Check that this field exists and is spelled correctly."
+```
+
+---
+
+### EP2 — Join Key Type Mismatch
+
+**User Story:** As an admin, I can see a clear inline error when my join keys are different data types so that I can fix the mismatch before running.
+
+**Importance:** High
+
+**Acceptance Criteria:**
+
+**AC-EP2-01 — Inline error on type mismatch**
+```
+Given the left and right join keys are different data types
+When the join configuration is validated
+Then an inline error appears: "Join key types don't match. '[Left field]' is [type] and '[Right field]' is [type]. Both keys must be the same type to join."
+```
+
+---
+
+### EP3 — Ambiguous Column Name
+
+**User Story:** As an admin, I can see a clear inline error when two source files share a column name so that I can resolve the conflict before merging.
+
+**Importance:** Medium
+
+**Acceptance Criteria:**
+
+**AC-EP3-01 — Inline error on column name conflict**
+```
+Given two source files contain a column with the same name
+When the merge configuration is validated
+Then an inline error appears on the conflicting column: "Both files have a column called '[column name].' Rename one or use a prefix to distinguish them before merging."
+```
+
+---
+
+### EP4 — File Upload Errors
+
+**User Story:** As an admin, I can see a clear inline error when an uploaded file is empty, corrupted, or in an unsupported format so that I can upload the correct file.
+
+**Importance:** High
+
+**Acceptance Criteria:**
+
+**AC-EP4-01 — Empty file error**
+```
+Given I upload a file that contains 0 data rows
+When the file is processed
+Then an inline error appears: "This file appears to be empty. Upload a version that contains data rows."
+```
+
+**AC-EP4-02 — File format error**
+```
+Given I upload a file that is corrupted, password-protected, or not a supported format
+When the file is processed
+Then an inline error appears: "We couldn't read this file. Make sure it's a supported format (CSV, XLSX, or JSON) and isn't password-protected."
+```
+
+---
+
+### EP5 — Connection Failure at Run Time
+
+**User Story:** As an admin, I can see a clear error when a scheduled or manual run fails due to a connection issue so that I know what happened and how to recover.
+
+**Importance:** High
+
+**Acceptance Criteria:**
+
+**AC-EP5-01 — Run history entry with plain-language error**
+```
+Given a scheduled or manual model run fails because the source system is unreachable
+When the failure is recorded
+Then the run history entry shows: "Couldn't connect to [Source Name]. This may be a temporary issue — try running again. If the problem continues, check the connection settings."
+```
+
+**AC-EP5-02 — In-app failure notification**
+```
+Given a run fails due to a connection issue
+When the failure is recorded
+Then an in-app notification is sent to Data Studio admins with the model name, failure timestamp, and a link to the run detail
+```
+
+---
+
+### EP6 — Auth / Credential Expiry
+
+**User Story:** As an admin, I can see a clear notification when a connection's credentials have expired so that I can re-authorize before the next run fails.
+
+**Importance:** High
+
+**Acceptance Criteria:**
+
+**AC-EP6-01 — In-app notification on auth failure**
+```
+Given a run fails because an OAuth token has expired or SFTP credentials have changed
+When the failure is detected
+Then an in-app notification is sent: "Your [Source Name] connection needs to be re-authorized. Go to Connections and sign in again."
+```
+
+**AC-EP6-02 — Banner on model page**
+```
+Given a connection auth failure has occurred
+When I view the affected model's detail page
+Then a banner is displayed indicating the connection needs re-authorization with a link to Connections settings
+```
+
+---
+
+### EP7 — Invalid Transform Function
+
+**User Story:** As an admin, I can see a clear inline error when a transform function in a field mapping has a syntax error so that I can fix it before publishing.
+
+**Importance:** High
+
+**Acceptance Criteria:**
+
+**AC-EP7-01 — Inline error on invalid formula**
+```
+Given a transform function in field mapping has invalid syntax
+When the field is validated (on blur or publish attempt)
+Then an inline error appears on the affected field row: "The formula in '[Target Field]' has an error: [specific error description]. Fix the formula before publishing."
+```
+
+**AC-EP7-02 — Publish blocked on invalid formula**
+```
+Given one or more field mappings have invalid transform functions
+When I attempt to publish the model
+Then the publish action is blocked and the errors are highlighted inline
+```
+
+---
+
+### EP8 — Source Field No Longer Exists
+
+**User Story:** As an admin, I can see a clear error when a mapped source field no longer exists in the source system so that I can update the mapping before the next run.
+
+**Importance:** High
+
+**Acceptance Criteria:**
+
+**AC-EP8-01 — Inline error on missing source field**
+```
+Given a source field used in a mapping no longer exists in the source system
+When the model is validated or a run fails for this reason
+Then an inline error appears on the affected mapping row: "The source field '[field name]' no longer exists in [Source Name]. Update this mapping before running."
+```
+
+---
+
+### EP9 — Rate Limit Exceeded
+
+**User Story:** As an admin, I can see a plain-language explanation when a run fails due to an API rate limit so that I understand what happened without seeing a raw error code.
+
+**Importance:** Medium
+
+**Acceptance Criteria:**
+
+**AC-EP9-01 — Plain-language run log entry**
+```
+Given a run fails because the source API returns a rate limit error
+When the failure is recorded
+Then the run history entry shows: "The [Source Name] API is temporarily limiting requests. Data Studio will retry automatically. If this persists, reduce the schedule frequency."
+And no raw HTTP status code (e.g., 429) is shown to the user
+```
+
+---
+
+### EP10 — Partial Run Failure
+
+**User Story:** As an admin, I can see a clear summary when a run completes with some records processed and some failed so that I can investigate and decide how to recover.
+
+**Importance:** Medium
+
+**Acceptance Criteria:**
+
+**AC-EP10-01 — Partial failure summary in run history**
+```
+Given a run completes with some records processed successfully and some failed
+When the run is recorded
+Then the run history entry shows: "This run completed with errors. [X] records were processed successfully; [Y] records failed. Download the error report for details."
+```
+
+---
+
+## ▶️ User Flow Reference
+
+Error handling applies throughout the Data Studio user flow:
+- Steps covering source file upload and merge configuration (IDEA-2487)
+- Steps covering field mapping and transform function entry
+- Steps covering model publishing (validation gate)
+- Post-publish: scheduled and manual run execution (IDEA-2488)
+
+(Link to full user flow document — assign)
+
+---
+
+## 🎨 User Interaction & Design
+
+> To be completed by Natasha Clark. Key questions to resolve:
+>
+> - What is the visual treatment for inline errors — red border on the field, inline text below, or tooltip?
+> - Should auth/connection error banners on the model page be dismissible, or persist until the issue is resolved?
+> - Is there a distinct "warning" visual treatment for partial run failures vs. full failures?
+> - What does the error report download look like for partial failures?
+
+---
+
+## ✏️ UI Changes
+
+- Inline error states on join key selectors and merge configuration panel
+- Inline error states on field mapping rows (invalid function, missing source field)
+- Publish validation gate — blocks publish and highlights errors when field mapping errors exist
+- Run history: error detail on expand for failed runs
+- In-app notification for run failures (connection, auth)
+- Model page banner for persistent auth/connection errors
+
+---
+
+## 😎 Future Considerations
+
+- **Email / Slack notifications for run failures:** In-app only for v1; email and Slack alerts are a high-value follow-on for close-critical workflows.
+- **AI-suggested fixes:** For field mapping errors, proactively suggest the correct field name or syntax fix.
+- **Error report download:** Customer-facing CSV export of failed records for partial run failures.
+- **Automated retry on connection failure:** Retry once after a configurable delay before marking a run as Failed.
+
+---
+
+## ❓ Open Questions
+
+| # | Question | Owner | Status | Answer |
+|---|---|---|---|---|
+| OQ-1 | Should partial run failures trigger the same notification as full failures, or a "warning" level? | Alex K / Natasha | Open | |
+| OQ-2 | Should auth error banners persist until resolved, or dismiss after the user views them? | Alex K / Natasha | Open | |
+| OQ-3 | Is there a customer-facing error log export (beyond run history)? | Alex K | Open | |
+
+---
+
+## 🚫 Gaps
+
+| # | Gap | Impact | Proposed Resolution |
+|---|---|---|---|
+| G1 | Email / Slack failure notifications | Medium | In-app only for v1; add to backlog |
+| G2 | Error report download for partial failures | Medium | Deferred; add to future considerations |
+| G3 | Automated retry on connection failure | Low | Deferred; on-demand re-run is v1 recovery path |
+
+---
+
+## 📚 References
+
+### Related Sub-PRDs
+- [Scheduling](prd-scheduling.md)
+- [On-demand Refresh](prd-on-demand-refresh.md)
+- [Logging & Audit Requirements](prd-logging-audit.md)
+
+### Design Resources
+- Figma: Lineage Product — https://www.figma.com/design/pF3J27wNhb7TRnCmmJGrB9/Lineage---Product?node-id=1-2
+
+### Engineering References
+- IDEA-2487: https://floqast.atlassian.net/jira/polaris/projects/IDEA/ideas/view/11291632?selectedIssue=IDEA-2487
+- IDEA-2488: https://floqast.atlassian.net/jira/polaris/projects/IDEA/ideas/view/11291632?selectedIssue=IDEA-2488

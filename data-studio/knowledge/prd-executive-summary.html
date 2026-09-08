@@ -1,0 +1,258 @@
+<h1>Data Studio PRD Suite — Executive Summary</h1>
+<p><strong>Scope:</strong> 18 Confluence pages across Alex Kearns (AK) and Rebecca Beasley-Cockroft (RBC)
+<strong>As of:</strong> March 19, 2026</p>
+<hr>
+<h2>Reference Docs</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Reference Doc</th>
+<th>Author</th>
+<th>Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4464869409">Definitions &amp; Terms</a></td>
+<td>AK</td>
+<td>Shared glossary defining Model, Connector, Grouped Dataset, Effective Date, Version states, and Entity across the entire PRD suite.</td>
+</tr>
+<tr>
+<td>2</td>
+<td><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4444455089">Overview &amp; Index of &quot;Model Creation&quot; PRDs</a></td>
+<td>AK</td>
+<td>Parent of 5 sub-PRD cases around model creation.</td>
+</tr>
+<tr>
+<td>3</td>
+<td><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4430200905/QBO+Data+Ingestion+and+Transformation">Parent QBO Page</a></td>
+<td>RBC</td>
+<td>Parent of all PRD cases outlining the &quot;what&quot; / &quot;why&quot;.</td>
+</tr>
+</tbody></table>
+<h2>PRD Index</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>PRD</th>
+<th>Author</th>
+<th>Summary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4470800387">Merging Catalog &amp; Lineage Tabs</a></td>
+<td>AK</td>
+<td>Consolidates the 3-tab layout into 2 tabs (Catalog, Connectors), retires card-based Catalog, and standardizes the 6-tab Model detail view.</td>
+</tr>
+<tr>
+<td>2</td>
+<td><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4476731473">Catalog — Search and Filter</a></td>
+<td>AK</td>
+<td>Defines AG Grid table behavior for the Catalog tab: FQ Model type groupings, status badges, real-time search, column filters, and active filter chips.</td>
+</tr>
+<tr>
+<td>3</td>
+<td><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4442718323/QBO+Connection">QBO Connection</a></td>
+<td>RBC</td>
+<td>Covers both QBO Basic (Direct API / OAuth 2.0) and QBO Advanced (Fivetran) connection paths, including credential storage, token refresh, and the Connections tab at scale (~35k connections).</td>
+</tr>
+<tr>
+<td>4</td>
+<td><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4447568254">QBO Endpoint Handling</a></td>
+<td>RBC</td>
+<td>Manages per-connection API endpoint configuration: auto-provisioned endpoints, custom activation, sync frequency, and on-demand data run triggers with &lt;60s SLA.</td>
+</tr>
+<tr>
+<td>5</td>
+<td><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4462575617">CDC Connection Setup</a></td>
+<td>AK</td>
+<td>Self-service CDC connection wizard (e.g., NetSuite via Fivetran) with table selection, auto-created models, and full vendor abstraction — no Fivetran language surfaces to users.</td>
+</tr>
+<tr>
+<td>6</td>
+<td><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4449337387/Data+Studio+Manual+Upload+Connector+DRAFT">Manual Upload Connector</a></td>
+<td>AK</td>
+<td>New connector type for Excel/CSV uploads with schema inference, manual type overrides, rich validation, and as-of date per upload.</td>
+</tr>
+<tr>
+<td>7</td>
+<td><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4450189505">Model Creation &amp; Source Configuration (1/4)</a></td>
+<td>AK</td>
+<td>Model naming, FQ Model selection, linking source datasets, Primary Dataset designation, and Grouped Datasets (UNION of schema-identical files) for high-file-count customers.</td>
+</tr>
+<tr>
+<td>8a</td>
+<td><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4449927443">Field Mapping — Visual Refresh + AI-Suggested Mappings (2a/4)</a></td>
+<td>AK</td>
+<td><strong>Target: 6/30.</strong> Redesigned field mapping page, AI-suggested source-to-target mappings on first draft, many-to-one source field mapping, and custom field support.</td>
+</tr>
+<tr>
+<td>8b</td>
+<td>Field Mapping — AI-Assisted Transformation Functions (2b/4)</td>
+<td>AK</td>
+<td><strong>Target: 9/30.</strong> Per-row transformation logic editor with manual functions and AI Chat Modal for natural language → expression authoring. Depends on 8a and RBC&#39;s QBO Transformation Functions (#14).</td>
+</tr>
+<tr>
+<td>9</td>
+<td><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4449468593">Testing &amp; Publishing (3/4)</a></td>
+<td>AK</td>
+<td>Test/preview with as-of date and entity filter, publish action with Effective Date selector and validation, plus row-level error surfacing.</td>
+</tr>
+<tr>
+<td>10</td>
+<td><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4443013309">Versioning &amp; Lifecycle (4/4)</a></td>
+<td>AK + RBC</td>
+<td>Post-publish version lifecycle: new Drafts (manual and auto-triggered), one-Draft constraint, discard, archive, Logs tab, and Versions tab.</td>
+</tr>
+<tr>
+<td>11</td>
+<td><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4465296047/QBO+Standard+Mapping">QBO Standard Mapping</a></td>
+<td>RBC</td>
+<td>Auto-provisioned field mappings for QBO (API and Fivetran): Accounts, Balances, Transactions, Companies, FX Rates, and Dimensions with opt-in customization and Reset to Standard.</td>
+</tr>
+<tr>
+<td>12</td>
+<td><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4476535512/Entity+Mapping">Entity Mapping</a></td>
+<td>RBC</td>
+<td>Entity-to-model linking via a proposed Data Domains intermediate layer between FQ entities, models, and connections; predates current architecture.</td>
+</tr>
+<tr>
+<td>13</td>
+<td><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4449632496/Model+Creation+Data+Preview+Tab+DRAFT">Data Preview Tab</a></td>
+<td>AK</td>
+<td>Read-only AG Grid view of processed pipeline data with version selection, per-column filters, and server-side pagination; AI-assisted query deferred to V2.</td>
+</tr>
+<tr>
+<td>14</td>
+<td><a href="https://floqast.atlassian.net/wiki/spaces/Data/pages/4484530409/QBO+Transformation+Functions+DRAFT">QBO Transformation Functions</a></td>
+<td>RBC</td>
+<td>Defines the transformation functions needed to define source-to-target mapping for QBO into normalized FQ format (will support more than QBO).</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>1. Navigation &amp; UX Structure</h2>
+<p><strong>Merging Catalog &amp; Lineage Tabs</strong> (AK) consolidates the previous 3-tab layout (Catalog, Connectors, Lineage) into 2 tabs (Catalog, Connectors) and retires the card-based Catalog view in favor of an AG Grid table. The Model detail view standardizes to 6 vertical tabs: Overview · Source Datasets · Field Mappings · Data Preview · Versions · Logs.</p>
+<p><strong>Catalog — Search and Filter</strong> (AK) defines the AG Grid table behavior: FQ Model type groupings (collapsible), status badges, global real-time search, column filters, and active filter chips.</p>
+<p>Together these two PRDs define the complete shell UX. Neither addresses RBAC — both flag it as an open gap (G1/G2 respectively) and defer to a future access control PRD.</p>
+<hr>
+<h2>2. Connectors</h2>
+<table>
+<thead>
+<tr>
+<th>PRD</th>
+<th>Owner</th>
+<th>Type</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>QBO Connection</td>
+<td>RBC</td>
+<td>Direct API + Fivetran</td>
+<td>Draft</td>
+</tr>
+<tr>
+<td>QBO Endpoint Handling</td>
+<td>RBC</td>
+<td>API endpoint mgmt</td>
+<td>Draft</td>
+</tr>
+<tr>
+<td>CDC Connection Setup</td>
+<td>AK</td>
+<td>Fivetran (CDC)</td>
+<td>Draft</td>
+</tr>
+<tr>
+<td>Manual Upload Connector</td>
+<td>AK</td>
+<td>Excel/CSV upload</td>
+<td>Draft</td>
+</tr>
+</tbody></table>
+<p><strong>QBO Connection</strong> (RBC) covers both &quot;QBO Basic&quot; (Direct API / OAuth 2.0) and &quot;QBO Advanced&quot; (Fivetran) paths. Handles credential storage, token refresh, realmId capture, and the Connections tab (infinite scroll + search). Scale: up to ~35k connections.</p>
+<p><strong>QBO Endpoint Handling</strong> (RBC) manages API endpoint configuration per connection. Auto-provisions TrialBalance and Accounts endpoints, supports custom endpoint activation and nested calls, sets sync frequency (default 24h), and defines on-demand data run triggers for downstream apps (Close rec refresh, &lt;60s SLA).</p>
+<p><strong>CDC Connection Setup</strong> (AK) covers CDC connections (e.g., NetSuite) via Fivetran. Users self-select tables from an FQ-controlled list; models are auto-created with pre-defined Source-to-Target mappings. The 4-step wizard abstracts Fivetran entirely — no vendor language surfaces to users.</p>
+<p><strong>Manual Upload Connector</strong> (AK) is a new connector type supporting Excel (.xlsx) and CSV. Schema inferred from sample upload with manual type overrides, rich validation feedback, and as-of date required per upload. Customer trigger: Twilio request.</p>
+<hr>
+<h2>3. Model Creation Workflow</h2>
+<p>The core workflow is documented across 5 sequential PRDs (all AK), plus a shared Definitions &amp; Terms glossary:</p>
+<p><strong>Definitions &amp; Terms</strong> (AK) — shared glossary for all sub-PRDs. Defines Model, Connector, Grouped Dataset, Effective Date, Version states, Entity. Two open questions: whether &quot;Connector Type&quot; still appears in UI; whether Effective Date for Version 0 defaults to Jan 1, 1900.</p>
+<p><strong>1/4: Model Creation &amp; Source Configuration</strong> (AK) — Model naming, FQ Model selection, linking source datasets, designating Primary Dataset, creating Grouped Datasets (UNION of schema-identical files). Primary use case: customer with 200+ files split by entity.</p>
+<p><strong>2a/4: Field Mapping — Visual Refresh + AI-Suggested Mappings</strong> (AK, target 6/30) — Redesigned field mapping page with AI-suggested source-to-target mappings on first draft, many-to-one source field mapping, custom fields, and inline validation/error handling (unmapped required fields, type mismatches, invalid combinations). Gaps: autosave failure behavior (G2), AI empty/low-confidence state (G1).</p>
+<p><strong>2b/4: Field Mapping — AI-Assisted Transformation Functions</strong> (AK, target 9/30) — Per-row transformation logic editor with manual function-based logic and AI Chat Modal for natural language → expression authoring. Defines the supported function library (resolves former blocking gap G3). Depends on PRD 2a and RBC&#39;s QBO Transformation Functions PRD.</p>
+<p><strong>3/4: Testing &amp; Publishing</strong> (AK) — Test/preview with as-of date, entity filter, row-level filter, and runtime error surfacing (catches data-level issues like type coercion failures on specific rows). Publish action with Effective Date selector and publish-time validation. Critical open question: Jan 1, 1900 default unconfirmed with data platform team.</p>
+<p><strong>4/4: Versioning &amp; Lifecycle</strong> (AK + RBC) — Post-publish version lifecycle: creating new Drafts (manual and auto-triggered by structural changes), one-Draft constraint, discard, archive, Logs tab, Data Preview tab, autosave, Versions tab. 17 user stories. RBAC model undefined (G2).</p>
+<hr>
+<h2>4. Standard Mapping, Entity Linking &amp; Transformations</h2>
+<p><strong>QBO Standard Mapping</strong> (RBC) defines the auto-provisioned field mappings for QBO (both API and Fivetran paths): Accounts, Balances (debit - credit aggregation from Trial Balance), Transactions (Fivetran only), Companies (hard-coded per connection), FX Rates (N/A for QBO), Dimensions (Vendor, Customer, Class, Department via Fivetran). Customization is opt-in; Reset to Standard is available.</p>
+<p><strong>Entity Mapping</strong> (RBC) — earlier PRD (predates current architecture) covering entity-to-model linking. Proposes Data Domains as an intermediate layer between FQ entities, models, and connections. The current Merging Catalog/Lineage PRD (AK) references Entity Mappings as a third tab placeholder, but the data model for entity linking is only defined here in Rebecca&#39;s older document.</p>
+<p><strong>QBO Transformation Functions</strong> (RBC) — defines the transformation functions needed to define source-to-target mapping for QBO into FQ&#39;s normalized format. Scoped to QBO initially but intended to support additional connector types.</p>
+<p><strong>Data Preview Tab</strong> (AK) — read-only AG Grid view of processed pipeline data. Supports Active and Archived version selection, per-column filters, server-side pagination. V2 deferred: AI-assisted natural language query.</p>
+<hr>
+<h2>5. Discrepancies &amp; Cross-Author Gaps</h2>
+<h3>5a. Effective Date Default (Jan 1, 1900)</h3>
+<p><strong>Where it appears:</strong> Testing &amp; Publishing PRD (AK, marked critical), Definitions &amp; Terms (AK, open question Q2), and Versioning PRD (AK + RBC).
+<strong>Status:</strong> Unconfirmed with the data platform team. This is a blocking assumption — if the default is not Jan 1, 1900, the historical backfill mechanic changes significantly. Neither author has confirmed resolution.</p>
+<h3>5b. &quot;Source&quot; vs. &quot;File&quot; Terminology</h3>
+<p><strong>Rebecca&#39;s PRDs</strong> (QBO Connection, QBO Endpoint Handling, Standard Mapping) use &quot;Source&quot; consistently throughout. <strong>Alex&#39;s earlier PRDs</strong> (Model Creation 1/4 and the current prototype) use &quot;Linked Files&quot; and &quot;File Label.&quot; The Definitions &amp; Terms glossary does not fully reconcile this — &quot;Source Dataset&quot; is defined, but &quot;File Label&quot; (a field in the prototype today) has no canonical definition. This creates UI copy inconsistency risk.</p>
+<h3>5c. Standard Mapping Ownership Gap</h3>
+<p>The <strong>CDC PRD</strong> (AK) assumes &quot;standard Source-to-Target mappings&quot; exist as a dependency for auto-created CDC models but explicitly marks standard mapping as out of scope. The only standard mapping definition in the suite is the <strong>QBO Standard Mapping</strong> (RBC), which is QBO-specific. There is no PRD covering standard mappings for CDC sources (e.g., NetSuite). If CDC models are auto-created with pre-defined mappings, someone needs to define what those mappings are.</p>
+<h3>5d. Entity Mapping Architecture Mismatch</h3>
+<p><strong>Alex&#39;s Merging Catalog/Lineage PRD</strong> includes &quot;Entity Mappings&quot; as a top-level L1 tab (placeholder). <strong>Rebecca&#39;s Ability to Link Entities PRD</strong> proposes a Data Domains intermediate layer as the linking mechanism. These two documents reflect different architectural assumptions — the tab exists in the current navigation design but the underlying data model is based on a pre-Data Studio architecture document. This needs reconciliation before Entity Mapping is built.</p>
+<h3>5e. Connection Error States</h3>
+<p><strong>Rebecca&#39;s QBO Endpoint Handling PRD</strong> defines detailed connection error states and downstream notification SLAs (&lt;60s). <strong>Alex&#39;s CDC PRD</strong> explicitly marks connection status and error states as out of scope, deferring to a future PRD. The result: connection error handling is defined for QBO but undefined for CDC, and there&#39;s no shared PRD that establishes common error state patterns across connector types.</p>
+<h3>5f. RBAC / Permissions</h3>
+<p>Neither author owns a permissions PRD. It&#39;s listed as an open gap in at least 3 documents (Catalog Search &amp; Filter G1, Merging Catalog/Lineage, Versioning &amp; Lifecycle G2). Given that publish actions, version management, and connector credential access all carry access control implications, this is a cross-cutting gap that needs its own PRD or a dedicated section in an umbrella document.</p>
+<h3>5g. Fivetran Vendor Abstraction Consistency</h3>
+<p><strong>Alex&#39;s CDC PRD</strong> is explicit: user-facing language must never mention Fivetran — it&#39;s abstracted as FQ infrastructure. <strong>Rebecca&#39;s QBO Connection PRD</strong> uses &quot;QBO Advanced (Fivetran)&quot; as the user-facing label in the Connections tab. These are inconsistent. Either Fivetran is abstracted everywhere (CDC approach) or surfaced where relevant (QBO approach) — this needs a product decision.</p>
+<hr>
+<h2>6. Open Blockers Summary (Cross-Suite)</h2>
+<table>
+<thead>
+<tr>
+<th>Blocker</th>
+<th>Status</th>
+<th>Owner</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Jan 1, 1900 Effective Date default</td>
+<td>Unconfirmed with data platform</td>
+<td>AK</td>
+</tr>
+<tr>
+<td>Standard mapping for non-QBO sources (CDC)</td>
+<td>No PRD exists</td>
+<td>Unowned</td>
+</tr>
+<tr>
+<td>RBAC / permissions model</td>
+<td>No PRD exists</td>
+<td>Unowned</td>
+</tr>
+<tr>
+<td>Entity mapping architecture (Data Domains vs. tab)</td>
+<td>Conflicting approaches</td>
+<td>AK + RBC</td>
+</tr>
+<tr>
+<td>Fivetran vendor abstraction policy</td>
+<td>Inconsistent between PRDs</td>
+<td>AK + RBC</td>
+</tr>
+<tr>
+<td>Autosave failure behavior</td>
+<td>Undefined</td>
+<td>AK</td>
+</tr>
+<tr>
+<td><del>Supported transformation function library</del></td>
+<td><del>Undefined</del> — <strong>Resolved:</strong> Now explicitly owned by PRD 2b: AI-Assisted Transformation Functions (target 9/30). No longer blocks the 6/30 release.</td>
+<td>AK</td>
+</tr>
+</tbody></table>
+
