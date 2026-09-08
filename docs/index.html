@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FQ Prototypes - Jimmy Chen</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; background: #f9fafb; color: #111827; }
+  header { background: white; border-bottom: 1px solid #e5e7eb; padding: 24px 32px; display: flex; align-items: baseline; gap: 16px; }
+  header h1 { font-size: 18px; font-weight: 600; margin: 0; }
+  header p { font-size: 14px; color: #6b7280; margin: 0; }
+  main { max-width: 960px; margin: 0 auto; padding: 32px; }
+  .section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #9ca3af; margin: 32px 0 12px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .card { background: white; border: 1px solid #e5e7eb; border-radius: 10px; padding: 20px; text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 6px; transition: border-color 0.15s, box-shadow 0.15s; }
+  .card:hover { border-color: #d1d5db; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .card-title { font-size: 14px; font-weight: 600; color: #111827; }
+  .card-meta { font-size: 12px; color: #6b7280; }
+  .badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 4px; margin-top: 4px; }
+  .badge-live { background: #dcfce7; color: #15803d; }
+  .badge-placeholder { background: #f3f4f6; color: #6b7280; }
+  .badge-html { background: #fef3c7; color: #92400e; }
+  footer { text-align: center; padding: 40px; font-size: 13px; color: #9ca3af; }
+  footer a { color: #6b7280; }
+</style>
+</head>
+<body>
+<header>
+  <h1>FQ Prototypes</h1>
+  <p>Jimmy Chen - FloQast Product Design</p>
+</header>
+<main>
+
+<div class="section-label">Live prototypes</div>
+<div class="grid">
+  <a class="card" href="/fq-prototypes/recs-side-drawer/">
+    <div class="card-title">Recs Side Drawer</div>
+    <div class="card-meta">Vite + React + FlowUI</div>
+    <div class="card-meta">Checklist and Documents drawer patterns for the Reconciliations page</div>
+    <span class="badge badge-live">Live</span>
+  </a>
+  <a class="card" href="/fq-prototypes/recs-multicurrency/">
+    <div class="card-title">Recs Multicurrency</div>
+    <div class="card-meta">Vite + React + FlowUI</div>
+    <div class="card-meta">Standard / Multi Currency toggle for Reconciliations</div>
+    <span class="badge badge-live">Live</span>
+  </a>
+  <a class="card" href="/fq-prototypes/recs-ag-grid/">
+    <div class="card-title">Recs AG Grid</div>
+    <div class="card-meta">Vite + React + AG Grid Enterprise</div>
+    <div class="card-meta">Recs multicurrency view rebuilt on a real grid engine</div>
+    <span class="badge badge-live">Live</span>
+  </a>
+  <a class="card" href="/fq-prototypes/catalyst/">
+    <div class="card-title">Catalyst</div>
+    <div class="card-meta">Vite + React + shadcn</div>
+    <div class="card-meta">Task-centric UX redesign for FloQast Close</div>
+    <span class="badge badge-live">Live</span>
+  </a>
+  <a class="card" href="/fq-prototypes/recs-translation/">
+    <div class="card-title">Recs Translation</div>
+    <div class="card-meta">HTML</div>
+    <div class="card-meta">Currency translation UX for Workday ERP reconciliations</div>
+    <span class="badge badge-html">HTML</span>
+  </a>
+  <a class="card" href="/fq-prototypes/ai-variance-prototype/">
+    <div class="card-title">AI Variance</div>
+    <div class="card-meta">HTML</div>
+    <div class="card-meta">Focus Mode inbox pattern for AI variance analysis</div>
+    <span class="badge badge-html">HTML</span>
+  </a>
+  <a class="card" href="/fq-prototypes/detect-prototype/">
+    <div class="card-title">Detect</div>
+    <div class="card-meta">HTML</div>
+    <div class="card-meta">Anomaly detection inbox - flagged transactions by risk score</div>
+    <span class="badge badge-html">HTML</span>
+  </a>
+  <a class="card" href="/fq-prototypes/inbox-prototype/">
+    <div class="card-title">Unified Inbox</div>
+    <div class="card-meta">HTML</div>
+    <div class="card-meta">All actionable accounting work in one inbox UI</div>
+    <span class="badge badge-html">HTML</span>
+  </a>
+  <a class="card" href="/fq-prototypes/table-standards/">
+    <div class="card-title">Table Standards</div>
+    <div class="card-meta">HTML</div>
+    <div class="card-meta">Consistent interaction patterns across FloQast tables</div>
+    <span class="badge badge-html">HTML</span>
+  </a>
+  <a class="card" href="/fq-prototypes/transform-extract/">
+    <div class="card-title">Transform Extract</div>
+    <div class="card-meta">HTML</div>
+    <div class="card-meta">AI-assisted PDF extraction with template builder</div>
+    <span class="badge badge-html">HTML</span>
+  </a>
+</div>
+
+<div class="section-label">Source only (run locally)</div>
+<div class="grid">
+  <a class="card" href="/fq-prototypes/admin-agent/">
+    <div class="card-title">Admin Agent</div>
+    <div class="card-meta">Vite + React + FlowUI</div>
+    <div class="card-meta">AI copilot for FloQast admin configuration</div>
+    <span class="badge badge-placeholder">Run locally</span>
+  </a>
+  <a class="card" href="/fq-prototypes/agents-playbooks/">
+    <div class="card-title">Agents and Playbooks</div>
+    <div class="card-meta">Vite + React + FlowUI</div>
+    <div class="card-meta">End-to-end AI agent lifecycle - creation to compliance</div>
+    <span class="badge badge-placeholder">Run locally</span>
+  </a>
+  <a class="card" href="/fq-prototypes/auditreportreboot/">
+    <div class="card-title">Audit Report Reboot</div>
+    <div class="card-meta">Vite + React + FlowUI</div>
+    <div class="card-meta">Redesigned Admin Settings > Reports page</div>
+    <span class="badge badge-placeholder">Run locally</span>
+  </a>
+  <a class="card" href="/fq-prototypes/bulk-invite-user/">
+    <div class="card-title">Bulk Invite User</div>
+    <div class="card-meta">Vite + React + FlowUI</div>
+    <div class="card-meta">Multi-user creation for Admin Settings > Team Members</div>
+    <span class="badge badge-placeholder">Run locally</span>
+  </a>
+  <a class="card" href="/fq-prototypes/coso-ai-rcm/">
+    <div class="card-title">COSO AI RCM</div>
+    <div class="card-meta">Vite + React + FlowUI</div>
+    <div class="card-meta">AI governance command center - three lines of defense</div>
+    <span class="badge badge-placeholder">Run locally</span>
+  </a>
+  <a class="card" href="/fq-prototypes/data-studio/">
+    <div class="card-title">Data Studio</div>
+    <div class="card-meta">Vite + React + FlowUI</div>
+    <div class="card-meta">Lineage Creation - source-to-target field mapping</div>
+    <span class="badge badge-placeholder">Run locally</span>
+  </a>
+  <a class="card" href="/fq-prototypes/defender/">
+    <div class="card-title">Defender</div>
+    <div class="card-meta">Vite + React + FlowUI</div>
+    <div class="card-meta">Anomaly detection dashboard with KPI cards and rule builders</div>
+    <span class="badge badge-placeholder">Run locally</span>
+  </a>
+  <a class="card" href="/fq-prototypes/fdm-rollup/">
+    <div class="card-title">FDM Rollup</div>
+    <div class="card-meta">Vite + React + FlowUI</div>
+    <div class="card-meta">In-app rollup structure editing alongside mapping table</div>
+    <span class="badge badge-placeholder">Run locally</span>
+  </a>
+  <a class="card" href="/fq-prototypes/mike-ux-feedback-4-2026/">
+    <div class="card-title">Mike UX Feedback</div>
+    <div class="card-meta">Vite + React + FlowUI</div>
+    <div class="card-meta">CEO UX feedback session synthesis - April 2026</div>
+    <span class="badge badge-placeholder">Run locally</span>
+  </a>
+  <a class="card" href="/fq-prototypes/scheduler-1-many/">
+    <div class="card-title">Scheduler 1:Many</div>
+    <div class="card-meta">Vite + React + FlowUI</div>
+    <div class="card-meta">One schedule driving multiple orchestrated tasks</div>
+    <span class="badge badge-placeholder">Run locally</span>
+  </a>
+</div>
+
+</main>
+<footer>
+  <a href="https://github.com/jimjimjimmy/fq-prototypes">github.com/jimjimjimmy/fq-prototypes</a>
+</footer>
+</body>
+</html>

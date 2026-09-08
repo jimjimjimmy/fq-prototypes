@@ -1,0 +1,1925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extract — Schema Builder</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1D2433; height: 100vh; overflow: hidden; display: flex; flex-direction: row; background: #fff; }
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-thumb { background: #CBD2E1; border-radius: 3px; }
+
+  /* ===== APP SHELL ===== */
+  .app-rail { width: 56px; background: #fff; border-right: 1px solid #E1E6EF; display: flex; flex-direction: column; align-items: center; padding: 12px 0; flex-shrink: 0; gap: 4px; }
+  .app-rail .rail-logo { width: 32px; height: 32px; border-radius: 8px; background: #1B1F27; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 12px; }
+  .app-rail .rail-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #6B7280; cursor: pointer; }
+  .app-rail .rail-icon:hover { background: #F1F3F9; color: #1D2433; }
+  .app-rail .rail-icon.active { background: #ECFFF8; color: #1FAC76; }
+  .app-rail .rail-spacer { flex: 1; }
+  .app-rail .rail-divider { width: 24px; height: 1px; background: #E1E6EF; margin: 8px 0; }
+  .app-rail .rail-avatar { width: 32px; height: 32px; border-radius: 50%; background: #1FAC76; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; margin-top: 4px; }
+
+  .app-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+  .app-header { height: 48px; border-bottom: 1px solid #E1E6EF; display: flex; align-items: center; padding: 0 20px; gap: 24px; flex-shrink: 0; background: #fff; }
+  .app-header .product { display: flex; align-items: center; gap: 8px; }
+  .app-header .product-icon { width: 22px; height: 22px; border-radius: 5px; background: linear-gradient(135deg, #A78BFA 0%, #7C3AED 100%); }
+  .app-header .product-name { font-size: 14px; font-weight: 600; color: #1D2433; }
+  .app-header nav { display: flex; align-items: center; gap: 2px; height: 100%; }
+  .app-header nav a { padding: 0 12px; height: 100%; display: flex; align-items: center; font-size: 13px; color: #6B7280; text-decoration: none; border-bottom: 2px solid transparent; font-weight: 500; }
+  .app-header nav a.active { color: #1FAC76; border-bottom-color: #1FAC76; }
+  .app-header nav a:hover { color: #1D2433; }
+
+  .page-bar { height: 56px; border-bottom: 1px solid #E1E6EF; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; background: #fff; }
+  .page-bar-left { display: flex; align-items: center; gap: 10px; }
+  .page-bar .back-arrow { background: none; border: none; cursor: pointer; color: #6B7280; padding: 6px; border-radius: 6px; display: flex; align-items: center; }
+  .page-bar .back-arrow:hover { background: #F1F3F9; color: #1D2433; }
+  .page-bar .page-title { font-size: 17px; font-weight: 600; color: #1D2433; }
+  .page-bar-right { display: flex; align-items: center; gap: 8px; }
+  .page-bar-right .pb-icon { background: none; border: none; cursor: pointer; color: #6B7280; padding: 7px; border-radius: 6px; display: flex; align-items: center; }
+  .page-bar-right .pb-icon:hover { background: #F1F3F9; color: #1D2433; }
+  .page-bar-right .pb-badge { display: inline-flex; align-items: center; gap: 4px; padding: 5px 9px; border-radius: 6px; background: #ECFFF8; /* --flo-sem-color-success-background */ color: #1FAC76; font-size: 12px; font-weight: 600; }
+  .page-bar-right .pb-badge svg { color: #1FAC76; }
+  .page-bar-right .run-btn { display: flex; align-items: stretch; border: 1px solid #E1E6EF; border-radius: 6px; overflow: hidden; }
+  .page-bar-right .run-btn .run-label { padding: 6px 14px; font-size: 13px; font-weight: 600; color: #1D2433; background: #fff; border: none; cursor: pointer; font-family: inherit; }
+  .page-bar-right .run-btn .run-caret { padding: 6px 8px; border: none; border-left: 1px solid #E1E6EF; background: #fff; cursor: pointer; color: #6B7280; display: flex; align-items: center; }
+  .page-bar-right .run-btn .run-label:hover, .page-bar-right .run-btn .run-caret:hover { background: #F8FAFC; }
+
+  .modal-frame { flex: 1; display: flex; flex-direction: column; overflow: hidden; border-top: 1px solid #E1E6EF; background: #fff; }
+
+  /* ===== CANVAS VIEW (pre-config) ===== */
+  .canvas-view { flex: 1; display: flex; flex-direction: column; overflow: hidden; border-top: 1px solid #E1E6EF; background: #FAFBFC; position: relative; min-height: 0; }
+  .canvas { flex: 1; position: relative; overflow: auto; background-color: #FAFBFC; background-image: radial-gradient(circle, #D6DBE5 1px, transparent 1px); background-size: 14px 14px; display: flex; align-items: center; justify-content: center; }
+
+  .canvas-toolbox { position: absolute; top: 20px; left: 20px; background: #fff; border: 1px solid #E1E6EF; border-radius: 8px; box-shadow: 0 1px 3px rgba(20,30,55,0.06); padding: 6px; display: flex; flex-direction: column; gap: 2px; z-index: 5; }
+  .canvas-toolbox button { width: 30px; height: 30px; border-radius: 6px; background: none; border: none; cursor: pointer; color: #6B7280; display: flex; align-items: center; justify-content: center; }
+  .canvas-toolbox button:hover { background: #F1F3F9; color: #1D2433; }
+
+  .canvas-step-wrap { display: flex; flex-direction: column; align-items: center; }
+  .starting-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px 4px; background: #ECFFF8; color: #1FAC76; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-radius: 4px 4px 0 0; margin-bottom: -1px; position: relative; z-index: 1; }
+  .starting-badge svg { fill: currentColor; }
+
+  .step-card { background: #fff; border: 1.5px dashed #CBD2E1; border-radius: 8px; padding: 10px 14px 10px 10px; display: flex; align-items: center; gap: 12px; min-width: 240px; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; box-shadow: 0 1px 2px rgba(20,30,55,0.04); }
+  .step-card:hover { border-color: #1FAC76; box-shadow: 0 2px 8px rgba(31,172,118,0.12); }
+  .step-card-icon { width: 36px; height: 36px; border-radius: 6px; background: linear-gradient(135deg, #E9EDF5 0%, #DDE3EE 100%); display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; overflow: hidden; }
+  .step-card-icon .doc-shape { position: absolute; bottom: 4px; right: 4px; width: 18px; height: 16px; background: #6B5840; border-radius: 2px; clip-path: polygon(0 0, 80% 0, 100% 20%, 100% 100%, 0 100%); }
+  .step-card-icon .sparkle { position: absolute; top: 5px; left: 5px; color: #1D2433; }
+  .step-card-body { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 0; }
+  .step-card-title { font-size: 13px; font-weight: 600; color: #1D2433; line-height: 1.2; }
+  .step-card-tag { align-self: flex-start; padding: 2px 8px; font-size: 11px; color: #424867; background: #F1F3F9; border-radius: 4px; font-weight: 500; }
+
+  .step-connector { width: 1px; height: 18px; background: #CBD2E1; margin: 0 auto; }
+  .add-step-btn { width: 22px; height: 22px; border-radius: 50%; background: #6B7280; color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; line-height: 1; font-family: inherit; padding: 0; }
+  .add-step-btn:hover { background: #4A5563; }
+
+  /* Toolbar */
+  .toolbar { min-height: 64px; border-bottom: 1px solid #E1E6EF; display: flex; align-items: center; justify-content: space-between; padding: 12px 24px; flex-shrink: 0; }
+  .toolbar-left { display: flex; align-items: center; gap: 12px; }
+  .toolbar-left .title-stack { display: flex; flex-direction: column; gap: 2px; }
+  .toolbar-left .title-row { display: flex; align-items: center; gap: 6px; }
+  .toolbar-left .title { font-weight: 700; font-size: 18px; color: #1D2433; line-height: 1.2; }
+  .toolbar-left .title-edit { background: none; border: none; padding: 4px; border-radius: 4px; cursor: pointer; color: #6B7280; display: flex; align-items: center; }
+  .toolbar-left .title-edit:hover { background: #F1F3F9; color: #1D2433; }
+  .toolbar-left .subtitle { font-size: 13px; color: #6B7280; line-height: 1.2; }
+  .toolbar-right { display: flex; align-items: center; gap: 8px; }
+  .btn-finish { border: none; background: #1FAC76; color: #fff; font-weight: 600; padding: 8px 20px; border-radius: 6px; font-size: 13px; cursor: pointer; font-family: inherit; }
+  .btn-finish:hover { background: #1C895F; }
+  .btn-icon { background: none; border: none; cursor: pointer; color: #6B7280; padding: 6px; border-radius: 6px; display: flex; align-items: center; }
+  .btn-icon:hover { background: #F1F3F9; color: #1D2433; }
+
+/* ===== MAIN AREA ===== */
+  .main { flex: 1; display: flex; overflow: hidden; position: relative; background: #fafafa; padding: 16px; gap: 16px; }
+
+  /* ---------- VALUES MODE: two rounded panel cards ---------- */
+  .values-layout { display: flex; width: 100%; height: 100%; gap: 16px; }
+
+  /* PDF side */
+  .pdf-side { flex: 1; display: flex; flex-direction: column; background: #fff; border: 1px solid #E1E6EF; border-radius: 12px; overflow: hidden; }
+  .pdf-bar { padding: 8px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #E1E6EF; background: #fff; font-size: 13px; color: #424867; flex-shrink: 0; }
+  .pdf-bar-center { display: flex; align-items: center; gap: 10px; }
+  .pdf-bar-center .fname { font-weight: 500; cursor: pointer; position: relative; }
+  .pdf-bar-center .fname:hover { color: #3D7BF7; }
+  .pdf-bar-center .counter { color: #ADB2BB; font-weight: 400; font-size: 12px; }
+  .nav-btn { background: none; border: 1px solid #E1E6EF; cursor: pointer; color: #6B7280; padding: 4px 10px; font-size: 16px; border-radius: 5px; font-family: inherit; }
+  .nav-btn:hover { background: #F1F3F9; color: #1D2433; }
+  .pdf-area { flex: 1; overflow-y: auto; padding: 16px; display: flex; justify-content: center; background: #F1F3F9; }
+
+  /* File dropdown */
+  .file-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #E1E6EF; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 50; margin-top: 4px; max-height: 280px; overflow-y: auto; }
+  .file-dropdown.hidden { display: none; }
+  .fd-item { padding: 8px 14px; font-size: 12px; color: #424867; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+  .fd-item:hover { background: #F1F3F9; }
+  .fd-item.active { background: #F0F5FF; font-weight: 500; }
+  .fd-item .fd-dot { width: 6px; height: 6px; border-radius: 50%; background: #CBD2E1; flex-shrink: 0; }
+  .fd-item.active .fd-dot { background: #2F6FED; }
+  .fd-item .fd-error-dot { width: 7px; height: 7px; border-radius: 50%; background: #D24747; flex-shrink: 0; margin-left: auto; }
+
+  /* Empty state — Figma card-in-card */
+  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; padding: 40px; }
+  .empty-state h3 { font-size: 18px; font-weight: 700; color: #1D2433; margin-bottom: 6px; }
+  .empty-state p { font-size: 13px; color: #6B7280; line-height: 1.5; max-width: 320px; margin-bottom: 20px; }
+  .empty-state .drop-card { background: #F8FAFC; border: 1px solid #E1E6EF; border-radius: 10px; padding: 36px 40px; display: flex; flex-direction: column; align-items: center; gap: 10px; width: 320px; }
+  .empty-state .upload-btn { background: #3D7BF7; color: #fff; border: none; padding: 9px 22px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 8px; }
+  .empty-state .upload-btn:hover { background: #1E4EAE; }
+  .empty-state .drop-hint { font-size: 12px; color: #6B7280; }
+
+  /* Trash button in nav bar */
+  .trash-btn { background: none; border: none; cursor: pointer; color: #ADB2BB; padding: 4px; border-radius: 4px; display: flex; align-items: center; }
+  .trash-btn:hover { color: #D24747; background: #FEF1F2; }
+
+  /* PDF card */
+  .pdf-card { background: #fff; border: 1px solid #ddd; padding: 28px 30px; font-size: 11px; color: #424867; line-height: 1.6; width: 100%; max-width: 520px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  .pdf-card .hdr { display: flex; justify-content: space-between; margin-bottom: 16px; }
+  .pdf-card .logo { font-size: 15px; font-weight: 700; color: #c2410c; letter-spacing: 0.7px; }
+  .pdf-card .invnum { font-size: 13px; font-weight: 600; }
+  .pdf-card .addr { font-size: 10px; color: #6B7280; margin-bottom: 16px; line-height: 1.5; }
+  .pdf-card .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; font-size: 10px; }
+  .pdf-card .parties .lbl { font-weight: 700; font-size: 9px; color: #6B7280; text-transform: uppercase; margin-bottom: 2px; }
+  .pdf-card .meta { width: 100%; border-collapse: collapse; margin-bottom: 18px; font-size: 10px; }
+  .pdf-card .meta td { padding: 3px 7px; border: 1px solid #E1E6EF; }
+  .pdf-card .meta td.l { font-weight: 600; color: #6B7280; background: #F8FAFC; font-size: 9px; }
+  .pdf-card .ltable { width: 100%; border-collapse: collapse; font-size: 10px; }
+  .pdf-card .ltable th { text-align: left; padding: 5px; color: #6B7280; font-weight: 700; font-size: 9px; border-bottom: 2px solid #CBD2E1; background: #F8FAFC; }
+  .pdf-card .ltable th.r { text-align: right; }
+  .pdf-card .ltable td { padding: 5px; border-bottom: 1px solid #F1F3F9; }
+  .pdf-card .ltable td.r { text-align: right; }
+  .pdf-card .ltable td.d { color: #6B7280; }
+  .pdf-card .ltable td.b { font-weight: 500; }
+  .pdf-card .foot { text-align: center; margin-top: 10px; color: #ADB2BB; font-size: 9px; }
+
+  /* Output side */
+  .output-side { flex: 1; display: flex; flex-direction: column; background: #fff; border: 1px solid #E1E6EF; border-radius: 12px; overflow: hidden; }
+  .output-toggle { display: flex; border: 1px solid #E1E6EF; border-radius: 6px; overflow: hidden; }
+  .output-toggle button { padding: 5px 12px; font-size: 11px; cursor: pointer; font-family: inherit; border: none; background: #fff; color: #6B7280; display: flex; align-items: center; gap: 4px; }
+  .output-toggle button.active { background: #F1F3F9; color: #1D2433; font-weight: 500; }
+  .output-toggle button + button { border-left: 1px solid #E1E6EF; }
+  .dl-btn { background: none; border: none; cursor: pointer; color: #6B7280; padding: 4px; margin-left: 4px; }
+  .output-body { flex: 1; overflow-y: auto; padding: 18px 20px 120px; }
+
+  /* Values form */
+  .ts-label { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+  .ts-sub { font-size: 12px; color: #6B7280; margin-bottom: 8px; }
+  .ts-select { padding: 8px 12px; border: 1px solid #E1E6EF; border-radius: 6px; font-size: 13px; font-family: inherit; color: #424867; width: 200px; margin-bottom: 16px; }
+  .data-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; margin-bottom: 18px; font-size: 13px; color: #6B7280; border-bottom: 1px solid #E1E6EF; }
+  .data-bar .fname { font-weight: 600; color: #1D2433; }
+  .edit-link { color: #3D7BF7; cursor: pointer; font-weight: 500; text-decoration: none; font-size: 12px; }
+  .edit-link:hover { text-decoration: underline; }
+  .val-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+  .val-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 24px; }
+  .val-field label { font-size: 12px; font-weight: 600; color: #424867; display: block; margin-bottom: 4px; }
+  .val-field input { width: 100%; padding: 8px 10px; border: 1px solid #E1E6EF; border-radius: 6px; font-size: 13px; font-family: inherit; color: #1D2433; }
+  .val-field input:focus { outline: none; border-color: #2F6FED; box-shadow: 0 0 0 2px rgba(47,111,237,0.12); }
+  .val-field input.empty { background: #fafafa; }
+  .val-field.required label::before { content: '• '; color: #D24747; font-weight: 700; margin-right: 1px; }
+  .val-field.required.missing input { border-color: #E89094; background: #FEF1F2; }
+  .val-field.required.missing input:focus { border-color: #D24747; box-shadow: 0 0 0 2px rgba(210,71,71,0.12); }
+  .val-field .val-error { font-size: 11px; color: #D24747; margin-top: 3px; display: none; }
+  .val-field.required.missing .val-error { display: block; }
+  .val-tbl-label { font-size: 14px; font-weight: 600; color: #6B7280; margin-bottom: 3px; }
+  .val-tbl-name { font-size: 13px; font-weight: 500; margin-bottom: 10px; }
+  .val-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .val-table th { text-align: left; padding: 8px 10px; background: #F8FAFC; font-weight: 600; font-size: 12px; color: #424867; border-bottom: 2px solid #E1E6EF; }
+  .val-table td { padding: 0; border-bottom: 1px solid #F1F3F9; }
+  .val-table td input { width: 100%; padding: 8px 10px; border: none; background: transparent; font-size: 12.5px; font-family: inherit; color: #424867; outline: none; }
+  .val-table td input:focus { background: #F0F5FF; box-shadow: inset 0 0 0 1.5px #2F6FED; }
+  .val-table tr:hover td { background: #fafafa; }
+  .val-table td.locked input { color: #ADB2BB; pointer-events: none; }
+
+  /* ---------- C-STATE: inline editor inside output-side panel ---------- */
+  .editor-inline { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+  .editor-inline.hidden { display: none; }
+  .editor-inline-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; border-bottom: 1px solid #E1E6EF; flex-shrink: 0; background: #fff; }
+  .editor-inline-toolbar .back-btn { background: none; border: 1px solid #E1E6EF; border-radius: 6px; padding: 5px 10px; cursor: pointer; color: #6B7280; font-size: 12px; display: flex; align-items: center; gap: 4px; font-family: inherit; }
+  .editor-inline-toolbar .back-btn:hover { background: #F1F3F9; color: #424867; }
+  .editor-inline-actions { display: flex; gap: 8px; align-items: center; }
+  .editor-btn { padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; font-family: inherit; }
+  .editor-btn-discard { border: 1px solid #F4C7CA; background: #fff; color: #981B25; font-weight: 500; }
+  .editor-btn-discard:hover { background: #FEF1F2; border-color: #D23340; }
+  .editor-btn-save { border: none; background: #1FAC76; color: #fff; font-weight: 600; }
+  .editor-btn-save:hover { background: #1C895F; }
+  .editor-inline-body { flex: 1; overflow-y: auto; padding: 20px 24px 80px; }
+
+  /* Template card — used by the A-state landing grid */
+  .tpl-card { padding: 14px 16px; border: 1px solid #E1E6EF; border-radius: 10px; background: #fff; cursor: pointer; transition: border-color 0.15s, background 0.15s, transform 0.15s; display: flex; flex-direction: column; gap: 6px; }
+  .tpl-card:hover { border-color: #1FAC76; background: #ECFFF8; transform: translateY(-1px); }
+  .tpl-card .tpl-card-icon { width: 28px; height: 28px; border-radius: 7px; background: #F1F3F9; display: flex; align-items: center; justify-content: center; color: #6B7280; margin-bottom: 4px; }
+  .tpl-card:hover .tpl-card-icon { background: #ECFFF8; color: #1FAC76; }
+  .tpl-card .tpl-card-name { font-size: 14px; font-weight: 600; color: #1D2433; }
+  .tpl-card .tpl-card-desc { font-size: 12px; color: #6B7280; line-height: 1.45; }
+  .tpl-card.blank { border-style: dashed; }
+  .tpl-card.blank .tpl-card-icon { background: #fef3c7; color: #d97706; }
+  .tpl-card.blank:hover { border-color: #d97706; background: #fffbeb; }
+  .tpl-card.blank:hover .tpl-card-icon { background: #fde68a; color: #b45309; }
+
+  /* A-state landing — inline template cards, vertically centered */
+  .landing-section { flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px; min-height: 0; }
+  .landing-section.hidden { display: none; }
+  .landing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 460px; }
+  .landing-grid .tpl-card { padding: 12px 14px; gap: 4px; }
+  .landing-grid .tpl-card .tpl-card-icon { width: 26px; height: 26px; }
+  .landing-grid .tpl-card .tpl-card-name { font-size: 13px; }
+  .landing-grid .tpl-card .tpl-card-desc { font-size: 11.5px; }
+
+  /* Info tooltip — schema/template glossary */
+  .info-tip { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; border-radius: 50%; border: 1px solid #CBD2E1; font-size: 10px; line-height: 1; color: #ADB2BB; margin-left: 6px; cursor: help; position: relative; vertical-align: middle; }
+  .info-tip:hover { color: #424867; border-color: #ADB2BB; }
+  .info-tip[data-tip]::after { content: attr(data-tip); position: absolute; top: 22px; left: 50%; transform: translateX(-50%); background: #1D2433; color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 12px; line-height: 1.45; white-space: normal; width: 240px; text-align: left; pointer-events: none; opacity: 0; transition: opacity 0.15s; box-shadow: 0 6px 20px rgba(0,0,0,0.18); z-index: 250; }
+  .info-tip[data-tip]::before { content: ''; position: absolute; top: 16px; left: 50%; transform: translateX(-50%) rotate(45deg); width: 8px; height: 8px; background: #1D2433; pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 250; }
+  .info-tip:hover::after, .info-tip:hover::before { opacity: 1; }
+  .tpl-title-label { font-size: 12px; font-weight: 500; color: #6B7280; margin-bottom: 4px; }
+  .tpl-title-input { padding: 8px 12px; border: 1px solid #E1E6EF; border-radius: 6px; font-size: 14px; font-family: inherit; color: #1D2433; width: 340px; margin-bottom: 24px; }
+  .tpl-title-input:focus { outline: none; border-color: #2F6FED; box-shadow: 0 0 0 2px rgba(47,111,237,0.12); }
+  .tpl-section-title { font-size: 16px; font-weight: 600; margin-bottom: 10px; }
+
+  .tpl-table { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid #E1E6EF; border-radius: 8px; overflow: hidden; margin-bottom: 24px; font-size: 13px; }
+  .tpl-table thead th { text-align: left; padding: 10px 12px; background: #F8FAFC; font-weight: 600; font-size: 12px; color: #6B7280; border-bottom: 1px solid #E1E6EF; }
+  .tpl-table thead th .info { display: inline-block; width: 14px; height: 14px; border-radius: 50%; border: 1px solid #CBD2E1; font-size: 10px; text-align: center; line-height: 13px; color: #ADB2BB; margin-left: 4px; cursor: help; }
+  .tpl-table tbody td { padding: 8px 10px; border-bottom: 1px solid #F1F3F9; vertical-align: middle; }
+  .tpl-table tbody tr:last-child td { border-bottom: none; }
+  .tpl-table tbody tr { transition: background 0.5s ease; }
+  .tpl-table tbody tr.highlighted { background: #ECFFF8; }
+  .tpl-table tbody tr.removing { background: #FEF1F2; opacity: 0; transition: opacity 0.4s ease, background 0.3s ease; }
+  .tpl-grip { color: #bbb; cursor: grab; font-size: 16px; width: 24px; text-align: center; }
+  .tpl-select { padding: 6px 8px; border: 1px solid #E1E6EF; border-radius: 5px; font-size: 13px; font-family: inherit; color: #424867; background: #fff; width: 100%; }
+  .tpl-input { padding: 6px 9px; border: 1px solid #E1E6EF; border-radius: 5px; font-size: 13px; font-family: inherit; color: #1D2433; background: #fff; width: 100%; }
+  .tpl-input.hint { color: #6B7280; }
+  .tpl-check { width: 18px; height: 18px; accent-color: #1FAC76; cursor: pointer; }
+  .tpl-delete { background: none; border: none; cursor: pointer; color: #b0b0b0; font-size: 18px; padding: 4px; border-radius: 4px; }
+  .tpl-delete:hover { color: #D24747; background: #FEF1F2; }
+  .tpl-add-row { padding: 10px 12px; color: #ADB2BB; font-size: 12px; cursor: pointer; }
+  .tpl-add-row:hover { color: #1FAC76; }
+  .tpl-sub-label { font-size: 12px; font-weight: 500; color: #6B7280; margin-bottom: 4px; }
+  .tpl-sub-input { padding: 7px 10px; border: 1px solid #E1E6EF; border-radius: 6px; font-size: 13px; font-family: inherit; color: #1D2433; width: 180px; margin-bottom: 12px; }
+  .tpl-add-table { width: 100%; padding: 12px; border: 1px solid #E1E6EF; border-radius: 8px; background: #fff; font-size: 13px; color: #6B7280; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; }
+  .tpl-add-table:hover { border-color: #1FAC76; color: #1FAC76; }
+  .tpl-add-table .plus { color: #1FAC76; font-weight: 600; font-size: 16px; }
+  /* Per-table title row inside the editor */
+  .tpl-table-block { margin-bottom: 24px; }
+  .tpl-table-titlerow { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .tpl-table-titlerow .tpl-sub-label { margin-bottom: 0; }
+  .tpl-table-titlerow .tpl-sub-input { margin-bottom: 0; }
+  .tpl-table-titlerow .tpl-table-delete { margin-left: auto; background: none; border: none; cursor: pointer; color: #ADB2BB; font-size: 13px; padding: 4px 8px; border-radius: 4px; font-family: inherit; display: flex; align-items: center; gap: 4px; }
+  .tpl-table-titlerow .tpl-table-delete:hover { color: #981B25; background: #FEF1F2; }
+
+  /* ===== APPROVED STATE ===== */
+  .approved-banner { padding: 10px 14px; background: #ECFFF8; border: 1px solid #B8F5DE; border-radius: 6px; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; font-size: 13px; color: #186749; font-weight: 500; }
+  .approved-banner svg { flex-shrink: 0; }
+  .approved-banner .label { font-weight: 400; color: #6B7280; margin-left: auto; font-size: 12px; }
+  .approved-banner .unlock-btn { background: none; border: none; color: #186749; font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; padding: 0 0 0 12px; text-decoration: underline; }
+  .approved-banner .unlock-btn:hover { color: #186749; }
+
+  /* Locked fields */
+  .val-field.locked input { background: #F8FAFC; color: #6B7280; border-color: #F1F3F9; cursor: default; pointer-events: none; }
+  .val-field.locked label { color: #ADB2BB; }
+  .ts-select:disabled { background: #F8FAFC; color: #6B7280; cursor: default; }
+  .data-bar.locked { color: #ADB2BB; }
+  .data-bar.locked .edit-link { display: none; }
+
+  /* Right panel header — Output Schema heading + schema row */
+  .output-header { padding: 20px 24px 16px; border-bottom: 1px solid #E1E6EF; flex-shrink: 0; }
+  .oh-title { font-size: 16px; font-weight: 600; color: #1D2433; margin-bottom: 4px; }
+  .oh-sub { font-size: 13px; color: #6B7280; margin-bottom: 14px; line-height: 1.45; }
+  .output-schema-row { display: flex; align-items: center; gap: 14px; }
+  .output-schema-row .schema-name { font-size: 14px; font-weight: 600; color: #1D2433; padding: 7px 12px; background: #F1F3F9; border-radius: 6px; }
+  .output-schema-row .edit-link { flex-shrink: 0; }
+  .output-schema-row .btn-process { margin-left: auto; }
+
+  /* Per-doc area below header — scrolls */
+  .output-doc { flex: 1; overflow-y: auto; padding: 20px 24px 32px; }
+
+  /* Validation error banner */
+  .validation-banner { padding: 10px 14px; background: #FEF1F2; border: 1px solid #F4C7CA; border-radius: 6px; margin-bottom: 14px; display: none; font-size: 13px; color: #981B25; animation: bubbleIn 0.25s ease; }
+  .validation-banner .val-banner-header { display: flex; align-items: center; gap: 8px; font-weight: 500; }
+  .validation-banner .val-banner-header svg { flex-shrink: 0; }
+  .validation-banner .val-banner-toggle { background: none; border: none; color: #981B25; font-size: 12px; cursor: pointer; font-family: inherit; margin-left: auto; text-decoration: underline; font-weight: 400; }
+  .validation-banner .val-banner-details { margin-top: 10px; padding-top: 10px; border-top: 1px solid #F4C7CA; font-size: 12px; font-weight: 400; color: #981B25; }
+  .validation-banner .val-file-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+  .validation-banner .val-file-item .vf-dot { width: 6px; height: 6px; border-radius: 50%; background: #D24747; flex-shrink: 0; }
+  .validation-banner .val-file-item .vf-name { font-weight: 500; }
+  .validation-banner .val-file-item .vf-fields { color: #981B25; font-weight: 400; }
+
+  /* Process button — sits inside right panel template row */
+  .btn-process { border: none; background: #1FAC76; color: #fff; font-weight: 600; padding: 8px 18px; border-radius: 6px; font-size: 13px; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .btn-process:hover { background: #1C895F; }
+  .btn-process.processing { background: #93EBC9; pointer-events: none; color: #fff; }
+  .btn-process:disabled { background: #B8F5DE; cursor: default; pointer-events: none; color: rgba(255,255,255,0.95); }
+  /* D-state Re-process variant — outline/ghost so it doesn't compete with Save */
+  .btn-process.reprocess { background: #fff; color: #424867; border: 1px solid #CBD2E1; font-weight: 500; }
+  .btn-process.reprocess:hover { background: #F8FAFC; border-color: #ADB2BB; color: #1D2433; }
+  .btn-finish:disabled { background: #B8F5DE; color: #fff; cursor: default; pointer-events: none; }
+
+  /* Reprocess required banner — shown when template/files changed in D state */
+  .reprocess-banner { padding: 12px 14px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; margin-bottom: 14px; display: none; align-items: center; gap: 12px; font-size: 13px; color: #92400e; animation: bubbleIn 0.25s ease; }
+  .reprocess-banner svg { flex-shrink: 0; color: #d97706; }
+  .reprocess-banner .rp-text { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+  .reprocess-banner .rp-title { font-weight: 600; font-size: 13px; color: #78350f; }
+  .reprocess-banner .rp-msg { font-size: 12px; color: #92400e; }
+  /* Hide chat input — kept in DOM so showResponse toasts still surface */
+  .chat-bar { display: none !important; }
+
+  /* Process progress bar */
+  .process-banner { padding: 10px 14px; background: #F0F5FF; border: 1px solid #BED3FE; border-radius: 6px; margin-bottom: 18px; display: none; flex-direction: column; gap: 6px; font-size: 13px; color: #1E4EAE; animation: bubbleIn 0.25s ease; }
+  .process-banner .process-label { display: flex; justify-content: space-between; align-items: center; font-weight: 500; }
+  .process-progress { height: 6px; background: #DCE7FE; border-radius: 3px; overflow: hidden; }
+  .process-progress-bar { height: 100%; background: #2F6FED; border-radius: 3px; transition: width 0.4s ease; width: 0%; }
+
+  /* Approved toolbar button state */
+  .btn-finish.approved { background: #E1E6EF; color: #ADB2BB; cursor: default; pointer-events: none; }
+
+  /* ===== TABLE VIEW (Excel-like) ===== */
+  .table-view { display: none; flex-direction: column; height: 100%; }
+  .table-view.active { display: flex; }
+  .form-view { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+  .form-view.hidden { display: none; }
+
+  .excel-header { display: none; }
+
+  .excel-wrap { flex: 1; overflow: auto; }
+  .excel-table { width: 100%; border-collapse: collapse; font-size: 12.5px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .excel-table thead { position: sticky; top: 0; z-index: 2; }
+  .excel-table th { padding: 8px 12px; background: #f8f8f8; font-weight: 600; font-size: 12px; color: #424867; border: 1px solid #e0e0e0; text-align: left; white-space: nowrap; }
+  .excel-table th.row-num { width: 36px; text-align: center; background: #f0f0f0; color: #ADB2BB; font-weight: 400; }
+  .excel-table td { padding: 7px 12px; border: 1px solid #E1E6EF; color: #424867; white-space: nowrap; }
+  .excel-table td.row-num { text-align: center; background: #f8f8f8; color: #ADB2BB; font-size: 11px; font-weight: 500; }
+  .excel-table tbody tr:hover td { background: #f0f7ff; }
+  .excel-table tbody tr:hover td.row-num { background: #e8f0fe; }
+
+  .excel-tabs { display: flex; align-items: stretch; border-top: 1px solid #e0e0e0; flex-shrink: 0; background: #f8f8f8; }
+  .excel-tab { padding: 7px 16px; font-size: 12px; color: #6B7280; cursor: pointer; border-right: 1px solid #e0e0e0; font-family: inherit; background: #f0f0f0; }
+  .excel-tab.active { background: #fff; color: #1D2433; font-weight: 500; }
+  .excel-tab:hover { color: #1D2433; }
+
+  .excel-scrollbar { height: 10px; background: #f0f0f0; border-top: 1px solid #e0e0e0; flex-shrink: 0; display: flex; align-items: center; padding: 0 4px; }
+  .excel-scrollbar .thumb { width: 40px; height: 6px; background: #c4c4c4; border-radius: 3px; }
+
+  /* ===== FLOATING CHAT BAR ===== */
+  .chat-bar-wrap { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; flex-direction: column; align-items: center; gap: 8px; width: 480px; max-width: calc(100% - 48px); }
+  .chat-response { background: #fff; border: 1px solid #E1E6EF; border-radius: 12px; padding: 11px 16px; font-size: 13px; line-height: 1.5; color: #424867; box-shadow: 0 4px 20px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); width: 100%; animation: bubbleIn 0.25s ease; }
+  .chat-response strong { font-weight: 600; }
+  .chat-response.fading { animation: bubbleOut 0.4s ease forwards; }
+  @keyframes bubbleIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes bubbleOut { from { opacity:1; transform:translateY(0); } to { opacity:0; transform:translateY(-8px); } }
+  .chat-bar { background: #fff; border: 1px solid #e0e0e0; border-radius: 14px; display: flex; align-items: center; gap: 10px; padding: 10px 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); width: 100%; transition: border-color 0.2s, box-shadow 0.2s; }
+  .chat-bar:focus-within { border-color: #1FAC76; box-shadow: 0 4px 20px rgba(0,0,0,0.08), 0 0 0 3px rgba(31,172,118,0.08); }
+  .chat-bar .dot { width: 8px; height: 8px; border-radius: 50%; background: #1FAC76; flex-shrink: 0; }
+  .chat-bar input { flex: 1; border: none; outline: none; font-size: 14px; font-family: inherit; color: #1D2433; background: transparent; }
+  .chat-bar input::placeholder { color: #b8b8b8; font-weight: 400; }
+  .send-btn { width: 32px; height: 32px; border-radius: 8px; border: none; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; transition: background 0.15s; }
+  .send-btn.active { background: #186749; color: #fff; }
+  .send-btn.inactive { background: transparent; color: #CBD2E1; cursor: default; }
+  .typing-dots { display: flex; gap: 3px; align-items: center; }
+  .typing-dots span { width: 5px; height: 5px; border-radius: 50%; background: #ADB2BB; animation: pulse 1s infinite; }
+  .typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes pulse { 0%,100% { opacity:0.3; } 50% { opacity:1; } }
+
+  /* ===== CONFIRM MODAL ===== */
+  .confirm-backdrop { position: fixed; inset: 0; background: rgba(17,24,39,0.45); z-index: 200; display: none; align-items: center; justify-content: center; }
+  .confirm-backdrop.active { display: flex; animation: fadeIn 0.18s ease; }
+  .confirm-modal { background: #fff; border-radius: 12px; padding: 22px 24px 20px; max-width: 440px; width: 90%; box-shadow: 0 16px 48px rgba(0,0,0,0.2); animation: bubbleIn 0.22s ease; }
+  .confirm-modal h3 { font-size: 15px; font-weight: 600; color: #1D2433; margin-bottom: 8px; }
+  .confirm-modal p { font-size: 13px; color: #424867; line-height: 1.55; margin-bottom: 20px; }
+  .confirm-actions { display: flex; justify-content: flex-end; gap: 8px; }
+  .confirm-btn { padding: 7px 16px; border-radius: 6px; font-size: 13px; font-family: inherit; cursor: pointer; font-weight: 500; }
+  .confirm-cancel { border: 1px solid #CBD2E1; background: #fff; color: #424867; }
+  .confirm-cancel:hover { background: #F8FAFC; }
+  .confirm-ok { border: none; color: #fff; font-weight: 600; background: #981B25; }
+  .confirm-ok:hover { background: #981B25; }
+  .confirm-ok.primary { background: #1FAC76; }
+  .confirm-ok.primary:hover { background: #1C895F; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+</style>
+</head>
+<body>
+
+
+<div class="app-main">
+
+<header class="app-header">
+  <div class="product">
+    <div class="product-icon"></div>
+    <div class="product-name">Transform</div>
+  </div>
+  <nav>
+    <a href="#" class="active">Agents</a>
+    <a href="#">Connections</a>
+  </nav>
+</header>
+
+<div class="page-bar">
+  <div class="page-bar-left">
+    <button class="back-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <div class="page-title">Coupa Unbilled Accruals</div>
+  </div>
+  <div class="page-bar-right">
+    <button class="pb-icon" title="History"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></button>
+    <span class="pb-badge"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>V3</span>
+    <button class="pb-icon" title="Settings"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33h.01A1.65 1.65 0 009 3.09V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></button>
+    <div class="run-btn">
+      <button class="run-label">Run</button>
+      <button class="run-caret"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CANVAS VIEW (start state) ============ -->
+<div class="canvas-view" id="canvasView">
+  <div class="canvas">
+    <div class="canvas-toolbox">
+      <button title="Files"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg></button>
+      <button title="Blocks"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
+      <button title="Toggle panel"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="9" y1="4" x2="9" y2="20"/></svg></button>
+    </div>
+
+    <div class="canvas-step-wrap">
+      <div class="starting-badge">
+        <svg width="9" height="9" viewBox="0 0 24 24"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+        STARTING POINT
+      </div>
+      <div class="step-card" onclick="openStepConfig()">
+        <div class="step-card-icon">
+          <svg class="sparkle" width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.8 5.4L19 9l-5.2 1.6L12 16l-1.8-5.4L5 9l5.2-1.6z"/></svg>
+          <div class="doc-shape"></div>
+        </div>
+        <div class="step-card-body">
+          <div class="step-card-title">Process Invoices</div>
+          <span class="step-card-tag">Document Extraction</span>
+        </div>
+      </div>
+      <div class="step-connector"></div>
+      <button class="add-step-btn" onclick="event.stopPropagation();" title="Add step">+</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CONFIG PANEL (opens on step click) ============ -->
+<div class="modal-frame" id="modalFrame" style="display:none;">
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div class="title-stack">
+        <div class="title-row">
+          <span class="title">Process Invoices</span>
+          <button class="title-edit" title="Rename"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        </div>
+        <span class="subtitle">Document Extraction</span>
+      </div>
+    </div>
+    <div class="toolbar-right">
+      <button class="btn-finish" id="approveBtn" onclick="handleApprove()" disabled>Save</button>
+      <button class="btn-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button>
+      <button class="btn-icon" onclick="closeStepConfig()" title="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- ==================== VALUES MODE ==================== -->
+    <div class="values-layout" id="valuesLayout">
+
+      <!-- Left: PDF -->
+      <div class="pdf-side">
+        <!-- Empty state (before upload) -->
+        <div class="empty-state" id="emptyState">
+          <h3>Add Documents</h3>
+          <p>Please ensure all documents are contained within a zipped folder before uploading.</p>
+          <div class="drop-card">
+            <button class="upload-btn" onclick="simulateUpload()">Upload Files</button>
+            <div class="drop-hint">Or drop file here to upload</div>
+          </div>
+        </div>
+
+        <!-- File loaded state -->
+        <div class="pdf-bar" style="position:relative;display:none;" id="pdfBar">
+          <button class="nav-btn" onclick="navFile(-1)">‹</button>
+          <div class="pdf-bar-center">
+            <span class="fname" id="fileNameBtn" onclick="toggleFileDropdown()">Invoice_2102125 - Oracle NetSuite.pdf <span class="counter">1 of 9</span> ▾</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <button class="nav-btn" onclick="navFile(1)">›</button>
+            <button class="trash-btn" onclick="handleDeleteAll()" title="Remove all files">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+            </button>
+          </div>
+          <!-- File dropdown -->
+          <div class="file-dropdown hidden" id="fileDropdown">
+            <div class="fd-item active"><div class="fd-dot"></div>Invoice_2102125 - Oracle NetSuite.pdf<div class="fd-error-dot"></div></div>
+            <div class="fd-item"><div class="fd-dot"></div>1111004723…_44_1 docu.pdf</div>
+            <div class="fd-item"><div class="fd-dot"></div>AN71538024 - Apple.pdf<div class="fd-error-dot"></div></div>
+            <div class="fd-item"><div class="fd-dot"></div>INV-990422_Microsoft_Azure.pdf</div>
+            <div class="fd-item"><div class="fd-dot"></div>20250311_Adobe_Creative_Cloud.pdf</div>
+            <div class="fd-item"><div class="fd-dot"></div>INV-990Bill_Amazon_Web_Services.pdf<div class="fd-error-dot"></div></div>
+            <div class="fd-item"><div class="fd-dot"></div>77200492134_2025…_doc.pdf</div>
+            <div class="fd-item"><div class="fd-dot"></div>SaaS_Subscription_Slack_Tech.pdf</div>
+            <div class="fd-item"><div class="fd-dot"></div>INV-44589201-Zoom.pdf</div>
+          </div>
+        </div>
+        <div class="pdf-area" id="pdfAreaValues" style="display:none;">
+          <div class="pdf-card">
+            <div class="hdr"><div class="logo">ORACLE NETSUITE</div><div class="invnum">Invoice # 2102125</div></div>
+            <div class="addr">Oracle America Inc.<br>500 Oracle Parkway<br>Redwood Shores, CA 94065<br>+1 888 803 7414<br>Tax ID No.: 94-2805249</div>
+            <div class="parties">
+              <div><div class="lbl">Bill To</div>FloQast, Inc.<br>14721 Califa Street<br>Los Angeles CA 91411</div>
+              <div><div class="lbl">Ship To</div>FloQast, Inc.<br>14721 Califa St<br>Los Angeles CA 91411</div>
+            </div>
+            <table class="meta">
+              <tr><td class="l">Invoice Date</td><td>26 February 2025</td><td class="l">Terms</td><td>Net 30</td><td class="l">Due Date</td><td>30 March 2025</td></tr>
+              <tr><td class="l">Currency</td><td>USD</td><td class="l">FX Rate</td><td>1</td><td class="l">PO #</td><td></td></tr>
+            </table>
+            <table class="ltable">
+              <thead><tr><th>Item</th><th>Description</th><th class="r">Qty</th><th class="r">Amount</th></tr></thead>
+              <tbody>
+                <tr><td>NetSuite Premium Support</td><td class="d" style="font-size:9px">Users of NetSuite Premium Support…</td><td class="r d">0.083</td><td class="r b">$5,402.70</td></tr>
+                <tr><td>SuiteCloud Plus Mid-Mkt</td><td class="d" style="font-size:9px">NetSuite SuiteCloud Plus…</td><td class="r d">0.083</td><td class="r b">$5,997.00</td></tr>
+                <tr><td>General Access Cloud</td><td class="d" style="font-size:9px">General access user for NetSuite…</td><td class="r d">0.583</td><td class="r b">$2,519.80</td></tr>
+              </tbody>
+            </table>
+            <div class="foot">Page 1 of 5</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Output values -->
+      <div class="output-side">
+
+        <!-- ── PANEL HEADER: Output Schema + schema row ── -->
+        <div class="output-header" id="outputHeader">
+          <div class="oh-title">Output Schema<span class="info-tip" data-tip="A template is a reusable starting point. Once applied, it creates a schema you can edit.">i</span></div>
+          <div class="oh-sub" id="schemaSub">The schema defines what fields to extract from your documents.</div>
+
+          <!-- B/D-state: schema assigned -->
+          <div class="output-schema-row" id="schemaRowB">
+            <div class="schema-name" id="schemaName">Invoice</div>
+            <a class="edit-link" href="#" id="openEditorGlobal">Edit Schema</a>
+            <button class="btn-process" id="processBtn" onclick="handleProcess()" disabled>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Process Documents
+            </button>
+          </div>
+        </div>
+
+        <!-- A-state landing section: centered card picker, fills remaining height -->
+        <div class="landing-section hidden" id="landingSection">
+          <div class="landing-grid">
+            <div class="tpl-card landing-card" data-tpl="Invoice">
+              <div class="tpl-card-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="14" y2="17"/></svg>
+              </div>
+              <div class="tpl-card-name">Invoice</div>
+              <div class="tpl-card-desc">Vendor invoices with line items, totals, dates, and PO numbers.</div>
+            </div>
+            <div class="tpl-card landing-card" data-tpl="Bank Statement">
+              <div class="tpl-card-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="14" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </div>
+              <div class="tpl-card-name">Bank Statement</div>
+              <div class="tpl-card-desc">Account balances, transactions, opening/closing dates.</div>
+            </div>
+            <div class="tpl-card landing-card" data-tpl="Vendor Statement">
+              <div class="tpl-card-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+              </div>
+              <div class="tpl-card-name">Vendor Statement</div>
+              <div class="tpl-card-desc">Vendor account summaries, outstanding balances, aging buckets.</div>
+            </div>
+            <div class="tpl-card landing-card" data-tpl="Lease">
+              <div class="tpl-card-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              </div>
+              <div class="tpl-card-name">Lease</div>
+              <div class="tpl-card-desc">Lease terms, schedules, escalation clauses, deposit amounts.</div>
+            </div>
+            <div class="tpl-card landing-card" data-tpl="Prepaid">
+              <div class="tpl-card-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="6" x2="12" y2="12"/><line x1="12" y1="12" x2="16" y2="14"/></svg>
+              </div>
+              <div class="tpl-card-name">Prepaid</div>
+              <div class="tpl-card-desc">Prepaid expenses, amortization schedules, recognition periods.</div>
+            </div>
+            <div class="tpl-card blank landing-card" data-tpl="__blank__">
+              <div class="tpl-card-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </div>
+              <div class="tpl-card-name">Start from blank</div>
+              <div class="tpl-card-desc">Build a schema from scratch — define fields and tables yourself.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- C-state: inline schema editor -->
+        <div class="editor-inline hidden" id="editorInline">
+          <div class="editor-inline-toolbar">
+            <button class="back-btn" id="editorBack">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+              Back
+            </button>
+            <div class="editor-inline-actions">
+              <button class="editor-btn editor-btn-discard" id="discardSchemaBtn" style="display:none;">Discard schema</button>
+              <button class="editor-btn editor-btn-save" id="saveEditor">Save Schema</button>
+            </div>
+          </div>
+          <div class="editor-inline-body">
+            <div class="tpl-title-label">Title</div>
+            <input class="tpl-title-input" id="schemaTitleInput" value="">
+
+            <div class="tpl-section-title">General Info</div>
+            <table class="tpl-table">
+              <thead>
+                <tr>
+                  <th style="width:28px;"></th>
+                  <th>Field Type <span class="info">?</span></th>
+                  <th>Label <span class="info">?</span></th>
+                  <th>Extraction Keywords <span class="info">?</span></th>
+                  <th style="width:80px;">Required <span class="info">?</span></th>
+                  <th style="width:36px;"></th>
+                </tr>
+              </thead>
+              <tbody id="generalBody"></tbody>
+              <tfoot><tr><td colspan="6" class="tpl-add-row" id="addGenFieldBtn">+ Add Field</td></tr></tfoot>
+            </table>
+
+            <div class="tpl-section-title" style="margin-top:8px;">Tables</div>
+            <div id="tablesContainer"></div>
+
+            <button class="tpl-add-table" id="addTableBtn"><span class="plus">+</span> Add Table</button>
+          </div>
+        </div>
+
+        <!-- FORM VIEW -->
+        <div class="form-view" id="formView">
+          <div class="output-doc">
+            <!-- Banners stack at top of doc area -->
+            <div class="validation-banner" id="validationBanner">
+              <div class="val-banner-header">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D24747" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span id="validationMsg">Required fields are missing values.</span>
+                <button class="val-banner-toggle" id="valToggleDetails" onclick="toggleValidationDetails()">Show details</button>
+              </div>
+              <div class="val-banner-details" id="valBannerDetails" style="display:none;"></div>
+            </div>
+            <div class="process-banner" id="processBanner">
+              <div class="process-label">
+                <span id="processLabel">Processing documents…</span>
+                <span id="processCount">0 of 9</span>
+              </div>
+              <div class="process-progress"><div class="process-progress-bar" id="processBar"></div></div>
+            </div>
+            <div class="approved-banner" id="approvedBanner" style="display:none;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1FAC76" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+              Saved
+              <span class="label">Values are locked</span>
+              <button class="unlock-btn" onclick="handleUnlock()">Unlock</button>
+            </div>
+            <div class="reprocess-banner" id="reprocessBanner">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><circle cx="12" cy="16" r="0.5" fill="currentColor" stroke="none"/></svg>
+              <div class="rp-text">
+                <span class="rp-title" id="reprocessTitle">Results are out of date</span>
+                <span class="rp-msg" id="reprocessMsg">Click <strong>Process</strong> again to update extracted values.</span>
+              </div>
+            </div>
+
+            <div class="data-bar" id="dataBar" style="display:none;">
+              <span>Output Data: <span class="fname">Oracle NetSuite.pdf</span></span>
+            </div>
+
+            <!-- Empty output values (before processing) — rendered from schema -->
+            <div id="outputEmpty"></div>
+
+            <!-- Populated output values (after processing) — rendered from schema -->
+            <div id="outputPopulated" style="display:none;"></div>
+          </div><!-- /output-doc -->
+        </div><!-- /form-view -->
+
+        <!-- TABLE VIEW (Excel-like) -->
+        <div class="table-view" id="tableView">
+          <div class="excel-header">
+            <div style="display:flex;align-items:center;">
+              <span class="step-label">Step 2 Output</span>
+              <span class="badge">Draft</span>
+            </div>
+            <button class="dl-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+          </div>
+          <div class="excel-wrap">
+            <table class="excel-table">
+              <thead>
+                <tr>
+                  <th class="row-num"></th>
+                  <th>Test Case</th>
+                  <th>Chart of Account</th>
+                  <th>PO Number</th>
+                  <th>Invoice #</th>
+                  <th>Billing</th>
+                  <th>Invoice Date</th>
+                  <th>Sub Department</th>
+                  <th>Region</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td class="row-num">2</td><td>1</td><td>FloQast Inc.</td><td>1111</td><td>6364</td><td>2-647000-14</td><td>01-01-2024</td><td>Data Software</td><td>US</td><td>Approved</td></tr>
+                <tr><td class="row-num">3</td><td>1</td><td>FloQast Inc.</td><td>1111</td><td>6578</td><td>2-647000-14</td><td>02-01-2024</td><td>Data Software</td><td>US</td><td>Approved</td></tr>
+                <tr><td class="row-num">4</td><td>2</td><td>FloQast Inc.</td><td>2222</td><td>9642</td><td>2-647000-14</td><td>03-01-2024</td><td>Data Software</td><td>US</td><td>Approved</td></tr>
+                <tr><td class="row-num">5</td><td>2</td><td>FloQast Inc.</td><td>2222</td><td>7653</td><td>2-647000-14</td><td>04-01-2024</td><td>Data Software</td><td>US</td><td>Approved</td></tr>
+                <tr><td class="row-num">6</td><td>3</td><td>FloQast Inc.</td><td>3333</td><td>4683</td><td>2-647000-14</td><td>01-01-2024</td><td>Marketing Services</td><td>US</td><td>Approved</td></tr>
+                <tr><td class="row-num">7</td><td>3</td><td>FloQast Inc.</td><td>3333</td><td>2711</td><td>2-647000-14</td><td>01-15-2024</td><td>Marketing Services</td><td>US</td><td>Approved</td></tr>
+                <tr><td class="row-num">8</td><td>4</td><td>FloQast Inc.</td><td>4444</td><td>1117</td><td>2-647000-14</td><td>09-01-2024</td><td>Creative Delivery</td><td>US</td><td>Approved</td></tr>
+                <tr><td class="row-num">9</td><td>4</td><td>FloQast Inc.</td><td>4444</td><td>9889</td><td>2-647000-14</td><td>11-01-2024</td><td>Creative Delivery</td><td>US</td><td>Approved</td></tr>
+                <tr><td class="row-num">10</td><td>5</td><td>FloQast Inc.</td><td>5555</td><td>2361</td><td>2-647000-14</td><td>01-01-2025</td><td>Creative Delivery</td><td>US</td><td>Approved</td></tr>
+                <tr><td class="row-num">11</td><td>5</td><td>FloQast Inc.</td><td>5555</td><td>1092</td><td>2-647000-14</td><td>12-15-2024</td><td>Creative Delivery</td><td>US</td><td>Approved</td></tr>
+                <tr><td class="row-num">12</td><td>6</td><td>FloQast UK</td><td>6666</td><td>0998</td><td>1-646000-1</td><td>07-01-2024</td><td>Event Planning Services</td><td>UK</td><td>Approved</td></tr>
+                <tr><td class="row-num">13</td><td>6</td><td>FloQast UK</td><td>6666</td><td>5482</td><td>1-646000-1</td><td>08-12-2024</td><td>Event Planning Services</td><td>UK</td><td>Approved</td></tr>
+                <tr><td class="row-num">14</td><td>7</td><td>FloQast AUS</td><td>7777</td><td>5748</td><td>1-646000-26</td><td>05-01-2024</td><td>Event Planning Services</td><td>AUS</td><td>Approved</td></tr>
+                <tr><td class="row-num">15</td><td>7</td><td>FloQast AUS</td><td>7777</td><td>2838</td><td>1-646000-26</td><td>06-01-2024</td><td>Event Planning Services</td><td>AUS</td><td>Approved</td></tr>
+                <tr><td class="row-num">16</td><td>8</td><td>FloQast Inc.</td><td>8888</td><td>3921</td><td>1-648000-22</td><td>05-01-2024</td><td>Billing Software</td><td>US</td><td>Approved</td></tr>
+                <tr><td class="row-num">17</td><td>8</td><td>FloQast Inc.</td><td>8888</td><td>9380</td><td>1-648000-22</td><td>05-01-2024</td><td>Billing Software</td><td>US</td><td>Approved</td></tr>
+                <tr><td class="row-num">18</td><td>8</td><td>FloQast Inc.</td><td>8888</td><td>2309</td><td>1-648000-22</td><td>03-01-2024</td><td>Billing Software</td><td>US</td><td>Approved</td></tr>
+                <tr><td class="row-num">19</td><td>8</td><td>FloQast Inc.</td><td>8888</td><td>5082</td><td>1-648000-22</td><td>03-01-2024</td><td>Billing Software</td><td>US</td><td>Approved</td></tr>
+                <tr><td class="row-num">20</td><td>8</td><td>FloQast Inc.</td><td>8888</td><td>8301</td><td>1-648000-22</td><td>03-01-2024</td><td>Billing Software</td><td>US</td><td>Approved</td></tr>
+                <tr><td class="row-num">21</td><td>8</td><td>FloQast Inc.</td><td>9999</td><td>8543</td><td>1-648000-22</td><td>03-01-2024</td><td>System Architecture</td><td>US</td><td></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="excel-tabs">
+            <div class="excel-tab">Filtered Data</div>
+            <div class="excel-tab">Purchase Orders</div>
+            <div class="excel-tab active">Invoices</div>
+          </div>
+          <div class="excel-scrollbar"><div class="thumb"></div></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Confirm modal -->
+    <div class="confirm-backdrop" id="confirmBackdrop">
+      <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+        <h3 id="confirmTitle">Are you sure?</h3>
+        <p id="confirmMessage"></p>
+        <div class="confirm-actions">
+          <button class="confirm-btn confirm-cancel" id="confirmCancel">Cancel</button>
+          <button class="confirm-btn confirm-ok" id="confirmOk">Confirm</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating chat bar -->
+    <div class="chat-bar-wrap">
+      <div id="chatResponses"></div>
+      <div class="chat-bar">
+        <div class="dot"></div>
+        <input type="text" id="chatInput" placeholder="Tell me about what you'd like to extract." autocomplete="off">
+        <button class="send-btn inactive" id="sendBtn" onclick="sendMessage()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /modal-frame -->
+</div><!-- /app-main -->
+
+<script>
+// ========== CANVAS <-> CONFIG TOGGLE ==========
+function openStepConfig() {
+  document.getElementById('canvasView').style.display = 'none';
+  document.getElementById('modalFrame').style.display = 'flex';
+}
+function closeStepConfig() {
+  document.getElementById('modalFrame').style.display = 'none';
+  document.getElementById('canvasView').style.display = 'flex';
+}
+
+// ========== FILE STATE ==========
+let filesLoaded = false;
+
+function simulateUpload() {
+  filesLoaded = true;
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('pdfBar').style.display = 'flex';
+  document.getElementById('pdfAreaValues').style.display = 'flex';
+  // Enable process button
+  document.getElementById('processBtn').disabled = false;
+  // If the "Files were removed" banner is up, the visible Process button is
+  // now sufficient cue — clear the banner.
+  document.getElementById('reprocessBanner').style.display = 'none';
+}
+
+function handleDeleteAll() {
+  // Processing is in flight — refuse delete until extraction completes.
+  if (isProcessing) {
+    showResponse('Processing in progress. Wait for extraction to finish.');
+    return;
+  }
+  // Approved data is locked — block delete until the user explicitly unlocks.
+  if (isApproved) {
+    showResponse('Unlock values before removing files.');
+    return;
+  }
+
+  const inD = isInDState();
+  if (inD) {
+    showConfirmModal({
+      title: 'Discard processed values?',
+      message: 'This will remove <strong>' + totalDocs + '</strong> uploaded files and clear the <strong>' + totalDocs + '</strong> values you\'ve extracted.',
+      confirmLabel: 'Discard',
+      onConfirm: () => doDeleteAll(true),
+    });
+  } else {
+    showConfirmModal({
+      title: 'Remove all files?',
+      message: 'You\'ll need to re-upload a new zip to continue.',
+      confirmLabel: 'Remove',
+      onConfirm: () => doDeleteAll(false),
+    });
+  }
+}
+
+function doDeleteAll(wasInD) {
+  filesLoaded = false;
+  document.getElementById('emptyState').style.display = 'flex';
+  document.getElementById('pdfBar').style.display = 'none';
+  document.getElementById('pdfAreaValues').style.display = 'none';
+  document.getElementById('fileDropdown').classList.add('hidden');
+  // Reset process state
+  isProcessing = false;
+  const btn = document.getElementById('processBtn');
+  btn.classList.remove('processing', 'reprocess');
+  btn.disabled = true;
+  btn.style.background = '';
+  btn.style.pointerEvents = '';
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg> Process';
+  // Disable approve again
+  document.getElementById('approveBtn').disabled = true;
+  document.getElementById('processBanner').style.display = 'none';
+  // Reset output to empty state (same path as invalidate() but also clears files)
+  document.getElementById('outputEmpty').style.display = 'block';
+  document.getElementById('outputPopulated').style.display = 'none';
+  document.getElementById('dataBar').style.display = 'none';
+  document.getElementById('validationBanner').style.display = 'none';
+
+  // If we just discarded processed results, swap the banner to "Files were
+  // removed" framing. Schema selection persists. Otherwise hide it entirely.
+  const banner = document.getElementById('reprocessBanner');
+  if (wasInD) {
+    document.getElementById('reprocessTitle').textContent = 'Files were removed';
+    document.getElementById('reprocessMsg').innerHTML = 'Upload new documents and click <strong>Process</strong> to extract values.';
+    banner.style.display = 'flex';
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+// ========== DATA ==========
+let nextId = 200;
+const types = ['Amount','Text','Number','Date','Boolean'];
+
+// Template library — seeds the editor and feeds the populated-state sample values.
+// Each genField has a `sample` (empty string = "missing required value" for required fields).
+// Each table has `sampleRows` (array of arrays, in field-order).
+const TEMPLATE_LIBRARY = {
+  'Invoice': {
+    genFields: [
+      { type:'Amount', label:'Total Amount', hint:'Total Amount', req:true, sample:'$8,359.30' },
+      { type:'Text',   label:'Invoice Number', hint:'Invoice Number', req:true, sample:'2102125' },
+      { type:'Text',   label:'Purchase Order Number', hint:'Purchase Order Number', req:true, sample:'' },
+      { type:'Date',   label:'Start Date', hint:'Start Date', req:true, sample:'02/26/2025' },
+      { type:'Date',   label:'Due Date', hint:'Due Date', req:true, sample:'' },
+      { type:'Text',   label:'Payment Terms', hint:'Payment Terms', req:true, sample:'Net15' },
+    ],
+    tables: [{
+      name:'Line Items',
+      fields:[
+        { type:'Text',   label:'Line Number', hint:'Line Number', req:true },
+        { type:'Text',   label:'Description', hint:'Description', req:true },
+        { type:'Number', label:'Quantity', hint:'Quantity', req:true },
+        { type:'Amount', label:'Unit Price', hint:'Unit Price', req:true },
+      ],
+      sampleRows:[
+        ['1','NetSuite Premium Support','0.083','$65,092.77'],
+        ['2','SuiteCloud Plus Mid-Market Cloud S…','0.083','$72,253.01'],
+        ['3','NetSuite General Access Cloud','0.583','$4,322.47'],
+        ['4','OneWorld Additional Country/Curren…','0.083','$28,879.52'],
+        ['5','Mid-Market Cloud Service','0.083','$90,325.30'],
+        ['6','Dunning Letters Mid-Market Cloud S…','0.083','$21,650.60'],
+      ],
+    }],
+  },
+  'Bank Statement': {
+    genFields: [
+      { type:'Text',   label:'Account Number', hint:'Account Number', req:true, sample:'1234-5678-9012' },
+      { type:'Text',   label:'Account Holder', hint:'Account Holder Name', req:true, sample:'FloQast, Inc.' },
+      { type:'Date',   label:'Statement Period Start', hint:'Period Start', req:true, sample:'04/01/2025' },
+      { type:'Date',   label:'Statement Period End', hint:'Period End', req:true, sample:'04/30/2025' },
+      { type:'Amount', label:'Opening Balance', hint:'Opening Balance', req:true, sample:'$42,150.20' },
+      { type:'Amount', label:'Closing Balance', hint:'Closing Balance', req:true, sample:'$38,229.15' },
+      { type:'Text',   label:'Currency', hint:'Currency', req:true, sample:'USD' },
+    ],
+    tables: [{
+      name:'Transactions',
+      fields:[
+        { type:'Date',   label:'Transaction Date', hint:'Transaction Date', req:true },
+        { type:'Text',   label:'Description', hint:'Description', req:true },
+        { type:'Amount', label:'Debit', hint:'Debit', req:false },
+        { type:'Amount', label:'Credit', hint:'Credit', req:false },
+        { type:'Amount', label:'Running Balance', hint:'Running Balance', req:true },
+      ],
+      sampleRows:[
+        ['04/02/2025','ACH Payment — Adobe',   '$7,200.00','',         '$34,950.20'],
+        ['04/05/2025','Wire In — Customer ABC','',         '$12,500.00','$47,450.20'],
+        ['04/12/2025','Payroll Run',           '$9,221.05','',         '$38,229.15'],
+        ['04/22/2025','Service Fee',           '$25.00',   '',         '$38,204.15'],
+        ['04/30/2025','Interest Earned',       '',         '$25.00',   '$38,229.15'],
+      ],
+    }],
+  },
+  'Vendor Statement': {
+    genFields: [
+      { type:'Text',   label:'Vendor Name', hint:'Vendor Name', req:true, sample:'Acme Supplies Co.' },
+      { type:'Date',   label:'Statement Date', hint:'Statement Date', req:true, sample:'04/30/2025' },
+      { type:'Amount', label:'Total Outstanding', hint:'Total Outstanding', req:true, sample:'$12,540.00' },
+      { type:'Text',   label:'Currency', hint:'Currency', req:true, sample:'USD' },
+      { type:'Text',   label:'Account Manager', hint:'Account Manager', req:false, sample:'Jane Doe' },
+    ],
+    tables: [
+      {
+        name:'Open Invoices',
+        fields:[
+          { type:'Text',   label:'Invoice Number', hint:'Invoice Number', req:true },
+          { type:'Date',   label:'Invoice Date', hint:'Invoice Date', req:true },
+          { type:'Date',   label:'Due Date', hint:'Due Date', req:true },
+          { type:'Amount', label:'Amount', hint:'Amount', req:true },
+          { type:'Number', label:'Days Past Due', hint:'Days Past Due', req:false },
+        ],
+        sampleRows:[
+          ['INV-0042','03/01/2025','03/31/2025','$4,200.00','30'],
+          ['INV-0051','03/12/2025','04/11/2025','$1,840.00','19'],
+          ['INV-0067','04/01/2025','05/01/2025','$3,500.00','0'],
+          ['INV-0072','04/15/2025','05/15/2025','$3,000.00','0'],
+        ],
+      },
+      {
+        name:'Aging Summary',
+        fields:[
+          { type:'Text',   label:'Bucket', hint:'Aging Bucket', req:true },
+          { type:'Amount', label:'Amount', hint:'Amount', req:true },
+        ],
+        sampleRows:[
+          ['Current',  '$6,500.00'],
+          ['1–30 days','$1,840.00'],
+          ['31–60 days','$4,200.00'],
+          ['61–90 days','$0.00'],
+          ['90+ days', '$0.00'],
+        ],
+      },
+    ],
+  },
+  'Lease': {
+    genFields: [
+      { type:'Text',   label:'Lessor', hint:'Lessor', req:true, sample:'14721 Califa Holdings LLC' },
+      { type:'Text',   label:'Lessee', hint:'Lessee', req:true, sample:'FloQast, Inc.' },
+      { type:'Date',   label:'Lease Start Date', hint:'Lease Start', req:true, sample:'01/01/2025' },
+      { type:'Date',   label:'Lease End Date', hint:'Lease End', req:true, sample:'12/31/2029' },
+      { type:'Amount', label:'Monthly Rent', hint:'Monthly Rent', req:true, sample:'$18,500.00' },
+      { type:'Amount', label:'Security Deposit', hint:'Security Deposit', req:false, sample:'$37,000.00' },
+      { type:'Text',   label:'Currency', hint:'Currency', req:true, sample:'USD' },
+    ],
+    tables: [{
+      name:'Payment Schedule',
+      fields:[
+        { type:'Number', label:'Period', hint:'Period', req:true },
+        { type:'Date',   label:'Due Date', hint:'Due Date', req:true },
+        { type:'Amount', label:'Base Rent', hint:'Base Rent', req:true },
+        { type:'Amount', label:'Escalation', hint:'Escalation', req:false },
+        { type:'Amount', label:'Total Due', hint:'Total Due', req:true },
+      ],
+      sampleRows:[
+        ['1','01/01/2025','$18,500.00','$0.00','$18,500.00'],
+        ['2','02/01/2025','$18,500.00','$0.00','$18,500.00'],
+        ['3','03/01/2025','$18,500.00','$0.00','$18,500.00'],
+        ['13','01/01/2026','$18,500.00','$555.00','$19,055.00'],
+        ['25','01/01/2027','$19,055.00','$571.65','$19,626.65'],
+      ],
+    }],
+  },
+  'Prepaid': {
+    genFields: [
+      { type:'Text',   label:'Vendor Name', hint:'Vendor Name', req:true, sample:'Adobe' },
+      { type:'Text',   label:'Description', hint:'Description', req:true, sample:'Creative Cloud annual subscription' },
+      { type:'Date',   label:'Service Start Date', hint:'Service Start', req:true, sample:'03/01/2025' },
+      { type:'Date',   label:'Service End Date', hint:'Service End', req:true, sample:'02/28/2026' },
+      { type:'Amount', label:'Total Amount', hint:'Total Amount', req:true, sample:'$7,200.00' },
+      { type:'Text',   label:'Recognition Method', hint:'Recognition Method', req:false, sample:'Straight-line' },
+      { type:'Text',   label:'Currency', hint:'Currency', req:true, sample:'USD' },
+    ],
+    tables: [{
+      name:'Amortization Schedule',
+      fields:[
+        { type:'Number', label:'Period', hint:'Period', req:true },
+        { type:'Date',   label:'Recognition Date', hint:'Recognition Date', req:true },
+        { type:'Amount', label:'Amount Recognized', hint:'Amount Recognized', req:true },
+        { type:'Amount', label:'Cumulative', hint:'Cumulative', req:false },
+      ],
+      sampleRows:[
+        ['1','03/31/2025','$600.00','$600.00'],
+        ['2','04/30/2025','$600.00','$1,200.00'],
+        ['3','05/31/2025','$600.00','$1,800.00'],
+        ['4','06/30/2025','$600.00','$2,400.00'],
+        ['5','07/31/2025','$600.00','$3,000.00'],
+      ],
+    }],
+  },
+};
+
+// Live editor state — populated by seedFromTemplate or built from scratch
+let genFields = [];
+let tables = []; // [{ id, name, fields:[{id,type,label,hint,req}], sampleRows? }]
+
+let highlightedIds = new Set();
+let currentView = 'values';
+let editorOrigin = 'B'; // 'A' (no schema yet), 'B' (blank form), or 'D' (results showing) — controls Cancel target and Save confirm
+let isApproved = false;
+
+function isInDState() {
+  return document.getElementById('outputPopulated').style.display === 'block';
+}
+
+// ========== RENDERING ==========
+function escAttr(v) {
+  return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function fieldRowHtml(field, tableId) {
+  const opts = types.map(v => `<option${v===field.type?' selected':''}>${v}</option>`).join('');
+  const hl = highlightedIds.has(field.id) ? ' class="highlighted"' : '';
+  const delAttr = tableId == null ? `data-fid="${field.id}"` : `data-fid="${field.id}" data-tid="${tableId}"`;
+  return `<tr id="trow-${field.id}"${hl}>
+    <td class="tpl-grip">⠿</td>
+    <td><select class="tpl-select" data-bind="type" ${delAttr}>${opts}</select></td>
+    <td><input class="tpl-input" data-bind="label" ${delAttr} value="${escAttr(field.label)}"></td>
+    <td><input class="tpl-input hint" data-bind="hint" ${delAttr} value="${escAttr(field.hint)}"></td>
+    <td style="text-align:center;"><input type="checkbox" class="tpl-check" data-bind="req" ${delAttr} ${field.req?'checked':''}></td>
+    <td><button class="tpl-delete" data-action="del-field" ${delAttr}>🗑</button></td>
+  </tr>`;
+}
+
+function renderEditor() {
+  // General Info
+  const genBody = document.getElementById('generalBody');
+  genBody.innerHTML = genFields.map(f => fieldRowHtml(f, null)).join('');
+
+  // Tables — fully dynamic
+  const container = document.getElementById('tablesContainer');
+  container.innerHTML = tables.map(t => `
+    <div class="tpl-table-block" data-tid="${t.id}">
+      <div class="tpl-table-titlerow">
+        <span class="tpl-sub-label">Title</span>
+        <input class="tpl-sub-input" data-bind="tableName" data-tid="${t.id}" value="${escAttr(t.name)}">
+        <button class="tpl-table-delete" data-action="del-table" data-tid="${t.id}">🗑 Delete table</button>
+      </div>
+      <table class="tpl-table">
+        <thead>
+          <tr>
+            <th style="width:28px;"></th>
+            <th>Field Type</th>
+            <th>Label</th>
+            <th>Extraction Keywords</th>
+            <th style="width:80px;">Required</th>
+            <th style="width:36px;"></th>
+          </tr>
+        </thead>
+        <tbody>${t.fields.map(f => fieldRowHtml(f, t.id)).join('')}</tbody>
+        <tfoot><tr><td colspan="6" class="tpl-add-row" data-action="add-col" data-tid="${t.id}">+ Add Column</td></tr></tfoot>
+      </table>
+    </div>
+  `).join('');
+}
+
+function removeGenField(id) {
+  const r = document.getElementById('trow-'+id);
+  if (r) r.classList.add('removing');
+  setTimeout(() => { genFields = genFields.filter(f=>f.id!==id); renderEditor(); }, 400);
+}
+function removeTableField(tableId, fieldId) {
+  const r = document.getElementById('trow-'+fieldId);
+  if (r) r.classList.add('removing');
+  setTimeout(() => {
+    const t = tables.find(t => t.id === tableId);
+    if (!t) return;
+    t.fields = t.fields.filter(f => f.id !== fieldId);
+    renderEditor();
+  }, 400);
+}
+function removeTable(tableId) {
+  tables = tables.filter(t => t.id !== tableId);
+  renderEditor();
+}
+function addGenField() {
+  const id = nextId++;
+  highlightedIds.add(id);
+  genFields.push({ id, type:'Text', label:'New Field', hint:'', req:false });
+  renderEditor();
+  setTimeout(() => { highlightedIds.delete(id); renderEditor(); }, 1600);
+}
+function addTableColumn(tableId) {
+  const t = tables.find(t => t.id === tableId);
+  if (!t) return;
+  const id = nextId++;
+  highlightedIds.add(id);
+  t.fields.push({ id, type:'Text', label:'New Column', hint:'', req:false });
+  renderEditor();
+  setTimeout(() => { highlightedIds.delete(id); renderEditor(); }, 1600);
+}
+function addTable() {
+  const id = nextId++;
+  tables.push({
+    id,
+    name: 'Untitled Table',
+    fields: [{ id: nextId++, type:'Text', label:'New Column', hint:'', req:false }],
+    sampleRows: [],
+  });
+  renderEditor();
+}
+
+// ========== OUTPUT FORM (B/D) RENDERING ==========
+// Rebuilds both empty (B) and populated (D) markup from the current schema.
+// Empty inputs are disabled; populated inputs carry field.sample values and
+// flag required-missing when sample is blank.
+function renderOutputForm() {
+  const empty = document.getElementById('outputEmpty');
+  empty.innerHTML = `
+    <div class="val-title">General Info</div>
+    <div class="val-grid">
+      ${genFields.map(f => `
+        <div class="val-field${f.req ? ' required' : ''}"><label>${escAttr(f.label)}</label><input value="" disabled class="empty"><div class="val-error">Required</div></div>
+      `).join('')}
+    </div>
+    ${tables.length > 0 ? '<div class="val-tbl-label">Tables</div>' : ''}
+    ${tables.map(t => `
+      <div class="val-tbl-name">${escAttr(t.name)}</div>
+      <table class="val-table">
+        <thead><tr>${t.fields.map(f => `<th>${escAttr(f.label)}</th>`).join('')}</tr></thead>
+        <tbody>
+          <tr>${t.fields.map(() => '<td><input value="" disabled></td>').join('')}</tr>
+        </tbody>
+      </table>
+    `).join('')}
+  `;
+
+  const populated = document.getElementById('outputPopulated');
+  populated.innerHTML = `
+    <div class="val-title">General Info</div>
+    <div class="val-grid" id="valGrid">
+      ${genFields.map(f => {
+        const val = f.sample || '';
+        const missingClass = f.req && !val ? ' missing' : '';
+        const emptyCls = !val ? ' class="empty"' : '';
+        return `<div class="val-field${f.req ? ' required' : ''}${missingClass}"><label>${escAttr(f.label)}</label><input value="${escAttr(val)}"${emptyCls}><div class="val-error">Required</div></div>`;
+      }).join('')}
+    </div>
+    ${tables.length > 0 ? '<div class="val-tbl-label">Tables</div>' : ''}
+    ${tables.map(t => {
+      const rows = t.sampleRows && t.sampleRows.length > 0
+        ? t.sampleRows.map(row => `<tr>${t.fields.map((_, i) => `<td><input value="${escAttr(row[i] != null ? row[i] : '')}"></td>`).join('')}</tr>`).join('')
+        : `<tr>${t.fields.map(() => '<td><input value=""></td>').join('')}</tr>`;
+      return `
+        <div class="val-tbl-name">${escAttr(t.name)}</div>
+        <table class="val-table">
+          <thead><tr>${t.fields.map(f => `<th>${escAttr(f.label)}</th>`).join('')}</tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }).join('')}
+  `;
+}
+
+// ========== EDITOR EVENT DELEGATION ==========
+// Routes clicks, input, and change events from rendered rows to the right handlers.
+function findField(fieldId, tableId) {
+  if (tableId != null) {
+    const t = tables.find(t => t.id === Number(tableId));
+    return t ? t.fields.find(f => f.id === Number(fieldId)) : null;
+  }
+  return genFields.find(f => f.id === Number(fieldId));
+}
+
+document.getElementById('editorInline').addEventListener('click', (e) => {
+  const action = e.target.closest('[data-action]')?.getAttribute('data-action');
+  if (!action) return;
+  const fid = e.target.closest('[data-fid]')?.getAttribute('data-fid');
+  const tid = e.target.closest('[data-tid]')?.getAttribute('data-tid');
+  if (action === 'add-col')   addTableColumn(Number(tid));
+  if (action === 'del-table') removeTable(Number(tid));
+  if (action === 'del-field') {
+    if (tid != null) removeTableField(Number(tid), Number(fid));
+    else             removeGenField(Number(fid));
+  }
+});
+
+document.getElementById('addGenFieldBtn').addEventListener('click', addGenField);
+document.getElementById('addTableBtn').addEventListener('click', addTable);
+
+// Bind row inputs/selects/checkboxes back to state
+document.getElementById('editorInline').addEventListener('input', (e) => {
+  const bind = e.target.getAttribute('data-bind');
+  if (!bind) return;
+  const fid = e.target.getAttribute('data-fid');
+  const tid = e.target.getAttribute('data-tid');
+  if (bind === 'tableName') {
+    const t = tables.find(t => t.id === Number(tid));
+    if (t) t.name = e.target.value;
+    return;
+  }
+  const f = findField(fid, tid);
+  if (!f) return;
+  if (bind === 'req') f.req = e.target.checked;
+  else                f[bind] = e.target.value;
+});
+
+document.getElementById('editorInline').addEventListener('change', (e) => {
+  // Selects don't fire 'input' on all browsers — handle separately
+  if (e.target.tagName !== 'SELECT') return;
+  const bind = e.target.getAttribute('data-bind');
+  if (!bind) return;
+  const fid = e.target.getAttribute('data-fid');
+  const tid = e.target.getAttribute('data-tid');
+  const f = findField(fid, tid);
+  if (f) f[bind] = e.target.value;
+});
+
+// ========== VIEW SWITCHING ==========
+function syncDiscardButton() {
+  // Discard only makes sense when there's a saved parent schema to discard.
+  document.getElementById('discardSchemaBtn').style.display = editorOrigin === 'A' ? 'none' : 'inline-block';
+}
+
+function showEditor() {
+  currentView = 'editor';
+  editorOrigin = isInDState() ? 'D' : 'B';
+  // Swap output-side contents: hide header/form/landing, show inline editor
+  document.getElementById('outputHeader').style.display = 'none';
+  document.getElementById('formView').style.display = 'none';
+  document.getElementById('landingSection').classList.add('hidden');
+  document.getElementById('editorInline').classList.remove('hidden');
+  renderEditor();
+  syncDiscardButton();
+}
+
+function showValues() {
+  currentView = 'values';
+  // Returning from editor to B/D — restore header + form view
+  document.getElementById('editorInline').classList.add('hidden');
+  document.getElementById('outputHeader').style.display = '';
+  document.getElementById('formView').style.display = 'flex';
+}
+
+document.getElementById('openEditorGlobal').addEventListener('click', (e) => {
+  e.preventDefault();
+  // Processing is in flight — refuse edits until extraction completes.
+  if (isProcessing) {
+    showResponse('Processing in progress. Wait for extraction to finish.');
+    return;
+  }
+  // Approved data is locked — block edits until user explicitly unlocks.
+  if (isApproved) {
+    showResponse('Unlock values before editing the schema.');
+    return;
+  }
+  showEditor();
+});
+
+function handleEditorCancel() {
+  if (editorOrigin === 'A') {
+    // No schema was assigned — return to A-state landing
+    showLandingState();
+  } else {
+    showValues();
+  }
+}
+
+document.getElementById('editorBack').addEventListener('click', handleEditorCancel);
+
+document.getElementById('saveEditor').addEventListener('click', () => {
+  const cameFromD = editorOrigin === 'D';
+  const cameFromA = editorOrigin === 'A';
+  const schemaName = (document.getElementById('schemaTitleInput').value || 'Untitled schema').trim();
+
+  if (cameFromD) {
+    showConfirmModal({
+      title: 'Clear processed values?',
+      message: 'Saving this schema will clear the <strong>' + totalDocs + '</strong> values you\'ve already extracted. Re-process to update them.',
+      confirmLabel: 'Save and clear',
+      onConfirm: () => {
+        showValues();
+        document.getElementById('schemaName').textContent = schemaName;
+        renderOutputForm();
+        rebuildValidation();
+        invalidate('Schema updated. Click <strong>Process</strong> again to update extracted values.');
+      },
+    });
+    return;
+  }
+
+  // Origin A or B: save lands in B
+  if (cameFromA) {
+    showSchemaAssignedState();
+  } else {
+    showValues();
+  }
+  document.getElementById('schemaName').textContent = schemaName;
+  renderOutputForm();
+  rebuildValidation();
+  showResponse('Schema saved.');
+});
+
+// ========== A-STATE LANDING (no schema) ==========
+function showLandingState() {
+  // No schema assigned — centered card picker, no editor, no form view
+  document.getElementById('outputHeader').style.display = '';
+  document.getElementById('schemaRowB').style.display = 'none';
+  document.getElementById('schemaSub').textContent = 'Choose a template to seed your schema, or build one from scratch.';
+  document.getElementById('landingSection').classList.remove('hidden');
+  document.getElementById('editorInline').classList.add('hidden');
+  document.getElementById('formView').style.display = 'none';
+  document.getElementById('outputEmpty').style.display = 'none';
+  document.getElementById('outputPopulated').style.display = 'none';
+  document.getElementById('dataBar').style.display = 'none';
+  document.getElementById('reprocessBanner').style.display = 'none';
+  document.getElementById('validationBanner').style.display = 'none';
+  currentView = 'values';
+}
+
+function showSchemaAssignedState() {
+  document.getElementById('outputHeader').style.display = '';
+  document.getElementById('landingSection').classList.add('hidden');
+  document.getElementById('editorInline').classList.add('hidden');
+  document.getElementById('formView').style.display = 'flex';
+  document.getElementById('schemaRowB').style.display = 'flex';
+  document.getElementById('schemaSub').textContent = 'The schema defines what fields to extract from your documents.';
+  document.getElementById('outputEmpty').style.display = 'block';
+  currentView = 'values';
+}
+
+// Landing card clicks — first-time schema creation, route into editor
+document.querySelectorAll('.landing-card').forEach(card => {
+  card.addEventListener('click', () => {
+    const tpl = card.getAttribute('data-tpl');
+    editorOrigin = 'A';
+    if (tpl === '__blank__') {
+      startFromScratchFields();
+      document.getElementById('schemaTitleInput').value = '';
+      document.getElementById('schemaTitleInput').placeholder = 'Enter schema name…';
+    } else {
+      seedFromTemplate(tpl);
+    }
+    showEditorFromLanding();
+  });
+});
+
+function showEditorFromLanding() {
+  currentView = 'editor';
+  document.getElementById('outputHeader').style.display = 'none';
+  document.getElementById('landingSection').classList.add('hidden');
+  document.getElementById('formView').style.display = 'none';
+  document.getElementById('editorInline').classList.remove('hidden');
+  renderEditor();
+  syncDiscardButton();
+}
+
+// ========== FILE DROPDOWN ==========
+function toggleFileDropdown() {
+  document.getElementById('fileDropdown').classList.toggle('hidden');
+}
+// Close dropdown on outside click
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#fileNameBtn') && !e.target.closest('#fileDropdown')) {
+    document.getElementById('fileDropdown').classList.add('hidden');
+  }
+});
+
+function navFile(dir) {
+  // Simulated — just closes dropdown if open
+  document.getElementById('fileDropdown').classList.add('hidden');
+}
+
+// ========== CHAT ==========
+const responses = {
+  vendor: {
+    text: 'Added <strong>Vendor Address</strong> to General Info.',
+    addGen: [{ type:'Text', label:'Vendor Address', hint:'Vendor Address', req:false }],
+  },
+  service: {
+    text: 'Added <strong>Service Start Date</strong> and <strong>Service End Date</strong>.',
+    addGen: [
+      { type:'Date', label:'Service Start Date', hint:'Service Start', req:false },
+      { type:'Date', label:'Service End Date', hint:'Service End', req:false },
+    ],
+  },
+  tax: {
+    text: 'Added <strong>Tax Amount</strong> field and <strong>Tax</strong> column.',
+    addGen: [{ type:'Amount', label:'Tax Amount', hint:'Tax Amount', req:false }],
+    addCol: [{ type:'Amount', label:'Tax', hint:'Tax', req:false }],
+  },
+  currency: {
+    text: 'Added <strong>Currency</strong> to General Info.',
+    addGen: [{ type:'Text', label:'Currency', hint:'Currency', req:true }],
+  },
+  remove: {
+    text: 'Removed <strong>Purchase Order Number</strong>.',
+    removeGen: ['Purchase Order Number'],
+  },
+  default: {
+    text: 'Try asking me to add fields (like vendor address, tax, currency) or remove fields.',
+  }
+};
+
+function classify(msg) {
+  const l = msg.toLowerCase();
+  if (l.includes('vendor')) return 'vendor';
+  if (l.includes('service') || l.includes('period')) return 'service';
+  if (l.includes('tax')) return 'tax';
+  if (l.includes('currency')) return 'currency';
+  if (l.includes('remove') && l.includes('purchase')) return 'remove';
+  return 'default';
+}
+
+function showResponse(html) {
+  const c = document.getElementById('chatResponses');
+  const b = document.createElement('div');
+  b.className = 'chat-response';
+  b.innerHTML = html;
+  c.appendChild(b);
+  setTimeout(() => { b.classList.add('fading'); setTimeout(() => b.remove(), 400); }, 4500);
+}
+
+function showTyping() {
+  const c = document.getElementById('chatResponses');
+  const b = document.createElement('div');
+  b.className = 'chat-response';
+  b.id = 'typingBubble';
+  b.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+  c.appendChild(b);
+}
+function hideTyping() { const e = document.getElementById('typingBubble'); if(e) e.remove(); }
+
+function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  updateSendBtn();
+
+  if (currentView === 'values') showEditor();
+
+  showTyping();
+  const key = classify(text);
+  const resp = responses[key];
+
+  setTimeout(() => {
+    hideTyping();
+    showResponse(resp.text);
+
+    if (resp.removeGen) {
+      resp.removeGen.forEach(label => {
+        const f = genFields.find(x => x.label === label);
+        if (f) { const r = document.getElementById('trow-'+f.id); if(r) r.classList.add('removing'); }
+      });
+      setTimeout(() => { genFields = genFields.filter(f => !resp.removeGen.includes(f.label)); renderEditor(); }, 400);
+    }
+
+    highlightedIds = new Set();
+    if (resp.addGen) {
+      resp.addGen.forEach(f => { const id = nextId++; highlightedIds.add(id); genFields.push({...f, id}); });
+    }
+    if (resp.addCol && tables[0]) {
+      resp.addCol.forEach(f => { const id = nextId++; highlightedIds.add(id); tables[0].fields.push({...f, id}); });
+    }
+
+    if (highlightedIds.size > 0) {
+      renderEditor();
+      const first = [...highlightedIds][0];
+      if (first) setTimeout(() => { const r = document.getElementById('trow-'+first); if(r) r.scrollIntoView({behavior:'smooth',block:'center'}); }, 100);
+      setTimeout(() => { highlightedIds = new Set(); renderEditor(); }, 2200);
+    }
+  }, 750);
+}
+
+const chatInput = document.getElementById('chatInput');
+chatInput.addEventListener('input', updateSendBtn);
+chatInput.addEventListener('keydown', e => { if(e.key==='Enter'){e.preventDefault();sendMessage();} });
+function updateSendBtn() {
+  const b = document.getElementById('sendBtn');
+  if(chatInput.value.trim()){b.classList.remove('inactive');b.classList.add('active');}
+  else{b.classList.remove('active');b.classList.add('inactive');}
+}
+
+// ========== VALIDATION ==========
+// Simulated per-file validation. Production would get this from the extraction engine.
+// rebuildValidation() picks a few required fields from the live schema and pretends
+// those are missing on 2–3 specific files — gives the banner something real to surface.
+const SAMPLE_FILES = [
+  'Invoice_2102125 - Oracle NetSuite.pdf',
+  'AN71538024 - Apple.pdf',
+  'INV-990Bill_Amazon_Web_Services.pdf',
+];
+let fileValidation = {};
+
+function rebuildValidation() {
+  fileValidation = {};
+  const requiredLabels = genFields.filter(f => f.req).map(f => f.label);
+  if (requiredLabels.length === 0) return;
+  // Seed each sample file with a slice of required fields it's "missing"
+  SAMPLE_FILES.forEach((name, idx) => {
+    const count = Math.min(idx + 1, requiredLabels.length);
+    fileValidation[name] = requiredLabels.slice(0, count);
+  });
+}
+
+function getFilesWithErrors() {
+  return Object.entries(fileValidation).map(([name, fields]) => ({ name, fields }));
+}
+
+function validateRequiredFields() {
+  let missingCount = 0;
+  document.querySelectorAll('#valGrid .val-field.required').forEach(f => {
+    const input = f.querySelector('input');
+    if (!input.value.trim()) {
+      f.classList.add('missing');
+      missingCount++;
+    } else {
+      f.classList.remove('missing');
+    }
+  });
+  return missingCount;
+}
+
+function showValidationBanner() {
+  const filesWithErrors = getFilesWithErrors();
+  const totalFiles = filesWithErrors.length;
+  const currentMissing = validateRequiredFields();
+
+  if (totalFiles === 0 && currentMissing === 0) {
+    document.getElementById('validationBanner').style.display = 'none';
+    return;
+  }
+
+  const banner = document.getElementById('validationBanner');
+  const msg = document.getElementById('validationMsg');
+  msg.textContent = totalFiles + ' of 9 documents have missing required fields.';
+  banner.style.display = 'block';
+
+  // Build details list
+  const details = document.getElementById('valBannerDetails');
+  details.innerHTML = filesWithErrors.map(f =>
+    '<div class="val-file-item">' +
+      '<div class="vf-dot"></div>' +
+      '<span class="vf-name">' + f.name + '</span>' +
+      '<span class="vf-fields">— ' + f.fields.join(', ') + '</span>' +
+    '</div>'
+  ).join('');
+}
+
+let valDetailsOpen = false;
+function toggleValidationDetails() {
+  valDetailsOpen = !valDetailsOpen;
+  document.getElementById('valBannerDetails').style.display = valDetailsOpen ? 'block' : 'none';
+  document.getElementById('valToggleDetails').textContent = valDetailsOpen ? 'Hide details' : 'Show details';
+}
+
+// Live validation: remove error state as user types. Delegated from the
+// outputPopulated container so it survives re-renders driven by schema changes.
+document.getElementById('outputPopulated').addEventListener('input', (e) => {
+  if (e.target.tagName === 'INPUT' && e.target.closest('#valGrid')) {
+    const field = e.target.closest('.val-field');
+    if (field && field.classList.contains('required')) {
+      if (e.target.value.trim()) {
+        field.classList.remove('missing');
+      } else {
+        field.classList.add('missing');
+      }
+      // Update banner counts
+      if (validateRequiredFields() === 0) {
+        // Update simulated data for current file
+        delete fileValidation['Invoice_2102125 - Oracle NetSuite.pdf'];
+        showValidationBanner();
+      }
+    }
+  }
+});
+
+// ========== DISCARD SCHEMA (editor toolbar) ==========
+// Throws away the in-progress schema and returns to the A-state landing where
+// the user picks a different template card or starts from blank. Only shown
+// when origin is B or D — when origin=A there's no parent schema to discard.
+function performDiscardSchema() {
+  startFromScratchFields();
+  document.getElementById('schemaTitleInput').value = '';
+  document.getElementById('schemaName').textContent = '';
+  // If we were in D, clear the populated values too — schema is gone.
+  if (editorOrigin === 'D') {
+    document.getElementById('outputPopulated').innerHTML = '';
+    document.getElementById('outputEmpty').innerHTML = '';
+    document.getElementById('dataBar').style.display = 'none';
+    document.getElementById('validationBanner').style.display = 'none';
+    // Reset Process/Re-process button
+    const btn = document.getElementById('processBtn');
+    btn.classList.remove('processing', 'reprocess');
+    btn.disabled = true;
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg> Process';
+    document.getElementById('approveBtn').disabled = true;
+  }
+  renderEditor();
+  renderOutputForm();
+  rebuildValidation();
+  editorOrigin = 'A';
+  showLandingState();
+}
+
+document.getElementById('discardSchemaBtn').addEventListener('click', () => {
+  const inD = editorOrigin === 'D';
+  let body = 'This will remove the current schema and return you to the template picker.';
+  if (inD) {
+    body += ' Extracted values from <strong>' + totalDocs + ' processed documents</strong> will be cleared.';
+  }
+  showConfirmModal({
+    title: 'Discard schema?',
+    message: body,
+    confirmLabel: 'Discard schema',
+    onConfirm: performDiscardSchema,
+  });
+});
+
+function seedFromTemplate(tpl) {
+  const def = TEMPLATE_LIBRARY[tpl];
+  if (!def) { startFromScratchFields(); return; }
+  // Clone field defs and assign fresh ids so editing one doesn't mutate the library.
+  genFields = def.genFields.map(f => ({ id: nextId++, ...f }));
+  tables = def.tables.map(t => ({
+    id: nextId++,
+    name: t.name,
+    fields: t.fields.map(f => ({ id: nextId++, ...f })),
+    sampleRows: t.sampleRows ? t.sampleRows.map(r => r.slice()) : [],
+  }));
+  document.getElementById('schemaTitleInput').value = tpl;
+}
+
+function startFromScratchFields() {
+  genFields = [];
+  tables = [];
+}
+
+// ========== CONFIRM MODAL HELPER ==========
+let pendingConfirm = null;
+function showConfirmModal({ title, message, confirmLabel = 'Confirm', danger = true, onConfirm }) {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMessage').innerHTML = message;
+  const ok = document.getElementById('confirmOk');
+  ok.textContent = confirmLabel;
+  ok.classList.toggle('primary', !danger);
+  pendingConfirm = onConfirm || null;
+  document.getElementById('confirmBackdrop').classList.add('active');
+}
+function closeConfirmModal() {
+  document.getElementById('confirmBackdrop').classList.remove('active');
+  pendingConfirm = null;
+}
+document.getElementById('confirmOk').addEventListener('click', () => {
+  const fn = pendingConfirm;
+  closeConfirmModal();
+  if (fn) fn();
+});
+document.getElementById('confirmCancel').addEventListener('click', closeConfirmModal);
+document.getElementById('confirmBackdrop').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeConfirmModal();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && document.getElementById('confirmBackdrop').classList.contains('active')) {
+    closeConfirmModal();
+  }
+});
+
+// ========== INVALIDATE (D → empty, "Re-process to update") ==========
+// Called when template or files change while in D state. Wipes processed
+// results, restores Process button to primary, disables Approve, and shows
+// the persistent reprocess banner. Empty state markup already exists — we
+// just swap visibility.
+function invalidate(reasonHtml) {
+  // Hide populated values, show empty form
+  document.getElementById('outputEmpty').style.display = 'block';
+  document.getElementById('outputPopulated').style.display = 'none';
+  document.getElementById('dataBar').style.display = 'none';
+
+  // Restore Process button to primary
+  const btn = document.getElementById('processBtn');
+  btn.classList.remove('processing', 'reprocess');
+  btn.style.background = '';
+  btn.style.pointerEvents = '';
+  btn.disabled = !filesLoaded;
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg> Process';
+
+  // Disable approve
+  document.getElementById('approveBtn').disabled = true;
+
+  // Clear validation banner
+  document.getElementById('validationBanner').style.display = 'none';
+
+  // Show persistent reprocess banner with reason (resets title to default)
+  const banner = document.getElementById('reprocessBanner');
+  document.getElementById('reprocessTitle').textContent = 'Results are out of date';
+  if (reasonHtml) document.getElementById('reprocessMsg').innerHTML = reasonHtml;
+  banner.style.display = 'flex';
+}
+
+// ========== PROCESS ALL DOCUMENTS ==========
+let isProcessing = false;
+const totalDocs = 9;
+
+function handleProcess() {
+  if (isProcessing || isApproved) return;
+
+  // D-state re-process: confirm before replacing extracted values
+  const btn = document.getElementById('processBtn');
+  if (btn.classList.contains('reprocess')) {
+    showConfirmModal({
+      title: 'Replace processed values?',
+      message: 'This will re-run extraction and replace the <strong>' + totalDocs + '</strong> values currently shown.',
+      confirmLabel: 'Re-process',
+      onConfirm: () => {
+        // Reset button to processing visual baseline so handleProcess can re-run
+        btn.classList.remove('reprocess');
+        btn.disabled = false;
+        document.getElementById('outputEmpty').style.display = 'block';
+        document.getElementById('outputPopulated').style.display = 'none';
+        document.getElementById('dataBar').style.display = 'none';
+        document.getElementById('validationBanner').style.display = 'none';
+        document.getElementById('approveBtn').disabled = true;
+        runProcessing();
+      },
+    });
+    return;
+  }
+
+  runProcessing();
+}
+
+function runProcessing() {
+  if (isProcessing) return;
+  isProcessing = true;
+
+  // Hide reprocess banner — we're acting on it now
+  document.getElementById('reprocessBanner').style.display = 'none';
+
+  const btn = document.getElementById('processBtn');
+  btn.classList.add('processing');
+  btn.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div> Processing…';
+
+  // Show progress banner
+  const banner = document.getElementById('processBanner');
+  banner.style.display = 'flex';
+  const bar = document.getElementById('processBar');
+  const countEl = document.getElementById('processCount');
+  const labelEl = document.getElementById('processLabel');
+
+  let processed = 0;
+  const interval = setInterval(() => {
+    processed++;
+    const pct = Math.round((processed / totalDocs) * 100);
+    bar.style.width = pct + '%';
+    countEl.textContent = processed + ' of ' + totalDocs;
+
+    if (processed >= totalDocs) {
+      clearInterval(interval);
+      labelEl.textContent = 'All documents processed';
+      countEl.textContent = totalDocs + ' of ' + totalDocs;
+      bar.style.width = '100%';
+
+      setTimeout(() => {
+        banner.style.display = 'none';
+        isProcessing = false;
+        btn.classList.remove('processing');
+        // In D state, the Process button becomes a clickable Re-process control
+        // (outline styling) — primary CTA shifts to Save in the toolbar.
+        btn.classList.add('reprocess');
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg> Re-process';
+        btn.style.background = '';
+        btn.style.pointerEvents = '';
+        btn.disabled = false;
+        // Enable Approve button
+        document.getElementById('approveBtn').disabled = false;
+        // Swap empty values for populated values
+        document.getElementById('outputEmpty').style.display = 'none';
+        document.getElementById('outputPopulated').style.display = 'block';
+        document.getElementById('dataBar').style.display = 'flex';
+        showResponse('All documents have been processed using the <strong>' + document.getElementById('schemaName').textContent + '</strong> schema.');
+      }, 600);
+    }
+  }, 420);
+}
+
+// ========== APPROVE ==========
+function handleApprove() {
+  if (isApproved) return;
+
+  // Validate — check all documents, not just current
+  const filesWithErrors = getFilesWithErrors();
+  const currentMissing = validateRequiredFields();
+  if (filesWithErrors.length > 0 || currentMissing > 0) {
+    showValidationBanner();
+    // Scroll to first missing field on current doc
+    const firstMissing = document.querySelector('.val-field.required.missing');
+    if (firstMissing) firstMissing.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  document.getElementById('validationBanner').style.display = 'none';
+  isApproved = true;
+
+  // Lock button
+  const btn = document.getElementById('approveBtn');
+  btn.classList.add('approved');
+  btn.textContent = '✓ Saved';
+
+  // Show banner
+  document.getElementById('approvedBanner').style.display = 'flex';
+
+  // Lock all form fields
+  document.querySelectorAll('#valGrid .val-field').forEach(f => {
+    f.classList.add('locked');
+  });
+
+  // Lock table cells across every table in the populated output
+  document.querySelectorAll('#outputPopulated .val-table td').forEach(td => {
+    td.classList.add('locked');
+  });
+
+  // Lock data bar
+  document.getElementById('dataBar').classList.add('locked');
+
+  // Hide chat bar
+  document.querySelector('.chat-bar-wrap').style.display = 'none';
+
+  // Disable process button too
+  document.getElementById('processBtn').disabled = true;
+
+  // Update excel badge to Approved
+  const badge = document.querySelector('.excel-header .badge');
+  if (badge) { badge.textContent = 'Approved'; badge.style.borderColor = '#1FAC76'; badge.style.color = '#4ade80'; }
+}
+
+// ========== UNLOCK (reverse of approve — values stay, locks lift) ==========
+// Does NOT invalidate — data is still valid, user just needs to edit it.
+// Subsequent template/file changes will invalidate via the usual path.
+function handleUnlock() {
+  if (!isApproved) return;
+  isApproved = false;
+
+  // Restore Approve button to active state
+  const btn = document.getElementById('approveBtn');
+  btn.classList.remove('approved');
+  btn.textContent = 'Save';
+  btn.disabled = false;
+
+  // Hide banner
+  document.getElementById('approvedBanner').style.display = 'none';
+
+  // Unlock all form fields and table cells
+  document.querySelectorAll('#valGrid .val-field').forEach(f => f.classList.remove('locked'));
+  document.querySelectorAll('#outputPopulated .val-table td').forEach(td => td.classList.remove('locked'));
+
+  // Unlock data bar
+  document.getElementById('dataBar').classList.remove('locked');
+
+  // Show chat bar again
+  document.querySelector('.chat-bar-wrap').style.display = '';
+
+  // Reset excel badge
+  const badge = document.querySelector('.excel-header .badge');
+  if (badge) { badge.textContent = 'Draft'; badge.style.borderColor = ''; badge.style.color = ''; }
+
+  showResponse('Values unlocked for editing.');
+}
+
+// ========== FORM / TABLE TOGGLE ==========
+function showFormView() {
+  document.getElementById('formView').style.display = 'flex';
+  document.getElementById('tableView').classList.remove('active');
+  document.getElementById('toggleFormBtn').classList.add('active');
+  document.getElementById('toggleTableBtn').classList.remove('active');
+}
+
+function showTableView() {
+  document.getElementById('formView').style.display = 'none';
+  document.getElementById('tableView').classList.add('active');
+  document.getElementById('toggleFormBtn').classList.remove('active');
+  document.getElementById('toggleTableBtn').classList.add('active');
+}
+
+// Initial render — boot in A-state so the blank/landing experience is visible.
+// genFields/tables stay empty until the user picks a template; renderOutputForm
+// is harmless on empty schema (renders an empty grid) and protects against
+// missing valGrid lookups elsewhere.
+renderEditor();
+renderOutputForm();
+showLandingState();
+</script>
+</body>
+</html>

@@ -1,0 +1,2717 @@
+<!-- Author: Jimmy Chen | Created: 2026-03-13 | Description: Recs with translation - target currency subtext in Account column -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reconciliations - Translation for Workday</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { 'museo': ['"Museo Sans"', 'sans-serif'], 'inter': ['Inter', 'sans-serif'] },
+          colors: {
+            'body': '#1d2433',
+            'sub': '#6b7280',
+            'muted': '#adb2bb',
+            'border-light': '#eef0f4',
+            'border-default': '#e1e6ef',
+            'border-header': '#dce0e8',
+            'bg-page': '#ffffff',
+            'bg-sidebar': '#F8FAFC',
+            'bg-hover': '#fafbfc',
+            'fq-green': '#1c895f',
+            'fq-green-hover': '#167a53',
+            'on-time': '#1c895f',
+            'late': '#dc2626',
+            'meta': 'rgba(29,36,51,0.55)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @font-face { font-family: 'Museo Sans'; src: local('Museo Sans'); font-weight: 700; }
+    body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+    .mi { font-family: 'Material Icons Outlined'; font-weight: normal; font-style: normal; display: inline-block; line-height: 1; letter-spacing: normal; word-wrap: normal; white-space: nowrap; direction: ltr; -webkit-font-smoothing: antialiased; }
+
+    /* Toggle switch */
+    .toggle {
+      width: 34px; height: 18px; background: #1c895f; border-radius: 9px;
+      position: relative; cursor: pointer; flex-shrink: 0;
+    }
+    .toggle::after {
+      content: ''; position: absolute; top: 1.5px; right: 1.5px;
+      width: 15px; height: 15px; background: white; border-radius: 50%;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    }
+
+    /* Avatar */
+    .av {
+      width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 600; color: white;
+    }
+    .av-sm { width: 26px; height: 26px; font-size: 9px; }
+    .av-photo { background:none !important; overflow:hidden; }
+    .av-photo img { width:100%; height:100%; object-fit:cover; }
+
+    /* Status dot */
+    .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
+
+    /* Action icon button */
+    .act-btn {
+      width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+      border-radius: 4px; cursor: pointer; transition: background 0.1s;
+    }
+    .act-btn:hover { background: #f0f1f3; }
+
+    /* Table */
+    table { border-collapse: separate; border-spacing: 0; }
+    tbody tr { border-bottom: 1px solid #eef0f4; }
+    tbody tr:hover { background: #fafbfc; }
+
+    /* FlowUI Button (Form / Button) - per Figma node 9017:100669
+       Secondary (outline): 40px tall, 1.4px #cbd2e1 border, 12px padding, 8px gap,
+       Museo Sans 700 12px/18px, color #6b7280, 24px icons, -0.12px tracking
+       Primary: same shape, #1fac76 fill, white text */
+    .fui-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      height: 40px;
+      max-height: 40px;
+      padding: 0 12px;
+      border-radius: 6px;
+      font-family: 'Museo Sans', sans-serif;
+      font-weight: 700;
+      font-size: 12px;
+      line-height: 18px;
+      letter-spacing: -0.12px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background-color 120ms ease, border-color 120ms ease;
+    }
+    .fui-btn-secondary {
+      background: white;
+      border: 1.4px solid #cbd2e1;
+      color: #6b7280;
+    }
+    .fui-btn-secondary:hover { background: #f6f7fa; }
+    .fui-btn-primary {
+      background: #1fac76;
+      border: 1.4px solid #1fac76;
+      color: white;
+    }
+    .fui-btn-primary:hover { background: #17935f; border-color: #17935f; }
+    .fui-btn-icon-only {
+      width: 40px;
+      padding: 0;
+      background: transparent;
+      border: none;
+      color: #6b7280;
+    }
+    .fui-btn-icon-only:hover { background: #f6f7fa; }
+    .fui-btn-icon { font-size: 24px !important; line-height: 1; flex-shrink: 0; }
+
+    /* Translated-row flash: highlight which row was just translated when user clicks Done */
+    @keyframes flashTranslatedRow {
+      0%, 100% { background-color: white; }
+      18%, 82% { background-color: #f0f5ff; }
+    }
+    tbody tr.row-translated-flash > td {
+      animation: flashTranslatedRow 4s ease;
+    }
+
+    /* Sticky columns */
+    .sticky-period {
+      position: sticky; left: 0; z-index: 2; background-color: inherit;
+    }
+    .sticky-account {
+      position: sticky; left: 155px; z-index: 2; background-color: inherit;
+    }
+    thead .sticky-period,
+    thead .sticky-account { z-index: 12; background-color: white; }
+    tbody tr .sticky-period,
+    tbody tr .sticky-account { background-color: white; }
+    tbody tr:hover .sticky-period,
+    tbody tr:hover .sticky-account { background-color: #fafbfc; }
+
+    /* Scroll shadow on account column */
+    .is-scrolled .sticky-account::after {
+      content: '';
+      position: absolute;
+      top: 0; right: -7px; bottom: 0;
+      width: 7px;
+      border-left: 1px solid #e1e6ef;
+      background: linear-gradient(to right, rgba(0,0,0,0.06), transparent);
+      pointer-events: none;
+    }
+    tbody tr.group-child { background: white; }
+    tbody tr.group-child:hover { background: #fafbfc; }
+    /* Group expand/collapse: smooth slide using inline JS-measured heights.
+       Each <td> becomes a container with overflow:hidden whose height is animated
+       between its natural value and 0 in lockstep with padding and opacity. */
+    tbody tr.is-sliding td {
+      transition: height 220ms cubic-bezier(0.4, 0, 0.2, 1),
+                  padding-top 220ms cubic-bezier(0.4, 0, 0.2, 1),
+                  padding-bottom 220ms cubic-bezier(0.4, 0, 0.2, 1),
+                  opacity 180ms cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+    }
+    /* gh-* cells (collapsed totals) animate via opacity within their normal padding */
+    .gh-cell { transition: opacity 200ms ease; }
+    .gh-cell.is-fading-out { opacity: 0; }
+    .gh-cell.is-fading-in  { opacity: 0; }
+    tbody tr.group-child td { border-color: transparent; }
+    tbody tr.group-child td.has-border { position: relative; }
+    tbody tr.group-child td.has-border::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 1px; background: #eef0f4;
+    }
+    tbody tr.group-child:first-of-type td.has-border::before { display: none; }
+    tbody tr.total-row { background: white; border-bottom: 2px solid #e1e6ef; }
+    tbody tr.total-row:hover { background: #fafbfc; }
+
+    /* Sidedrawer */
+    .sd-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.2); z-index:999; opacity:0; pointer-events:none; transition:opacity 0.3s ease; }
+    .sd-overlay.open { opacity:1; pointer-events:auto; }
+    .sd-panel { position:fixed; top:0; right:0; bottom:0; width:500px; z-index:1000; background:white; border-left:1px solid #e1e6ef; box-shadow:-4px 0 16px rgba(0,0,0,0.08); transform:translateX(100%); transition:transform 0.3s ease; display:flex; flex-direction:column; }
+    .sd-panel.open { transform:translateX(0); }
+    .sd-scroll { flex:1; overflow-y:auto; padding:24px 24px 160px; display:flex; flex-direction:column; gap:24px; }
+    .sd-scroll::-webkit-scrollbar { width:4px; }
+    .sd-scroll::-webkit-scrollbar-thumb { background:#cbd2e1; border-radius:2px; }
+
+    /* Sidedrawer form components */
+    .sd-label { display:flex; align-items:center; gap:6px; height:20px; margin-bottom:4px; }
+    .sd-label span.req { width:6px; height:6px; border-radius:50%; background:#D24747; flex-shrink:0; }
+    .sd-label label { font-size:12px; font-weight:500; line-height:18px; color:#1d2433; font-family:'Inter',sans-serif; }
+    .sd-label-plain label { color:#424867; }
+    .sd-dropdown {
+      background:white; border:1px solid #cbd2e1; border-radius:6px; height:40px;
+      padding:0 8px; display:flex; align-items:center; gap:8px;
+      box-shadow:0 1px 2px rgba(0,0,0,0.05); cursor:default;
+    }
+    .sd-dropdown .val { flex:1; min-width:0; font-size:12px; font-weight:500; color:#1d2433; font-family:'Inter',sans-serif; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .sd-dropdown { min-width:0; }
+    .sd-dropdown .val.placeholder { color:#424867; }
+    .sd-dropdown .chev { font-size:20px; color:#6b7280; flex-shrink:0; }
+    .sd-scroll .sd-dropdown { height:40px; }
+    .sd-inline-edit .sd-dropdown, .sd-filter-row .sd-dropdown { height:36px; }
+    .sd-input {
+      background:white; border:1px solid #e1e6ef; border-radius:6px; height:40px;
+      padding:0 8px; display:flex; align-items:center;
+      box-shadow:0 1px 2px rgba(0,0,0,0.05);
+    }
+    .sd-input span { font-size:12px; color:#1d2433; font-family:'Inter',sans-serif; }
+    .sd-section-header { display:flex; align-items:center; gap:8px; height:20px; }
+    .sd-section-header .title { flex:1; font-size:12px; font-weight:500; color:#1d2433; font-family:'Inter',sans-serif; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .sd-section-header .edit-btn { font-size:11px; font-weight:700; color:#6b7280; font-family:'Museo Sans',sans-serif; padding:6px; border-radius:6px; cursor:pointer; line-height:14px; }
+    .sd-section-header .edit-btn:hover { background:#f3f4f6; }
+    .sd-settings-box {
+      border:1px solid #e1e6ef; border-radius:4px; padding:8px;
+      display:flex; flex-direction:column; gap:4px; font-size:12px; line-height:18px;
+    }
+    .sd-settings-row { display:flex; gap:4px; }
+    .sd-settings-row .k { font-weight:600; color:rgba(29,36,51,0.9); max-width:88px; flex-shrink:0; white-space:nowrap; font-family:'Inter',sans-serif; }
+    .sd-settings-row .v { font-weight:400; color:#1d2433; font-family:'Inter',sans-serif; }
+
+    /* Account row in sidedrawer */
+    .sd-account-row { display:flex; align-items:flex-start; padding:0; }
+    .sd-account-row .info { flex:1; display:flex; flex-direction:column; gap:1px; }
+    .sd-account-row .info .name { font-size:11px; font-weight:600; color:#1d2433; line-height:16px; font-family:'Inter',sans-serif; }
+    .sd-account-row .info .meta { font-size:11px; color:rgba(29,36,51,0.65); line-height:16px; font-family:'Inter',sans-serif; }
+    .sd-account-row .info .meta b { font-weight:600; }
+    .sd-account-row .actions { display:flex; gap:2px; padding-top:2px; padding-left:12px; flex-shrink:0; }
+    .sd-icon-btn { width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50px; cursor:pointer; transition:background 0.1s; }
+    .sd-icon-btn:hover { background:#f3f4f6; }
+
+    /* Inline edit expansion */
+    .sd-inline-edit { display:none; background:#fafbfc; border-top:1px solid #e1e6ef; padding:16px; flex-direction:column; gap:16px; }
+    .sd-inline-edit.open { display:flex; }
+    .sd-filter-label { font-size:12px; font-weight:600; color:#6b7280; text-transform:uppercase; letter-spacing:0.03em; font-family:'Inter',sans-serif; }
+    .sd-filter-row { display:flex; align-items:center; gap:8px; }
+    .sd-filter-dd { flex:1; min-width:0; background:white; border:1px solid #e1e6ef; border-radius:6px; height:36px; padding:0 8px; display:flex; align-items:center; gap:4px; box-shadow:0 1px 2px rgba(0,0,0,0.05); }
+    .sd-filter-dd span { font-size:12px; font-weight:500; color:#424867; font-family:'Inter',sans-serif; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .filter-col { flex:1; min-width:0; }
+
+    /* Translated indicator */
+    .translated-badge {
+      display:inline-flex; align-items:center; gap:3px;
+      font-size:10px; font-weight:500; color:#6b7280; line-height:14px;
+      margin-top:2px; font-family:'Inter',sans-serif;
+    }
+    .translated-badge .arrow { color:#9ca3af; }
+    .info-trigger { display:inline-flex; cursor:pointer; }
+    .info-trigger .mi { font-size:13px; color:#9ca3af; }
+    .info-trigger:hover .mi { color:#6b7280; }
+    /* FlowUI TablePopover - dark variant (Description) per Storybook 5064580 */
+    .info-popover-fixed {
+      position:fixed; z-index:9999;
+      width:340px;
+      background:#1d2433;
+      border:1px solid #1d2433;
+      border-radius:8px;
+      box-shadow:0 8px 24px rgba(0,0,0,0.32);
+      padding:14px 16px;
+      font-family:'Inter',sans-serif;
+      font-size:12px;
+      line-height:18px;
+      color:rgba(255,255,255,0.85);
+    }
+    /* Caret/triangle */
+    .info-popover-fixed::after {
+      content:'';
+      position:absolute;
+      width:12px; height:12px;
+      background:#1d2433;
+      transform:rotate(45deg);
+    }
+    .info-popover-fixed.popover-below::after {
+      top:-6px; left:var(--caret-x, 50%); margin-left:-6px;
+    }
+    .info-popover-fixed.popover-above::after {
+      bottom:-6px; left:var(--caret-x, 50%); margin-left:-6px;
+    }
+    /* Content tokens for dark TablePopover */
+    .info-popover-fixed .pop-title {
+      font-family:'Inter',sans-serif;
+      font-weight:600;
+      font-size:13px;
+      line-height:18px;
+      color:#ffffff;
+      margin:0 0 4px 0;
+    }
+    .info-popover-fixed .pop-body {
+      font-family:'Inter',sans-serif;
+      font-weight:400;
+      font-size:12px;
+      line-height:18px;
+      color:rgba(255,255,255,0.85);
+      margin:0;
+    }
+    .info-popover-fixed .pop-body b,
+    .info-popover-fixed .pop-body strong {
+      color:#ffffff;
+      font-weight:600;
+    }
+    .info-popover-fixed .pop-footer {
+      margin-top:10px;
+      padding-top:10px;
+      border-top:1px solid rgba(255,255,255,0.1);
+      font-family:'Inter',sans-serif;
+      font-size:11px;
+      line-height:16px;
+      display:flex;
+      align-items:baseline;
+      gap:6px;
+    }
+    .info-popover-fixed .pop-footer-name {
+      color:#ffffff;
+      font-weight:600;
+    }
+    .info-popover-fixed .pop-footer-meta {
+      color:rgba(255,255,255,0.55);
+      font-weight:400;
+    }
+    .info-popover-fixed .rate-line {
+      margin-top:6px;
+      font-size:11px;
+      line-height:16px;
+      color:rgba(255,255,255,0.7);
+      font-weight:400;
+    }
+
+    /* FlowUI warning Badge pattern (Figma node 4137:101053 / 4137:101067)
+       warning-primary: #DB7712  (text + icon)
+       warning-secondary: #fff8eb (badge background) */
+    .fui-cell-error {
+      display:flex; flex-direction:column; align-items:flex-end; gap:4px;
+      font-family:'Inter',sans-serif;
+    }
+    .fui-cell-error .error-label {
+      font-weight:500; font-size:12px; line-height:18px;
+      color:#adb2bb; text-align:right;
+    }
+    .fui-cell-error .error-translated-val {
+      font-weight:500; font-size:12px; line-height:18px;
+      color:#1d2433; font-variant-numeric: tabular-nums;
+    }
+    .fui-cell-error .error-arrow-line {
+      font-weight:500; font-size:12px; line-height:18px;
+      color:#adb2bb;
+    }
+    .fui-warn-row {
+      display:inline-flex; align-items:center; gap:2px;
+    }
+    .fui-warn-row .mi {
+      font-family: 'Material Icons'; /* filled version - more visual weight */
+      font-size:14px; color:#DB7712; line-height:14px;
+    }
+    .fui-warn-badge {
+      background:#fff8eb;
+      color:#DB7712;
+      font-family:'Inter',sans-serif;
+      font-weight:600; font-size:10px; line-height:14px;
+      padding:2px 4px;
+      border-radius:4px;
+      white-space:nowrap;
+    }
+
+    /* Dropdown divider */
+    .dd-divider { height:1px; background:#e1e6ef; margin:4px 0; }
+  </style>
+</head>
+<body class="bg-bg-page flex h-screen overflow-hidden">
+
+  <!-- ===== SIDEBAR (FloQast branded icons from Figma) ===== -->
+  <nav class="w-[56px] h-screen bg-bg-sidebar border-r border-border-default flex flex-col items-center pb-6 shrink-0" style="box-shadow:10px 0 13px -7px rgba(0,0,0,0.04)">
+    <!-- Logo -->
+    <div class="flex h-[59px] w-[38px] items-center justify-center shrink-0">
+      <svg width="38" height="21" viewBox="0 0 37.9972 21.1571" fill="none"><path d="M17.8982 0L16.9322 5.416H16.5401C14.8688 5.416 13.4428 6.60892 13.1537 8.24591L13.088 8.61815H9.5219L8.96115 11.7593H12.5272L11.9555 14.9593H8.38944L7.38402 20.6017H4.10929L5.1169 14.9593H0L0.569518 11.7593H5.68642L6.24498 8.61815H1.12589L1.69322 5.416H6.81888L7.78706 0H11.0596L10.0936 5.416H13.6575L14.6235 0H17.8982Z" fill="#90E39A"/><path d="M16.3605 8.61815L15.7997 11.7593H21.3065L20.7348 14.9593H15.228L14.2204 20.6017H10.9479L11.9555 14.9593L12.5272 11.7593L13.088 8.61815L13.1537 8.24591C13.4428 6.60892 14.8688 5.41601 16.5401 5.41601H22.4303L21.8607 8.61815H16.3605ZM37.0077 15.8627C36.6003 16.6203 36.1031 17.2907 35.5226 17.8785L36.9617 19.7484L35.6628 20.7367H35.6584C35.6584 20.7367 35.654 20.7432 35.6496 20.7476C34.8041 21.4028 33.5906 21.2548 32.9225 20.4254H32.9138L32.4888 19.8703C31.8711 20.1206 31.2315 20.3035 30.5656 20.4036C30.0662 20.4798 29.558 20.4951 29.2579 20.519C27.7421 20.4994 26.487 20.2512 25.3326 19.6091C24.3359 19.054 23.5364 18.2899 22.9647 17.2994C22.4653 16.4352 22.1981 15.5014 22.1083 14.5131C21.9484 12.7215 22.3163 11.0475 23.2276 9.49107C24.1125 7.98469 25.3501 6.85055 26.9054 6.05818C27.7421 5.63151 28.6314 5.33764 29.5624 5.20703C30.9686 5.01111 32.3596 5.06118 33.7089 5.55097C35.4065 6.16484 36.6397 7.28374 37.3845 8.92509C37.7481 9.72617 37.9321 10.5686 37.9825 11.4459C38.0723 13.011 37.7503 14.4826 37.0055 15.8627H37.0077ZM33.5249 15.2815C34.4997 14.0211 34.8238 12.5844 34.4756 11.0149C34.239 9.94821 33.6125 9.14495 32.6137 8.66604C31.7682 8.25897 30.8679 8.22414 29.961 8.38523C28.6752 8.61162 27.6348 9.27121 26.8155 10.2617C26.0335 11.2064 25.6436 12.3014 25.6217 13.5357C25.6217 13.9754 25.6787 14.2388 25.7576 14.5805C26.016 15.7147 26.6688 16.5462 27.7552 17.0077C28.6008 17.3647 29.4857 17.393 30.3728 17.2298C30.3969 17.2254 30.421 17.2189 30.4451 17.2145L29.0476 15.3969L30.3466 14.4064H30.3509C30.3509 14.4064 30.3553 14.3999 30.3597 14.3977C31.214 13.7359 32.445 13.8883 33.1087 14.7373C33.1153 14.746 33.1153 14.7569 33.1219 14.7656H33.1306L33.5271 15.2837L33.5249 15.2815Z" fill="#13362A"/></svg>
+    </div>
+    <!-- Top nav -->
+    <div class="flex flex-col items-center shrink-0 w-full">
+      <button class="flex h-[45px] w-[56px] items-center justify-center shrink-0 cursor-pointer hover:bg-black/5" title="Home">
+        <svg width="34" height="34" viewBox="0 0 38 38" fill="none"><path d="M14 24.7893H16.7885V19.8373H21.2115V24.7893H24V17.2893L19 13.5232L14 17.2893V24.7893ZM12.75 26.0392V16.6643L19 11.9608L25.25 16.6643V26.0392H19.9615V21.0873H18.0385V26.0392H12.75Z" fill="#1D2433"/></svg>
+      </button>
+      <button class="flex h-[45px] w-[56px] items-center justify-center shrink-0 cursor-pointer hover:bg-black/5" title="Tasks" style="padding-left:4px">
+        <svg width="28" height="28" viewBox="-4 -7 24 24" fill="none"><path d="M0 7.91663V6.66667H6.24996V7.91663H0ZM0 4.58329V3.33333H9.58329V4.58329H0ZM0 1.24996V0H9.58329V1.24996H0ZM10.9166 10.3365L8.24679 7.66665L9.12498 6.78846L10.9166 8.55448L14.4583 5.01281L15.3365 5.91665L10.9166 10.3365Z" fill="#1D2433"/></svg>
+      </button>
+      <!-- Divider -->
+      <div class="flex items-center w-full py-[24px] max-h-[24px] shrink-0"><div class="bg-[#e1e6ef] h-px min-h-px min-w-px flex-[1_0_0]"></div></div>
+    </div>
+    <!-- Product apps -->
+    <div class="flex flex-[1_0_0] flex-col items-center min-h-px min-w-px w-full">
+      <!-- Close (active) -->
+      <button class="flex flex-col h-[45px] w-full items-center justify-center shrink-0 cursor-pointer bg-[#f1f3f9] border-l-[3px] border-solid border-[#186749]" title="Close" style="padding-right:2px">
+        <svg width="20" height="21" viewBox="0 0 19.9682 20.8142" fill="none"><path d="M19.9682 12.5031V12.4947L9.98409 4.18359L0 12.4947V12.5031L9.98409 20.8142L19.9682 12.5031Z" fill="url(#close-g1)"/><path d="M19.9682 8.31951V8.31112L9.98409 0L0 8.31112V8.31951L9.98409 16.6306L19.9682 8.31951Z" fill="url(#close-g2)"/><path d="M16.3998 2.80273L9.09498 8.95818L6.5063 6.85841L4.92383 8.20574L9.09498 11.6209L17.9708 4.143V4.11193L16.3998 2.80273Z" fill="#224030"/><defs><linearGradient id="close-g1" x1="4.98995" y1="17.4931" x2="14.9782" y2="7.50476" gradientUnits="userSpaceOnUse"><stop stop-color="#4B834C"/><stop offset="0.999814" stop-color="#A8D6AC"/></linearGradient><linearGradient id="close-g2" x1="4.98995" y1="13.3095" x2="14.9782" y2="3.32117" gradientUnits="userSpaceOnUse"><stop offset="0.000186" stop-color="#A8D6AC"/><stop offset="1" stop-color="#4B834C"/></linearGradient></defs></svg>
+      </button>
+      <!-- Compliance -->
+      <button class="flex flex-col h-[45px] w-full items-center justify-center shrink-0 cursor-pointer hover:bg-black/5" title="Compliance">
+        <svg width="18" height="22" viewBox="0 0 17.6592 22.1279" fill="none"><path d="M17.6592 10.0959V5.09777L8.82961 0L0 5.09777V10.0959C0 13.3121 1.71577 16.2839 4.50104 17.892L8.82961 20.3911L13.1581 17.892C15.9434 16.2839 17.6592 13.3121 17.6592 10.0959Z" fill="url(#comp-g1)"/><path d="M15.6581 19.9188L13.289 20.1243L11.8392 22.1279L8.82759 16.5268L5.81586 22.1279L4.36614 20.1243L1.99707 19.9188L5.73921 13.0615L8.82759 14.5153L11.9159 13.0615L15.6581 19.9188Z" fill="url(#comp-g2)"/><path d="M14.1761 17.2061C13.8543 17.4558 13.5157 17.6889 13.155 17.8942L10.4135 19.4759L8.82634 16.529L7.23916 19.4759L4.50322 17.8942C4.14249 17.6834 3.79841 17.4558 3.47656 17.2005L5.74077 13.0605L8.82634 14.5146L11.9175 13.0605L14.1761 17.2061Z" fill="#223656"/><path d="M15.2448 10.1268L14.0301 11.615C13.7652 11.9396 13.6015 12.3349 13.5592 12.7517L13.3656 14.6635L11.4539 14.8571C11.037 14.8993 10.6418 15.0631 10.3171 15.328L8.82891 16.5426L7.34068 15.328C7.01609 15.0631 6.62081 14.8993 6.20397 14.8571L4.2922 14.6634L4.09859 12.7517C4.05637 12.3349 3.89263 11.9396 3.6277 11.615L2.41309 10.1268L3.62773 8.63853C3.89265 8.31394 4.0564 7.91868 4.09862 7.50184L4.29227 5.59005L6.20397 5.39644C6.62083 5.35422 7.01611 5.19047 7.34071 4.92554L8.82895 3.71094L10.3172 4.92558C10.6418 5.19049 11.037 5.35423 11.4539 5.39646L13.3657 5.59014L13.5593 7.50183C13.6015 7.91869 13.7652 8.31397 14.0302 8.63858L15.2448 10.1268Z" fill="url(#comp-g3)"/><defs><linearGradient id="comp-g1" x1="8.82959" y1="0" x2="8.82959" y2="20.3911" gradientUnits="userSpaceOnUse"><stop stop-color="#385F96"/><stop offset="0.136894" stop-color="#476C9F"/><stop offset="1" stop-color="#A7BED7"/></linearGradient><linearGradient id="comp-g2" x1="8.82757" y1="22.1279" x2="8.82757" y2="13.0615" gradientUnits="userSpaceOnUse"><stop stop-color="#507FC0"/><stop offset="0.177843" stop-color="#7098CC"/><stop offset="0.42766" stop-color="#98B7DB"/><stop offset="0.656524" stop-color="#B5CEE6"/><stop offset="0.85479" stop-color="#C6DCED"/><stop offset="1" stop-color="#CDE1F0"/></linearGradient><linearGradient id="comp-g3" x1="6.76692" y1="15.7921" x2="10.8909" y2="4.46145" gradientUnits="userSpaceOnUse"><stop stop-color="#6690C8"/><stop offset="0.084874" stop-color="#739ACD"/><stop offset="0.359721" stop-color="#9AB8DC"/><stop offset="0.612986" stop-color="#B6CEE7"/><stop offset="0.834516" stop-color="#C7DCED"/><stop offset="1" stop-color="#CDE1F0"/></linearGradient></defs></svg>
+      </button>
+      <!-- Ops -->
+      <button class="flex flex-col h-[45px] w-full items-center justify-center shrink-0 cursor-pointer hover:bg-black/5" title="Ops">
+        <svg width="20" height="19" viewBox="0 0 19.7062 19.0001" fill="none"><path d="M13.9359 17.3697C11.6814 19.5435 8.02934 19.5435 5.77485 17.3697C3.52037 15.1958 3.52037 11.6744 5.77485 9.5005L9.85537 13.4351C11.3686 14.8942 13.5108 15.3728 15.4321 14.8777C15.1804 15.7893 14.6806 16.6516 13.9359 17.3697Z" fill="url(#ops-g1)"/><path d="M13.9325 9.50022L9.85203 5.56564C8.639 4.39599 7.02165 3.8523 5.43766 3.94888C5.04445 3.97034 4.65868 4.02757 4.28029 4.12773C4.52885 3.20849 5.02961 2.34645 5.77152 1.63107C8.02694 -0.543689 11.6771 -0.543689 13.9325 1.63107C16.188 3.80582 16.188 7.32547 13.9325 9.50022Z" fill="url(#ops-g2)"/><path d="M18.0147 13.4344C16.0115 15.3659 12.9103 15.5805 10.6623 14.0854C10.4731 13.9602 10.2914 13.8207 10.1133 13.6705C10.0243 13.5918 9.93895 13.5167 9.85364 13.4344L13.9342 9.49982C14.0269 9.4104 14.1196 9.31384 14.2049 9.21726C14.2643 9.15288 14.3236 9.0885 14.3793 9.01337C14.4201 8.96687 14.4609 8.92039 14.498 8.87031C14.5017 8.86673 14.5054 8.86315 14.5091 8.85241C14.6241 8.70576 14.728 8.54838 14.8245 8.391C14.8467 8.35524 14.8689 8.32662 14.8838 8.29086C14.9357 8.21216 14.9765 8.1299 15.0136 8.05119C15.0433 8.00113 15.0656 7.95819 15.0878 7.90813C15.1323 7.82229 15.1694 7.73644 15.2065 7.65058C15.251 7.53614 15.2955 7.42165 15.3326 7.30721C15.3734 7.19631 15.4106 7.08184 15.4402 6.96024C15.4699 6.85294 15.4958 6.74206 15.5181 6.62759C15.5218 6.61685 15.5256 6.60612 15.5218 6.59542C15.5478 6.48453 15.5663 6.37365 15.5775 6.25558C15.596 6.1447 15.6071 6.03382 15.6146 5.92654C15.6183 5.89431 15.6183 5.86572 15.6183 5.82996C15.622 5.73337 15.6257 5.63678 15.622 5.5402C15.622 5.42576 15.6183 5.31486 15.6108 5.20042C15.6146 5.18968 15.6109 5.17893 15.6109 5.1718C15.6034 5.05733 15.5886 4.94287 15.5738 4.82841C15.5589 4.7211 15.5404 4.61022 15.5181 4.50292C15.5181 4.49578 15.5181 4.48146 15.5107 4.4743C15.4884 4.35983 15.4588 4.24539 15.4291 4.13093C15.8297 4.23107 16.2192 4.37055 16.5902 4.55656C17.1021 4.8141 17.5844 5.15033 18.0147 5.56524C20.2701 7.74 20.2701 11.2597 18.0147 13.4344Z" fill="#87520B"/><path d="M5.77332 9.50003C4.26247 10.9569 3.7641 13.0207 4.28346 14.8721C3.32866 14.6344 2.4368 14.1488 1.69187 13.4356C-0.563955 11.2604 -0.563955 7.73969 1.69187 5.56452C2.4368 4.85128 3.32867 4.36565 4.27821 4.12285C4.62969 4.0318 4.99167 3.97617 5.35366 3.95088C5.49006 3.94076 5.63169 3.93569 5.77332 3.93569C5.97267 3.93569 6.17205 3.94582 6.36615 3.96604C6.46061 3.97617 6.55502 3.98627 6.6547 4.00146C6.91701 4.03687 7.17933 4.09757 7.43114 4.16839C7.51506 4.19368 7.59901 4.21896 7.67769 4.24931C7.86132 4.30495 8.03445 4.37578 8.20229 4.45167C8.28625 4.48708 8.37017 4.52753 8.45412 4.57307C8.53805 4.61354 8.622 4.65399 8.70067 4.70459C8.76887 4.74001 8.83181 4.78045 8.89476 4.82093C9.24628 5.03338 9.5663 5.2863 9.85483 5.56451L5.77332 9.50003Z" fill="#87520B"/><defs><linearGradient id="ops-g1" x1="4.75472" y1="10.4841" x2="12.6187" y2="18.6398" gradientUnits="userSpaceOnUse"><stop stop-color="#F5E480"/><stop offset="1" stop-color="#BE7F20"/></linearGradient><linearGradient id="ops-g2" x1="6.79167" y1="0.647422" x2="14.6556" y2="8.80303" gradientUnits="userSpaceOnUse"><stop stop-color="#F5E480"/><stop offset="1" stop-color="#BE7F20"/></linearGradient></defs></svg>
+      </button>
+      <!-- Proj Mgmt -->
+      <button class="flex flex-col h-[45px] w-full items-center justify-center shrink-0 cursor-pointer hover:bg-black/5" title="Proj Mgmt">
+        <svg width="20" height="16" viewBox="0 0 19.9453 15.9558" fill="none"><path d="M16.455 15.9558H0.998047L4.48833 4.98633H19.9453L16.455 15.9558Z" fill="url(#pm-g1)"/><path d="M4.48764 4.98633L0.576172 15.9558H16.4543V4.98633H4.48764Z" fill="#894022"/><path d="M16.4542 1.99445V4.98612H4.48751L1.12492 15.5542C1.04886 15.7932 0.826878 15.9556 0.576033 15.9556C0.257904 15.9556 0 15.6977 0 15.3796V0H5.36701C5.74473 0 6.09005 0.21341 6.25897 0.551253L6.98056 1.99445H16.4542ZM13.9611 7.47918H8.97501L7.97779 9.97223H12.9639L13.9611 7.47918Z" fill="url(#pm-g2)"/><defs><linearGradient id="pm-g1" x1="2.99249" y1="17.9502" x2="17.9508" y2="2.99188" gradientUnits="userSpaceOnUse"><stop offset="0.000186" stop-color="#CF5A2C"/><stop offset="1" stop-color="#F7C394"/></linearGradient><linearGradient id="pm-g2" x1="-2.07504" y1="13.5431" x2="12.9639" y2="-1.49584" gradientUnits="userSpaceOnUse"><stop offset="0.000186" stop-color="#CF5A2C"/><stop offset="1" stop-color="#F7C394"/></linearGradient></defs></svg>
+      </button>
+      <!-- Reporting -->
+      <button class="flex flex-col h-[45px] w-full items-center justify-center shrink-0 cursor-pointer hover:bg-black/5" title="Reporting">
+        <svg width="17" height="18" viewBox="0 0 16.9993 17.4863" fill="none"><path d="M14.0858 0V17.4858H4.85718C2.17601 17.4858 0 15.3098 0 12.6287V0H14.0858Z" fill="url(#rep-g1)"/><path d="M4.85718 12.6291V16.0291C4.85718 16.8339 5.50957 17.4863 6.31433 17.4863H4.85718C2.17463 17.4863 0 15.3116 0 12.6291V11.1719C0 11.9767 0.652391 12.6291 1.45715 12.6291H4.85718Z" fill="#235656"/><path d="M11.1702 3.4007H2.91302V4.85786H11.1702V3.4007Z" fill="#235656"/><path d="M14.0873 7.28457H5.83007V8.74172H14.0873V7.28457Z" fill="#235656"/><path d="M14.086 11.1719H8.74309V12.6291H14.086V11.1719Z" fill="#235656"/><path d="M16.9993 11.1719H14.085V12.6291H16.9993V11.1719Z" fill="url(#rep-g2)"/><defs><linearGradient id="rep-g1" x1="0.573144" y1="15.2127" x2="14.9358" y2="0.850005" gradientUnits="userSpaceOnUse"><stop stop-color="#468A8B"/><stop offset="1" stop-color="#B6D9D3"/></linearGradient><linearGradient id="rep-g2" x1="14.4493" y1="12.9934" x2="16.635" y2="10.8077" gradientUnits="userSpaceOnUse"><stop stop-color="#468A8B"/><stop offset="1" stop-color="#B6D9D3"/></linearGradient></defs></svg>
+      </button>
+      <!-- AI -->
+      <button class="flex flex-col h-[45px] w-full items-center justify-center shrink-0 cursor-pointer hover:bg-black/5" title="AI">
+        <svg width="20" height="20" viewBox="0 0 22.4746 22.4746" fill="none"><path d="M11.2373 0C12.8629 5.3924 17.0822 9.61167 22.4746 11.2373C17.0822 12.8629 12.8629 17.0822 11.2373 22.4746C9.61167 17.0822 5.3924 12.8629 0 11.2373C5.3924 9.61167 9.61167 5.3924 11.2373 0Z" fill="url(#ai-g1)"/><path d="M15.663 8.75293C16.638 11.9873 19.1687 14.518 22.403 15.493C19.1687 16.4681 16.638 18.9988 15.663 22.2331C14.6879 18.9988 12.1572 16.4681 8.92285 15.493C12.1572 14.518 14.6879 11.9873 15.663 8.75293Z" fill="url(#ai-g2)"/><path d="M18.345 13.1245C17.2916 13.79 16.3193 14.5713 15.4454 15.4453C14.6294 16.2613 13.8944 17.1641 13.2577 18.1364C13.2229 18.0959 13.1825 18.0554 13.142 18.0149C11.9787 16.8574 10.5434 15.9835 8.92285 15.4915C10.5434 15.0054 11.9787 14.1315 13.142 12.974C14.2995 11.8165 15.1734 10.3696 15.6654 8.75488C16.1747 10.4448 17.1065 11.9438 18.345 13.1245Z" fill="#51315E"/><defs><linearGradient id="ai-g1" x1="5.61865" y1="16.856" x2="16.856" y2="5.61865" gradientUnits="userSpaceOnUse"><stop stop-color="#A670C5"/><stop offset="0.172726" stop-color="#AA77C8"/><stop offset="0.425151" stop-color="#B88AD1"/><stop offset="0.724913" stop-color="#CFAAE0"/><stop offset="1" stop-color="#E8CEF2"/></linearGradient><linearGradient id="ai-g2" x1="12.2929" y1="18.8631" x2="19.033" y2="12.123" gradientUnits="userSpaceOnUse"><stop stop-color="#A670C5"/><stop offset="0.172726" stop-color="#AA77C8"/><stop offset="0.425151" stop-color="#B88AD1"/><stop offset="0.724913" stop-color="#CFAAE0"/><stop offset="1" stop-color="#E8CEF2"/></linearGradient></defs></svg>
+      </button>
+      <!-- ReMind -->
+      <button class="flex flex-col h-[45px] w-full items-center justify-center shrink-0 cursor-pointer hover:bg-black/5" title="ReMind">
+        <svg width="20" height="16" viewBox="0 0 21.9982 17.0946" fill="none"><path d="M4.09999 5.8452L4.07715 13.4665L7.57195 10.8282L21.9966 0.0419922L4.07715 5.85133" fill="url(#rm-g1)"/><path d="M21.9967 0L20.472 2.61105L11.9977 17.0946L8.24591 11.7525L3.41487 4.86786L0 0H21.9967Z" fill="url(#rm-g2)"/><path d="M21.9697 0.0556641L21.9525 0.0740482L7.59072 10.8173L4.10156 5.84665L21.9697 0.0556641Z" fill="#325624"/><defs><linearGradient id="rm-g1" x1="4.07715" y1="6.75426" x2="21.9966" y2="6.75426" gradientUnits="userSpaceOnUse"><stop stop-color="#769630"/><stop offset="0.999814" stop-color="#C6E6A1"/></linearGradient><linearGradient id="rm-g2" x1="0" y1="8.5473" x2="21.9967" y2="8.5473" gradientUnits="userSpaceOnUse"><stop stop-color="#769630"/><stop offset="0.999814" stop-color="#C6E6A1"/></linearGradient></defs></svg>
+      </button>
+      <!-- Academy -->
+      <button class="flex flex-col h-[45px] w-full items-center justify-center shrink-0 cursor-pointer hover:bg-black/5" title="Academy">
+        <svg width="18" height="19" viewBox="0 0 17.9987 18.9469" fill="none"><path d="M9 3.51748L17.9987 0.9375C17.9987 4.95043 17.9987 8.96336 17.9987 12.9763L9 16.0022V4.00389V3.51748Z" fill="url(#ac-g1)"/><path d="M8.9987 3.51748L0 0.9375C0 4.95043 0 8.96336 0 12.9763L8.9987 16.0022V4.00389V3.51748Z" fill="url(#ac-g2)"/><path d="M9 3.52386C11.0955 0.402693 16.4989 0.00585938 16.4989 0.00585938V12.0446C16.4989 12.0446 10.5716 12.4415 9 16.0085V3.52386Z" fill="url(#ac-g3)"/><path d="M8.99785 3.518C6.90234 0.396834 1.49893 0 1.49893 0V12.0388C1.49893 12.0388 7.42622 12.4357 8.99785 16.0027V3.518Z" fill="url(#ac-g4)"/><path d="M12.1752 9.81543L16.9909 14.983L15.186 15.5743L16.0729 18.2816L14.0424 18.9467L13.1555 16.2394L11.3506 16.8307L12.1752 9.81543Z" fill="url(#ac-g5)"/><path d="M15.8082 13.7129L11.5488 15.1477L12.1737 9.81348L15.8082 13.7129Z" fill="#41447A"/><defs><linearGradient id="ac-g1" x1="7.03382" y1="10.6001" x2="19.8216" y2="5.94579" gradientUnits="userSpaceOnUse"><stop stop-color="#BEC0ED"/><stop offset="0.192055" stop-color="#9B9EE0"/><stop offset="0.387913" stop-color="#8084D6"/><stop offset="0.587066" stop-color="#6D71CE"/><stop offset="0.789488" stop-color="#6166CA"/><stop offset="1" stop-color="#5E63C9"/></linearGradient><linearGradient id="ac-g2" x1="-0.922023" y1="10.4431" x2="10.064" y2="6.44446" gradientUnits="userSpaceOnUse"><stop stop-color="#5E63C9"/><stop offset="0.233957" stop-color="#777BD2"/><stop offset="0.747456" stop-color="#AAACE5"/><stop offset="1" stop-color="#BEC0ED"/></linearGradient><linearGradient id="ac-g3" x1="8.25087" y1="15.576" x2="17.055" y2="0.326893" gradientUnits="userSpaceOnUse"><stop stop-color="#5E63C9"/><stop offset="1" stop-color="#BEC0ED"/></linearGradient><linearGradient id="ac-g4" x1="8.99785" y1="8.00135" x2="1.49893" y2="8.00135" gradientUnits="userSpaceOnUse"><stop stop-color="#5E63C9"/><stop offset="0.999627" stop-color="#BEC0ED"/></linearGradient><linearGradient id="ac-g5" x1="17.0077" y1="14.8401" x2="11.6578" y2="14.2103" gradientUnits="userSpaceOnUse"><stop stop-color="#BEC0ED"/><stop offset="1" stop-color="#5E63C9"/></linearGradient></defs></svg>
+      </button>
+    </div>
+    <!-- Bottom section -->
+    <div class="flex flex-col items-center justify-end shrink-0 w-full">
+      <button class="flex h-[45px] w-[56px] items-center justify-center shrink-0 cursor-pointer hover:bg-black/5" title="Explore">
+        <svg width="20" height="20" viewBox="0 0 19 19" fill="none"><path d="M4.325 14.675L11.225 11.225L14.675 4.325L7.775 7.775L4.325 14.675ZM9.5 10.5C9.21667 10.5 8.97933 10.404 8.788 10.212C8.596 10.0207 8.5 9.78333 8.5 9.5C8.5 9.21667 8.596 8.979 8.788 8.787C8.97933 8.59567 9.21667 8.5 9.5 8.5C9.78333 8.5 10.021 8.59567 10.213 8.787C10.4043 8.979 10.5 9.21667 10.5 9.5C10.5 9.78333 10.4043 10.0207 10.213 10.212C10.021 10.404 9.78333 10.5 9.5 10.5ZM9.5 19C8.18333 19 6.946 18.75 5.788 18.25C4.62933 17.75 3.625 17.075 2.775 16.225C1.925 15.375 1.25 14.3707 0.75 13.212C0.25 12.054 0 10.8167 0 9.5C0 8.18333 0.25 6.94567 0.75 5.787C1.25 4.629 1.925 3.625 2.775 2.775C3.625 1.925 4.62933 1.25 5.788 0.75C6.946 0.25 8.18333 0 9.5 0C10.8167 0 12.0543 0.25 13.213 0.75C14.371 1.25 15.375 1.925 16.225 2.775C17.075 3.625 17.75 4.629 18.25 5.787C18.75 6.94567 19 8.18333 19 9.5C19 10.8167 18.75 12.054 18.25 13.212C17.75 14.3707 17.075 15.375 16.225 16.225C15.375 17.075 14.371 17.75 13.213 18.25C12.0543 18.75 10.8167 19 9.5 19ZM9.5 17.5C11.7333 17.5 13.625 16.725 15.175 15.175C16.725 13.625 17.5 11.7333 17.5 9.5C17.5 7.26667 16.725 5.375 15.175 3.825C13.625 2.275 11.7333 1.5 9.5 1.5C7.26667 1.5 5.375 2.275 3.825 3.825C2.275 5.375 1.5 7.26667 1.5 9.5C1.5 11.7333 2.275 13.625 3.825 15.175C5.375 16.725 7.26667 17.5 9.5 17.5Z" fill="#1D2433"/></svg>
+      </button>
+      <button class="flex h-[45px] w-[56px] items-center justify-center shrink-0 cursor-pointer hover:bg-black/5" title="Settings">
+        <svg width="16" height="16" viewBox="0 0 15.6667 15.8333" fill="none"><path d="M5.91667 15.8333L5.58333 13.2917C5.36111 13.2222 5.13556 13.1181 4.90667 12.9792C4.67722 12.8403 4.46528 12.6944 4.27083 12.5417L1.91667 13.5417L0 10.2083L2.04167 8.66667C2.01389 8.54167 1.99667 8.41667 1.99 8.29167C1.98278 8.16667 1.97917 8.04167 1.97917 7.91667C1.97917 7.80556 1.98278 7.6875 1.99 7.5625C1.99667 7.4375 2.01389 7.30556 2.04167 7.16667L0 5.625L1.91667 2.3125L4.27083 3.29167C4.46528 3.13889 4.67722 2.99667 4.90667 2.865C5.13556 2.73278 5.36111 2.625 5.58333 2.54167L5.91667 0H9.75L10.0833 2.54167C10.3333 2.63889 10.5589 2.74639 10.76 2.86417C10.9617 2.9825 11.1667 3.125 11.375 3.29167L13.75 2.3125L15.6667 5.625L13.6042 7.1875C13.6319 7.32639 13.6458 7.45139 13.6458 7.5625V7.91667C13.6458 8.02778 13.6422 8.14222 13.635 8.26C13.6283 8.37833 13.6111 8.51389 13.5833 8.66667L15.625 10.2083L13.7083 13.5417L11.375 12.5417C11.1667 12.7083 10.955 12.8542 10.74 12.9792C10.5244 13.1042 10.3056 13.2083 10.0833 13.2917L9.75 15.8333H5.91667ZM7.83333 10.4167C8.52778 10.4167 9.11806 10.1736 9.60417 9.6875C10.0903 9.20139 10.3333 8.61111 10.3333 7.91667C10.3333 7.22222 10.0903 6.63194 9.60417 6.14583C9.11806 5.65972 8.52778 5.41667 7.83333 5.41667C7.13889 5.41667 6.54861 5.65972 6.0625 6.14583C5.57639 6.63194 5.33333 7.22222 5.33333 7.91667C5.33333 8.61111 5.57639 9.20139 6.0625 9.6875C6.54861 10.1736 7.13889 10.4167 7.83333 10.4167ZM7.83333 9.16667C7.48611 9.16667 7.19111 9.045 6.94833 8.80167C6.705 8.55889 6.58333 8.26389 6.58333 7.91667C6.58333 7.56944 6.705 7.27444 6.94833 7.03167C7.19111 6.78833 7.48611 6.66667 7.83333 6.66667C8.18056 6.66667 8.47556 6.78833 8.71833 7.03167C8.96167 7.27444 9.08333 7.56944 9.08333 7.91667C9.08333 8.26389 8.96167 8.55889 8.71833 8.80167C8.47556 9.045 8.18056 9.16667 7.83333 9.16667ZM7 14.5833H8.64583L8.9375 12.3542C9.36806 12.2431 9.75694 12.0833 10.1042 11.875C10.4514 11.6667 10.7917 11.4028 11.125 11.0833L13.1875 11.9583L14.0208 10.5417L12.2083 9.1875C12.2778 8.96528 12.3231 8.75 12.3442 8.54167C12.3647 8.33333 12.375 8.125 12.375 7.91667C12.375 7.69444 12.3647 7.48278 12.3442 7.28167C12.3231 7.08 12.2778 6.875 12.2083 6.66667L14.0208 5.29167L13.2083 3.875L11.1042 4.75C10.8264 4.45833 10.4931 4.19778 10.1042 3.96833C9.71528 3.73944 9.32639 3.57639 8.9375 3.47917L8.66667 1.25H7.02083L6.72917 3.47917C6.3125 3.57639 5.92361 3.72917 5.5625 3.9375C5.20139 4.14583 4.85417 4.40972 4.52083 4.72917L2.45833 3.875L1.64583 5.29167L3.4375 6.625C3.36806 6.83333 3.31944 7.04167 3.29167 7.25C3.26389 7.45833 3.25 7.68056 3.25 7.91667C3.25 8.13889 3.26389 8.35417 3.29167 8.5625C3.31944 8.77083 3.36806 8.97917 3.4375 9.1875L1.64583 10.5417L2.45833 11.9583L4.52083 11.0833C4.84028 11.4028 5.18056 11.6667 5.54167 11.875C5.90278 12.0833 6.29861 12.2431 6.72917 12.3542L7 14.5833Z" fill="#1D2433"/></svg>
+      </button>
+      <div class="flex h-[45px] w-[56px] items-center justify-center shrink-0">
+        <div class="w-[30px] h-[30px] rounded-full overflow-hidden">
+          <img src="https://randomuser.me/api/portraits/men/36.jpg" alt="JC" class="w-full h-full object-cover">
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== MAIN ===== -->
+  <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+
+    <!-- Tab bar -->
+    <div class="border-b border-border-default flex items-center shrink-0">
+      <div class="flex items-center gap-2 pl-6 pr-3">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13 4L5.5 11.5L3 9" stroke="#1c895f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="text-[13px] font-semibold text-body">Close</span>
+      </div>
+      <div class="flex items-center">
+        <button class="px-3.5 py-3 text-[13px] font-medium border-b-2 border-transparent text-sub hover:text-body transition-colors">Dashboard</button>
+        <button class="px-3.5 py-3 text-[13px] font-medium border-b-2 border-transparent text-sub hover:text-body transition-colors">Folders</button>
+        <button class="px-3.5 py-3 text-[13px] font-medium border-b-2 border-transparent text-sub hover:text-body transition-colors">Checklist</button>
+        <button class="px-3.5 py-3 text-[13px] font-semibold border-b-[2.5px] border-fq-green text-body">Reconciliations</button>
+        <button class="px-3.5 py-3 text-[13px] font-medium border-b-2 border-transparent text-sub hover:text-body transition-colors">Notes</button>
+        <button class="px-3.5 py-3 text-[13px] font-medium border-b-2 border-transparent text-sub hover:text-body transition-colors">Journal Entries</button>
+        <button class="px-3.5 py-3 text-[13px] font-medium border-b-2 border-transparent text-sub hover:text-body transition-colors">Flux Analysis</button>
+      </div>
+
+      <!-- Demo Scenarios dropdown (PROTOTYPE-ONLY) -->
+      <div style="margin-left:auto;padding-right:24px;position:relative">
+        <button id="demoScenariosBtn" onclick="toggleScenarioMenu(event)" style="display:flex;align-items:center;gap:8px;height:36px;padding:0 14px;border:1px solid #1d4ed8;background:#1d4ed8;color:#fff;border-radius:6px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;min-width:252px;justify-content:space-between;box-shadow:0 1px 3px rgba(29,78,216,0.3)">
+          <span id="demoScenariosLabel" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Demo Scenarios ( Prototype Only )</span>
+          <span class="mi" style="font-size:18px;flex-shrink:0;color:#fff">expand_more</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="px-6 py-3 flex items-center gap-2.5 shrink-0">
+      <button class="border border-border-default rounded-[6px] h-[34px] px-3 flex items-center gap-1.5 text-[13px] text-body font-medium bg-white hover:border-sub/40 transition-colors">
+        All Entities <span class="mi" style="font-size:16px;color:#6b7280">expand_more</span>
+      </button>
+      <button class="border border-border-default rounded-[6px] h-[34px] px-3 flex items-center gap-1.5 text-[13px] text-body font-medium bg-white hover:border-sub/40 transition-colors">
+        <span class="mi" style="font-size:16px;color:#6b7280">date_range</span> By Period <span class="mi" style="font-size:16px;color:#6b7280">expand_more</span>
+      </button>
+      <button class="border border-border-default rounded-[6px] h-[34px] px-3 flex items-center gap-1.5 text-[13px] text-body font-medium bg-white hover:border-sub/40 transition-colors">
+        March 2025 <span class="mi" style="font-size:16px;color:#6b7280">expand_more</span>
+      </button>
+    </div>
+
+    <!-- Migration callout - FlowUI Inline Alert (Info, Dismissable) per node 24675-230834 -->
+    <div id="migrationCallout" style="display:none;margin:12px 24px 16px 24px;padding:12px 16px;background:#f0f5ff;border:1px solid #3d7bf7;border-radius:6px;align-items:center;gap:12px;font-family:'Inter',sans-serif">
+      <span class="mi" style="font-size:20px;color:#3d7bf7;flex-shrink:0;line-height:1">info</span>
+      <p style="flex:1;min-width:0;font-family:'Inter',sans-serif;font-weight:400;font-size:12px;line-height:18px;color:#1d2433;margin:0">
+        <span style="display:inline-block;font-size:10px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#3d7bf7;background:#e0e9ff;padding:1px 6px;border-radius:3px;margin-right:6px;vertical-align:1px">Placeholder</span>
+        <span style="font-weight:600">Workday balances and currency translation are now synced automatically each period</span>
+        - no more manual rate entry.
+        <a href="#" onclick="event.preventDefault()" style="font-weight:700;color:#1d2433;text-decoration:underline;white-space:nowrap">Learn More</a>
+      </p>
+      <button onclick="document.getElementById('migrationCallout').style.display='none'" aria-label="Dismiss" style="background:none;border:none;cursor:pointer;color:#1d2433;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;padding:0;width:20px;height:20px;line-height:1">
+        <span class="mi" style="font-size:18px">close</span>
+      </button>
+    </div>
+
+    <!-- Title bar -->
+    <div class="px-6 pt-1 pb-4 flex items-start justify-between shrink-0">
+      <div>
+        <h1 class="text-[20px] font-bold text-body tracking-[-0.3px]">Reconciliations - Translation for Workday</h1>
+        <p class="text-[12px] text-sub mt-0.5">1/100</p>
+      </div>
+      <div class="flex items-center gap-2" style="position:relative">
+        <button id="pageFilterBtn" onclick="togglePageFilterMenu(event)" class="fui-btn fui-btn-secondary">
+          <span class="mi fui-btn-icon">filter_list</span>
+          <span id="pageFilterBtnLabel">Filter</span>
+        </button>
+        <div id="pageFilterMenu" style="display:none;position:absolute;top:44px;left:0;z-index:9000;background:white;border:1px solid #e1e6ef;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.12);padding:8px;font-family:'Inter',sans-serif;min-width:240px">
+          <div style="font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.04em;padding:6px 10px 4px 10px">Reconciliation Type</div>
+          <button onclick="setPageFilter('all')"      class="page-filter-opt" style="display:flex;width:100%;text-align:left;padding:8px 10px;border:none;background:transparent;cursor:pointer;font-family:inherit;font-size:12px;color:#1d2433;border-radius:4px;gap:8px;align-items:center"><span class="mi" id="pfi-all"      style="font-size:16px;color:#1c895f">check</span>All reconciliations</button>
+          <button onclick="setPageFilter('standalone')" class="page-filter-opt" style="display:flex;width:100%;text-align:left;padding:8px 10px;border:none;background:transparent;cursor:pointer;font-family:inherit;font-size:12px;color:#1d2433;border-radius:4px;gap:8px;align-items:center"><span class="mi" id="pfi-standalone" style="font-size:16px;color:#1c895f;visibility:hidden">check</span>Standalone only</button>
+          <button onclick="setPageFilter('group')"    class="page-filter-opt" style="display:flex;width:100%;text-align:left;padding:8px 10px;border:none;background:transparent;cursor:pointer;font-family:inherit;font-size:12px;color:#1d2433;border-radius:4px;gap:8px;align-items:center"><span class="mi" id="pfi-group"     style="font-size:16px;color:#1c895f;visibility:hidden">check</span>Group only</button>
+        </div>
+        <button class="fui-btn fui-btn-secondary">
+          <span class="mi fui-btn-icon">sync</span> Refresh <span class="mi fui-btn-icon">expand_more</span>
+        </button>
+        <button class="fui-btn fui-btn-secondary">
+          <span class="mi fui-btn-icon">unfold_less</span> Collapse All
+        </button>
+        <button class="fui-btn fui-btn-secondary">
+          Completeness <span class="mi fui-btn-icon">expand_more</span>
+        </button>
+        <button onclick="openBulkTranslationModal()" class="fui-btn fui-btn-secondary">
+          Bulk Translation
+        </button>
+        <button class="fui-btn fui-btn-primary">
+          Add <span class="mi fui-btn-icon">expand_more</span>
+        </button>
+        <button class="fui-btn fui-btn-icon-only">
+          <span class="mi fui-btn-icon">more_vert</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="flex-1 overflow-auto px-6">
+      <div id="tableWrap" class="border border-border-default rounded-[6px] overflow-auto bg-white">
+      <table class="w-full text-left" style="min-width:1664px;table-layout:fixed">
+        <thead class="sticky top-0 bg-white z-10">
+          <tr style="border-bottom:2px solid #dce0e8">
+            <th class="py-2.5 px-4 text-[11px] font-semibold text-sub tracking-[0.03em] sticky-period" style="width:155px">Period/ Folder</th>
+            <th class="py-2.5 px-4 text-[11px] font-semibold text-sub tracking-[0.03em] sticky-account" style="width:271px">Account</th>
+            <th class="py-2.5 px-4 text-[11px] font-semibold text-sub tracking-[0.03em] text-right" style="width:144px">Per GL</th>
+            <th class="py-2.5 px-4 text-[11px] font-semibold text-sub tracking-[0.03em] text-right" style="width:144px">Rec. Balance</th>
+            <th class="py-2.5 px-4 text-[11px] font-semibold text-sub tracking-[0.03em] text-right" style="width:144px">Rec. Items</th>
+            <th class="py-2.5 px-4 text-[11px] font-semibold text-sub tracking-[0.03em] text-right" style="width:144px">Difference</th>
+            <th class="py-2.5 px-4 text-[11px] font-semibold text-sub tracking-[0.03em]" style="width:220px">Assignees</th>
+            <th class="py-2.5 px-4 text-[11px] font-semibold text-sub tracking-[0.03em]" style="width:110px">Due Date</th>
+            <th class="py-2.5 px-4 text-[11px] font-semibold text-sub tracking-[0.03em]" style="width:164px">Completed</th>
+            <th class="py-2.5 px-4 text-[11px] font-semibold text-sub tracking-[0.03em]" style="width:168px">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <!-- ===== ROW 1: 1225 Accounts Receivable ===== -->
+          <tr data-rec-type="standalone" data-rec-id="rec-r1">
+            <td class="py-4 px-4 text-[12px] font-semibold text-body align-top leading-[17px] sticky-period">01 Cash and cash<br>equivalents</td>
+            <td class="py-4 px-4 align-top sticky-account" id="acct-subtext-r1">
+              <p class="text-[12px] font-semibold text-body leading-[17px]">1225 - Accounts Receivable: Non-trade</p>
+              <p class="text-[11px] text-meta leading-[16px]"><span class="font-semibold">Company:</span><span class="font-normal"> Global Modern Services, Inc. (USD)</span></p>
+              <p class="text-[11px] text-meta leading-[16px]"><span class="font-semibold">Bank Account:</span><span class="font-normal"> (No Value)</span></p>
+              <p class="text-[11px] text-meta leading-[16px]"><span class="font-semibold">Book Code:</span><span class="font-normal"> Book Code A</span></p>
+              <p class="text-[11px] text-meta leading-[16px] flex items-center gap-1">#FQ-adf2304-123213 <span class="mi" style="font-size:12px;color:#c0c4cc;cursor:pointer">content_copy</span></p>
+            </td>
+            <td class="py-4 px-4 text-[12px] text-body text-right align-top tabular-nums" id="r1-gl" data-usd="10000">$10,000.00</td>
+            <td class="py-4 px-4 text-[12px] text-body text-right align-top tabular-nums" id="r1-rb" data-usd="453509" data-star="1">$453,509.00*</td>
+            <td class="py-4 px-4 text-[12px] text-body text-right align-top tabular-nums" id="r1-ri" data-usd="120000">$120,000.00</td>
+            <td class="py-4 px-4 text-[12px] text-body text-right align-top tabular-nums" id="r1-df" data-usd="0">$0.00</td>
+            <td class="py-4 px-4 align-top">
+              <div class="flex flex-col gap-[14px]">
+                <div class="flex items-center gap-2.5">
+                  <div class="av av-photo"><img src="https://i.pravatar.cc/64?img=33" alt="DS"></div>
+                  <div class="flex-1 min-w-0"><p class="text-[12px] font-medium text-body leading-[15px]">Sean Bean</p><p class="text-[11px] text-sub leading-[15px]">Preparer</p></div>
+                  <div class="toggle"></div>
+                </div>
+                <div class="flex items-center gap-2.5">
+                  <div class="av av-photo"><img src="https://i.pravatar.cc/64?img=47" alt="AP"></div>
+                  <div class="flex-1 min-w-0"><p class="text-[12px] font-medium text-body leading-[15px]">Liv Tyler</p><p class="text-[11px] text-sub leading-[15px]">Preparer</p></div>
+                  <div class="toggle"></div>
+                </div>
+              </div>
+            </td>
+            <td class="py-4 px-4 align-top">
+              <div class="flex flex-col gap-[14px]">
+                <div style="height:32px;display:flex;align-items:center"><p class="text-[12px] text-body">11/26/2024</p></div>
+                <div style="height:32px;display:flex;align-items:center"><p class="text-[12px] text-body">11/26/2024</p></div>
+              </div>
+            </td>
+            <td class="py-4 px-4 align-top">
+              <div class="flex flex-col gap-[14px]">
+                <div class="flex items-center gap-2">
+                  <div class="av av-sm av-photo"><img src="https://i.pravatar.cc/52?img=33" alt="DS"></div>
+                  <div><p class="text-[12px] font-medium text-body leading-[15px]">Sean Bean</p><p class="text-[11px] leading-[15px] text-on-time flex items-center gap-1"><span class="dot" style="background:#1c895f"></span>11/20/2024</p></div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <div class="av av-sm av-photo"><img src="https://i.pravatar.cc/52?img=47" alt="AP"></div>
+                  <div><p class="text-[12px] font-medium text-body leading-[15px]">Liv Tyler</p><p class="text-[11px] leading-[15px] text-late flex items-center gap-1"><span class="dot" style="background:#dc2626"></span>11/27/2024</p></div>
+                </div>
+              </div>
+            </td>
+            <td class="py-4 px-4 align-top">
+              <div class="flex items-center gap-0 pt-0.5">
+                <div class="act-btn" title="Add Review Note"><span class="mi" style="font-size:16px;color:#9ca3af">post_add</span></div>
+                <div class="act-btn" title="Attachments"><span class="mi" style="font-size:16px;color:#9ca3af">description</span></div>
+                <div class="act-btn" onclick="openDrawer('individual',0)"><span class="mi" style="font-size:16px;color:#9ca3af">settings</span></div>
+                <div class="act-btn"><span class="mi" style="font-size:16px;color:#9ca3af">more_vert</span></div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- ===== ROW 2: 1400 Prepaid Expenses ===== -->
+          <tr data-rec-type="standalone" data-rec-id="rec-r2">
+            <td class="py-4 px-4 text-[12px] font-semibold text-body align-top leading-[17px] sticky-period">01 Cash and cash<br>equivalents</td>
+            <td class="py-4 px-4 align-top sticky-account" id="acct-subtext-r2">
+              <p class="text-[12px] font-semibold text-body leading-[17px]">1400 - Prepaid Expenses</p>
+              <p class="text-[11px] text-meta leading-[16px]"><span class="font-semibold">Company:</span><span class="font-normal"> Global Modern Services, Inc. (USD)</span></p>
+              <p class="text-[11px] text-meta leading-[16px]"><span class="font-semibold">Bank Account:</span><span class="font-normal"> (No Value)</span></p>
+              <p class="text-[11px] text-meta leading-[16px]"><span class="font-semibold">Book Code:</span><span class="font-normal"> Book Code B</span></p>
+              <p class="text-[11px] text-meta leading-[16px] flex items-center gap-1">#FQ-adf2304-123213 <span class="mi" style="font-size:12px;color:#c0c4cc;cursor:pointer">content_copy</span></p>
+            </td>
+            <td class="py-4 px-4 text-[12px] text-body text-right align-top tabular-nums" id="r2-gl" data-usd="20000">$20,000.00</td>
+            <td class="py-4 px-4 text-[12px] text-body text-right align-top tabular-nums" id="r2-rb" data-usd="453509" data-star="1">$453,509.00*</td>
+            <td class="py-4 px-4 text-[12px] text-body text-right align-top tabular-nums" id="r2-ri" data-usd="120000">$120,000.00</td>
+            <td class="py-4 px-4 text-[12px] text-body text-right align-top tabular-nums" id="r2-df" data-usd="0">$0.00</td>
+            <td class="py-4 px-4 align-top">
+              <div class="flex flex-col gap-[14px]">
+                <div class="flex items-center gap-2.5">
+                  <div class="av av-photo"><img src="https://i.pravatar.cc/64?img=33" alt="DS"></div>
+                  <div class="flex-1 min-w-0"><p class="text-[12px] font-medium text-body leading-[15px]">Sean Bean</p><p class="text-[11px] text-sub leading-[15px]">Preparer</p></div>
+                  <div class="toggle"></div>
+                </div>
+                <div class="flex items-center gap-2.5">
+                  <div class="av av-photo"><img src="https://i.pravatar.cc/64?img=47" alt="AP"></div>
+                  <div class="flex-1 min-w-0"><p class="text-[12px] font-medium text-body leading-[15px]">Liv Tyler</p><p class="text-[11px] text-sub leading-[15px]">Preparer</p></div>
+                  <div class="toggle"></div>
+                </div>
+              </div>
+            </td>
+            <td class="py-4 px-4 align-top">
+              <div class="flex flex-col gap-[14px]">
+                <div style="height:32px;display:flex;align-items:center"><p class="text-[12px] text-body">11/26/2024</p></div>
+                <div style="height:32px;display:flex;align-items:center"><p class="text-[12px] text-body">11/26/2024</p></div>
+              </div>
+            </td>
+            <td class="py-4 px-4 align-top">
+              <div class="flex flex-col gap-[14px]">
+                <div class="flex items-center gap-2">
+                  <div class="av av-sm av-photo"><img src="https://i.pravatar.cc/52?img=33" alt="DS"></div>
+                  <div><p class="text-[12px] font-medium text-body leading-[15px]">Sean Bean</p><p class="text-[11px] leading-[15px] text-on-time flex items-center gap-1"><span class="dot" style="background:#1c895f"></span>11/20/2024</p></div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <div class="av av-sm av-photo"><img src="https://i.pravatar.cc/52?img=47" alt="AP"></div>
+                  <div><p class="text-[12px] font-medium text-body leading-[15px]">Liv Tyler</p><p class="text-[11px] leading-[15px] text-late flex items-center gap-1"><span class="dot" style="background:#dc2626"></span>11/27/2024</p></div>
+                </div>
+              </div>
+            </td>
+            <td class="py-4 px-4 align-top">
+              <div class="flex items-center gap-0 pt-0.5">
+                <div class="act-btn" title="Add Review Note"><span class="mi" style="font-size:16px;color:#9ca3af">post_add</span></div>
+                <div class="act-btn" title="Attachments"><span class="mi" style="font-size:16px;color:#9ca3af">description</span></div>
+                <div class="act-btn" onclick="openDrawer('individual',1)"><span class="mi" style="font-size:16px;color:#9ca3af">settings</span></div>
+                <div class="act-btn"><span class="mi" style="font-size:16px;color:#9ca3af">more_vert</span></div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- ===== ROW 3: GROUP HEADER ===== -->
+          <tr style="border-bottom:none" id="groupHeader" data-rec-type="group" data-rec-id="rec-hd">
+            <td class="py-4 px-4 text-[12px] font-semibold text-body align-top leading-[17px] sticky-period">01 Cash and cash<br>equivalents</td>
+            <td class="py-4 px-4 align-top sticky-account">
+              <p class="text-[12px] font-semibold text-body leading-[17px]">Hamburger Donuts</p>
+              <p class="text-[11px] text-meta leading-[16px]">4 Accounts</p>
+              <p class="text-[11px] text-meta leading-[16px] flex items-center gap-1">#FQ-adf2304-123213 <span class="mi" style="font-size:12px;color:#c0c4cc;cursor:pointer">content_copy</span></p>
+            </td>
+            <!-- Financial values: hidden when expanded, shown when collapsed -->
+            <td class="py-4 px-4 text-[12px] text-body text-right align-top tabular-nums gh-cell" id="gh-gl" style="display:none" data-usd="20000">$20,000.00</td>
+            <td class="py-4 px-4 text-[12px] text-body text-right align-top tabular-nums gh-cell" id="gh-rb" style="display:none" data-usd="453509" data-star="1">$453,509.00*</td>
+            <td class="py-4 px-4 text-[12px] text-body text-right align-top tabular-nums gh-cell" id="gh-ri" style="display:none" data-usd="120000">$120,000.00</td>
+            <td class="py-4 px-4 text-[12px] text-body text-right align-top tabular-nums gh-cell" id="gh-df" style="display:none" data-usd="0">$0.00</td>
+            <!-- Empty placeholders when expanded -->
+            <td class="py-4 px-4 align-top gh-empty"></td>
+            <td class="py-4 px-4 align-top gh-empty"></td>
+            <td class="py-4 px-4 align-top gh-empty"></td>
+            <td class="py-4 px-4 align-top gh-empty"></td>
+            <td class="py-4 px-4 align-top">
+              <div class="flex flex-col gap-[14px]">
+                <div class="flex items-center gap-2.5">
+                  <div class="av av-photo"><img src="https://i.pravatar.cc/64?img=33" alt="DS"></div>
+                  <div class="flex-1 min-w-0"><p class="text-[12px] font-medium text-body leading-[15px]">Sean Bean</p><p class="text-[11px] text-sub leading-[15px]">Preparer</p></div>
+                  <div class="toggle"></div>
+                </div>
+                <div class="flex items-center gap-2.5">
+                  <div class="av av-photo"><img src="https://i.pravatar.cc/64?img=47" alt="AP"></div>
+                  <div class="flex-1 min-w-0"><p class="text-[12px] font-medium text-body leading-[15px]">Liv Tyler</p><p class="text-[11px] text-sub leading-[15px]">Preparer</p></div>
+                  <div class="toggle"></div>
+                </div>
+              </div>
+            </td>
+            <td class="py-4 px-4 align-top">
+              <div class="flex flex-col gap-[14px]">
+                <div style="height:32px;display:flex;align-items:center"><p class="text-[12px] text-body">11/26/2024</p></div>
+                <div style="height:32px;display:flex;align-items:center"><p class="text-[12px] text-body">11/26/2024</p></div>
+              </div>
+            </td>
+            <td class="py-4 px-4 align-top">
+              <div class="flex flex-col gap-[14px]">
+                <div class="flex items-center gap-2">
+                  <div class="av av-sm av-photo"><img src="https://i.pravatar.cc/52?img=33" alt="DS"></div>
+                  <div><p class="text-[12px] font-medium text-body leading-[15px]">Sean Bean</p><p class="text-[11px] leading-[15px] text-on-time flex items-center gap-1"><span class="dot" style="background:#1c895f"></span>11/20/2024</p></div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <div class="av av-sm av-photo"><img src="https://i.pravatar.cc/52?img=47" alt="AP"></div>
+                  <div><p class="text-[12px] font-medium text-body leading-[15px]">Liv Tyler</p><p class="text-[11px] leading-[15px] text-late flex items-center gap-1"><span class="dot" style="background:#dc2626"></span>11/27/2024</p></div>
+                </div>
+              </div>
+            </td>
+            <td class="py-4 px-4 align-top">
+              <div class="flex items-center gap-0 pt-0.5">
+                <div class="act-btn" title="Add Review Note"><span class="mi" style="font-size:16px;color:#9ca3af">post_add</span></div>
+                <div class="act-btn" title="Attachments"><span class="mi" style="font-size:16px;color:#9ca3af">description</span></div>
+                <div class="act-btn" onclick="openDrawer('group')"><span class="mi" style="font-size:16px;color:#9ca3af">settings</span></div>
+                <div class="act-btn"><span class="mi" style="font-size:16px;color:#9ca3af">more_vert</span></div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- ===== ROW 4: GROUP CHILD 1 - 1010 Cash in Bank USD Operating ===== -->
+          <tr class="group-child group-expandable" style="border-bottom:none" data-rec-type="group" data-rec-id="rec-hd">
+            <td class="py-4 px-4 align-top sticky-period" style="border:none"></td>
+            <td class="py-4 px-4 align-top sticky-account" id="acct-subtext-g1" style="border-top:1px solid #eef0f4">
+              <p class="text-[12px] font-semibold text-body leading-[17px]">1010 - Cash in Bank - USD Operating</p>
+              <p class="text-[11px] text-meta leading-[16px]"><span class="font-semibold">Company:</span><span class="font-normal"> Global Modern Services, Inc. (USD)</span></p>
+              <p class="text-[11px] text-meta leading-[16px]"><span class="font-semibold">Bank Account:</span><span class="font-normal"> Morgan Stanley</span></p>
+              <p class="text-[11px] text-meta leading-[16px]"><span class="font-semibold">Book Code:</span><span class="font-normal"> Book Code A</span></p>
+              <p class="text-[11px] text-meta leading-[16px]"><span class="font-semibold">Currency:</span><span class="font-normal"> USD (US Dollar)</span></p>
+              <p class="text-[11px] text-meta leading-[16px] flex items-center gap-1">#FQ-adf2304-123213 <span class="mi" style="font-size:12px;color:#c0c4cc;cursor:pointer">content_copy</span></p>
+            </td>
+            <td class="py-4 px-4 text-[12px] text-body text-right align-top tabular-nums" style="border-top:1px solid #eef0f4" id="g1-gl" data-usd="10000">$10,000.00</td>
+            <td class="py-4 px-4 text-[12px] text-body text-right align-top tabular-nums" style="border-top:1px solid #eef0f4" id="g1-rb" data-usd="453509" data-star="1">$453,509.00*</td>
+            <td class="py-4 px-4 text-[12px] text-body text-right align-top tabular-nums" style="border-top:1px solid #eef0f4" id="g1-ri" data-usd="120000">$120,000.00</td>
+            <td class="py-4 px-4 text-[12px] text-body text-right align-top tabular-nums" style="border-top:1px solid #eef0f4" id="g1-df" data-usd="0">$0.00</td>
+            <td class="py-4 px-4 align-top" style="border:none"></td>
+            <td class="py-4 px-4 align-top" style="border:none"></td>
+            <td class="py-4 px-4 align-top" style="border:none"></td>
+            <td class="py-4 px-4 align-top" style="border:none"></td>
+          </tr>
+
+          <!-- ===== ROW 5: GROUP CHILD 2 - 1020 Cash in Bank USD Payroll ===== -->
+          <tr class="group-child group-expandable" style="border-bottom:none" data-rec-type="group" data-rec-id="rec-hd">
+            <td class="py-4 px-4 align-top sticky-period" style="border:none"></td>
+            <td class="py-4 px-4 align-top sticky-account" id="acct-subtext-g2" style="border-top:1px solid #eef0f4">
+              <p class="text-[12px] font-semibold text-body leading-[17px]">1020 - Cash in Bank - USD Payroll</p>
+              <p class="text-[11px] text-meta leading-[16px]"><span class="font-semibold">Company:</span><span class="font-normal"> Global Modern Services, Inc. (USD)</span></p>
+              <p class="text-[11px] text-meta leading-[16px]"><span class="font-semibold">Bank Account:</span><span class="font-normal"> Morgan Stanley</span></p>
+              <p class="text-[11px] text-meta leading-[16px]"><span class="font-semibold">Book Code:</span><span class="font-normal"> Book Code A</span></p>
+              <p class="text-[11px] text-meta leading-[16px]"><span class="font-semibold">Currency:</span><span class="font-normal"> USD (US Dollar)</span></p>
+              <p class="text-[11px] text-meta leading-[16px] flex items-center gap-1">#FQ-adf2304-123213 <span class="mi" style="font-size:12px;color:#c0c4cc;cursor:pointer">content_copy</span></p>
+            </td>
+            <td class="py-4 px-4 text-[12px] text-body text-right align-top tabular-nums" style="border-top:1px solid #eef0f4" id="g2-gl" data-usd="10000">$10,000.00</td>
+            <td class="py-4 px-4 text-[12px] text-body text-right align-top tabular-nums" style="border-top:1px solid #eef0f4" id="g2-rb" data-usd="453509" data-star="1">$453,509.00*</td>
+            <td class="py-4 px-4 text-[12px] text-body text-right align-top tabular-nums" style="border-top:1px solid #eef0f4" id="g2-ri" data-usd="120000">$120,000.00</td>
+            <td class="py-4 px-4 text-[12px] text-body text-right align-top tabular-nums" style="border-top:1px solid #eef0f4" id="g2-df" data-usd="0">$0.00</td>
+            <td class="py-4 px-4 align-top" style="border:none"></td>
+            <td class="py-4 px-4 align-top" style="border:none"></td>
+            <td class="py-4 px-4 align-top" style="border:none"></td>
+            <td class="py-4 px-4 align-top" style="border:none"></td>
+          </tr>
+
+          <!-- ===== ROW 6: GROUP CHILD 3 - 1030 Cash in Bank EUR Operating ===== -->
+          <tr class="group-child group-expandable" style="border-bottom:none" data-rec-type="group" data-rec-id="rec-hd">
+            <td class="py-4 px-4 align-top sticky-period" style="border:none"></td>
+            <td class="py-4 px-4 align-top sticky-account" id="acct-subtext-g3" style="border-top:1px solid #eef0f4">
+              <p class="text-[12px] font-semibold text-body leading-[17px]">1030 - Cash in Bank - EUR Operating</p>
+              <p class="text-[11px] text-meta leading-[16px]"><span class="font-semibold">Company:</span><span class="font-normal"> Global Modern Services, Inc. (USD)</span></p>
+              <p class="text-[11px] text-meta leading-[16px]"><span class="font-semibold">Bank Account:</span><span class="font-normal"> Morgan Stanley</span></p>
+              <p class="text-[11px] text-meta leading-[16px]"><span class="font-semibold">Book Code:</span><span class="font-normal"> Book Code A</span></p>
+              <p class="text-[11px] text-meta leading-[16px]"><span class="font-semibold">Currency:</span><span class="font-normal"> USD (US Dollar)</span></p>
+              <p class="text-[11px] text-meta leading-[16px] flex items-center gap-1">#FQ-adf2304-123213 <span class="mi" style="font-size:12px;color:#c0c4cc;cursor:pointer">content_copy</span></p>
+            </td>
+            <td class="py-4 px-4 text-[12px] text-body text-right align-top tabular-nums" style="border-top:1px solid #eef0f4" id="g3-gl" data-usd="20000">$20,000.00</td>
+            <td class="py-4 px-4 text-[12px] text-body text-right align-top tabular-nums" style="border-top:1px solid #eef0f4" id="g3-rb" data-usd="453509" data-star="1">$453,509.00*</td>
+            <td class="py-4 px-4 text-[12px] text-body text-right align-top tabular-nums" style="border-top:1px solid #eef0f4" id="g3-ri" data-usd="120000">$120,000.00</td>
+            <td class="py-4 px-4 text-[12px] text-body text-right align-top tabular-nums" style="border-top:1px solid #eef0f4" id="g3-df" data-usd="0">$0.00</td>
+            <td class="py-4 px-4 align-top" style="border:none"></td>
+            <td class="py-4 px-4 align-top" style="border:none"></td>
+            <td class="py-4 px-4 align-top" style="border:none"></td>
+            <td class="py-4 px-4 align-top" style="border:none"></td>
+          </tr>
+
+          <!-- ===== ROW 7: GROUP CHILD 4 - 1030 Cash in Bank EUR Operating (1) ===== -->
+          <tr class="group-child group-expandable" style="border-bottom:none" data-rec-type="group" data-rec-id="rec-hd">
+            <td class="py-4 px-4 align-top sticky-period" style="border:none"></td>
+            <td class="py-4 px-4 align-top sticky-account" id="acct-subtext-g4" style="border-top:1px solid #eef0f4">
+              <p class="text-[12px] font-semibold text-body leading-[17px]">1030 - Cash in Bank - EUR Operating (1)</p>
+              <p class="text-[11px] text-meta leading-[16px]"><span class="font-semibold">Company:</span><span class="font-normal"> Global Modern Services, Inc. (USD)</span></p>
+              <p class="text-[11px] text-meta leading-[16px]"><span class="font-semibold">Bank Account:</span><span class="font-normal"> Morgan Stanley</span></p>
+              <p class="text-[11px] text-meta leading-[16px]"><span class="font-semibold">Book Code:</span><span class="font-normal"> Book Code C</span></p>
+              <p class="text-[11px] text-meta leading-[16px]"><span class="font-semibold">Currency:</span><span class="font-normal"> USD (US Dollar)</span></p>
+              <p class="text-[11px] text-meta leading-[16px] flex items-center gap-1">#FQ-adf2304-123213 <span class="mi" style="font-size:12px;color:#c0c4cc;cursor:pointer">content_copy</span></p>
+            </td>
+            <td class="py-4 px-4 text-[12px] text-body text-right align-top tabular-nums" style="border-top:1px solid #eef0f4" id="g4-gl" data-usd="15000">$15,000.00</td>
+            <td class="py-4 px-4 text-[12px] text-body text-right align-top tabular-nums" style="border-top:1px solid #eef0f4" id="g4-rb" data-usd="320000" data-star="1">$320,000.00*</td>
+            <td class="py-4 px-4 text-[12px] text-body text-right align-top tabular-nums" style="border-top:1px solid #eef0f4" id="g4-ri" data-usd="90000">$90,000.00</td>
+            <td class="py-4 px-4 text-[12px] text-body text-right align-top tabular-nums" style="border-top:1px solid #eef0f4" id="g4-df" data-usd="0">$0.00</td>
+            <td class="py-4 px-4 align-top" style="border:none"></td>
+            <td class="py-4 px-4 align-top" style="border:none"></td>
+            <td class="py-4 px-4 align-top" style="border:none"></td>
+            <td class="py-4 px-4 align-top" style="border:none"></td>
+          </tr>
+
+          <!-- ===== TOTAL ROW (expanded state) ===== -->
+          <tr class="total-row" id="totalRowExpanded" style="border-bottom:none" data-rec-type="group" data-rec-id="rec-hd">
+            <td class="py-4 px-4 align-top sticky-period" style="border:none"></td>
+            <td class="py-4 px-4 align-top sticky-account" style="border-top:1px solid #eef0f4">
+              <p class="text-[12px] font-semibold text-body leading-[17px]">Total</p>
+              <button onclick="toggleGroup()" class="flex items-center gap-1 mt-1.5 text-[12px] text-[#3b82f6] font-medium hover:underline">
+                <span class="mi" style="font-size:16px;color:#3b82f6">schema</span> Close Group
+              </button>
+            </td>
+            <td class="py-4 px-4 text-[12px] font-semibold text-body text-right align-top tabular-nums" style="border-top:1px solid #eef0f4" id="gt-gl" data-usd="20000">$20,000.00</td>
+            <td class="py-4 px-4 text-[12px] font-semibold text-body text-right align-top tabular-nums" style="border-top:1px solid #eef0f4" id="gt-rb" data-usd="453509" data-star="1">$453,509.00*</td>
+            <td class="py-4 px-4 text-[12px] font-semibold text-body text-right align-top tabular-nums" style="border-top:1px solid #eef0f4" id="gt-ri" data-usd="120000">$120,000.00</td>
+            <td class="py-4 px-4 text-[12px] font-semibold text-body text-right align-top tabular-nums" style="border-top:1px solid #eef0f4" id="gt-df" data-usd="0">$0.00</td>
+            <td class="py-4 px-4 align-top" style="border:none"></td>
+            <td class="py-4 px-4 align-top" style="border:none"></td>
+            <td class="py-4 px-4 align-top" style="border:none"></td>
+            <td class="py-4 px-4 align-top" style="border:none"></td>
+          </tr>
+          <!-- ===== TOTAL ROW (collapsed state) ===== -->
+          <tr class="total-row" id="totalRowCollapsed" style="border-bottom:none;display:none" data-rec-type="group" data-rec-id="rec-hd">
+            <td class="py-4 px-4 align-top sticky-period" style="border:none"></td>
+            <td class="py-4 px-4 align-top sticky-account" style="border-top:1px solid #eef0f4">
+              <p class="text-[12px] font-semibold text-body leading-[17px]">Total</p>
+              <button onclick="toggleGroup()" class="flex items-center gap-1 mt-1.5 text-[12px] text-[#3b82f6] font-medium hover:underline">
+                <span class="mi" style="font-size:16px;color:#3b82f6">schema</span> Expand Group
+              </button>
+            </td>
+            <td class="py-4 px-4 align-top" style="border-top:1px solid #eef0f4"></td>
+            <td class="py-4 px-4 align-top" style="border-top:1px solid #eef0f4"></td>
+            <td class="py-4 px-4 align-top" style="border-top:1px solid #eef0f4"></td>
+            <td class="py-4 px-4 align-top" style="border-top:1px solid #eef0f4"></td>
+            <td class="py-4 px-4 align-top" style="border:none"></td>
+            <td class="py-4 px-4 align-top" style="border:none"></td>
+            <td class="py-4 px-4 align-top" style="border:none"></td>
+            <td class="py-4 px-4 align-top" style="border:none"></td>
+          </tr>
+
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== OVERLAY ===== -->
+  <div class="sd-overlay" id="sdOverlay" onclick="closeDrawer()"></div>
+
+  <!-- ===== SIDEDRAWER CONTAINER (rendered by JS) ===== -->
+  <div class="sd-panel" id="sdPanel"></div>
+
+  <!-- ===== BULK TRANSLATION MODAL ===== -->
+  <div id="bulkTransOverlay" style="display:none;position:fixed;inset:0;z-index:9990;background:rgba(15,23,42,0.45)" onclick="closeBulkTranslationModal()"></div>
+  <div id="bulkTransModal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9991;width:520px;background:white;border-radius:12px;box-shadow:0 24px 64px rgba(0,0,0,0.18);font-family:'Inter',sans-serif;overflow:hidden">
+    <div style="padding:20px 24px 16px 24px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f3f4f6">
+      <h2 style="flex:1;margin:0;font-family:'Museo Sans',sans-serif;font-weight:700;font-size:16px;line-height:20px;color:#000">Bulk apply translation</h2>
+      <button onclick="closeBulkTranslationModal()" aria-label="Close" style="background:none;border:none;cursor:pointer;color:#6b7280;display:inline-flex;align-items:center"><span class="mi" style="font-size:20px">close</span></button>
+    </div>
+    <div style="padding:16px 24px;display:flex;flex-direction:column;gap:16px">
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <label style="font-family:'Inter',sans-serif;font-weight:500;font-size:12px;line-height:18px;color:#1d2433">Apply to</label>
+          <span id="bulkScopeChip" style="display:inline-flex;align-items:center;gap:4px;font-family:'Inter',sans-serif;font-size:11px;line-height:16px;color:#3d7bf7;background:#f0f5ff;border:1px solid #bfdbfe;border-radius:999px;padding:2px 8px;font-weight:500">
+            <span class="mi" style="font-size:12px">filter_list</span>
+            <span id="bulkScopeChipText">All reconciliations</span>
+          </span>
+        </div>
+        <div id="bulkRecsDropdown"></div>
+        <p id="bulkScopeHelper" style="font-family:'Inter',sans-serif;font-weight:400;font-size:11px;line-height:16px;color:rgba(29,36,51,0.65);margin:4px 0 0 0">Translation will be applied to checked reconciliations. Adjust the page filter or uncheck below to change scope.</p>
+      </div>
+      <div>
+        <p style="font-family:'Inter',sans-serif;font-weight:500;font-size:12px;line-height:18px;color:#424867;margin:0 0 8px 0">Translation</p>
+        <div style="border:1px solid #e1e6ef;border-radius:6px;padding:12px;display:flex;flex-direction:column;gap:8px;background:#fff">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-family:'Inter',sans-serif;font-weight:500;font-size:12px;line-height:18px;color:#1d2433">Target Currency</label>
+            <div id="bulkTargetDropdown"></div>
+          </div>
+          <p style="font-family:'Inter',sans-serif;font-weight:400;font-size:11px;line-height:16px;color:rgba(29,36,51,0.65);margin:0">Balance will be translated from source to target currency. Translation only, no consolidation adjustments.</p>
+        </div>
+      </div>
+    </div>
+    <div style="padding:14px 24px;display:flex;justify-content:flex-end;gap:8px;border-top:1px solid #f3f4f6;background:#fafbfc">
+      <button onclick="closeBulkTranslationModal()" class="fui-btn fui-btn-secondary" style="border:none;background:transparent">Cancel</button>
+      <button id="bulkTransApplyBtn" onclick="applyBulkTranslation()" class="fui-btn fui-btn-primary">Apply Translation</button>
+    </div>
+  </div>
+
+  <!-- ===== DEMO SCENARIO MENU (PROTOTYPE-ONLY UI - opens from top-right button) ===== -->
+  <div id="scenarioMenu" style="display:none;position:absolute;z-index:9999;background:white;border:1px solid #e1e6ef;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.12);padding:8px;font-family:'Inter',sans-serif;width:300px">
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <button id="scenS1" onclick="applyScenario('S1')" class="scen-btn" style="text-align:left;padding:8px 10px;border:1px solid transparent;border-radius:6px;background:white;cursor:pointer;font-family:inherit">
+        <div style="font-size:12px;font-weight:600;color:#1d2433">S-1 · Single entity, no translation</div>
+        <div style="font-size:11px;color:#6b7280;margin-top:1px">US only - display USD as-is</div>
+      </button>
+      <button id="scenS2" onclick="applyScenario('S2')" class="scen-btn" style="text-align:left;padding:8px 10px;border:1px solid transparent;border-radius:6px;background:white;cursor:pointer;font-family:inherit">
+        <div style="font-size:12px;font-weight:600;color:#1d2433">S-2 · Single entity, translated</div>
+        <div style="font-size:11px;color:#6b7280;margin-top:1px">US to GBP (UK Holdings)</div>
+      </button>
+      <button id="scenS3" onclick="applyScenario('S3')" class="scen-btn" style="text-align:left;padding:8px 10px;border:1px solid transparent;border-radius:6px;background:white;cursor:pointer;font-family:inherit">
+        <div style="font-size:12px;font-weight:600;color:#1d2433">S-3 · Multi entity, no translation</div>
+        <div style="font-size:11px;color:#6b7280;margin-top:1px">US + CA - mixed-currency sum</div>
+      </button>
+      <button id="scenS4" onclick="applyScenario('S4')" class="scen-btn" style="text-align:left;padding:8px 10px;border:1px solid transparent;border-radius:6px;background:white;cursor:pointer;font-family:inherit">
+        <div style="font-size:12px;font-weight:600;color:#1d2433">S-4 · Multi entity, translated</div>
+        <div style="font-size:11px;color:#6b7280;margin-top:1px">US + CA to GBP - translate-then-sum</div>
+      </button>
+      <button id="scenS5" onclick="applyScenario('S5')" class="scen-btn" style="text-align:left;padding:8px 10px;border:1px solid transparent;border-radius:6px;background:white;cursor:pointer;font-family:inherit">
+        <div style="font-size:12px;font-weight:600;color:#1d2433">S-5 · No shared currency</div>
+        <div style="font-size:11px;color:#6b7280;margin-top:1px">US + MX - no overlapping target currencies</div>
+      </button>
+      <button id="scenS6" onclick="applyScenario('S6')" class="scen-btn" style="text-align:left;padding:8px 10px;border:1px solid transparent;border-radius:6px;background:white;cursor:pointer;font-family:inherit">
+        <div style="font-size:12px;font-weight:600;color:#1d2433">S-6 · Translation errors</div>
+        <div style="font-size:11px;color:#6b7280;margin-top:1px">US to GBP - rate fetch failures</div>
+      </button>
+    </div>
+    <div id="errorToggleWrap" style="margin-top:8px;padding-top:8px;border-top:1px solid #f3f4f6">
+      <label id="errorToggleLabel" style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:#1d2433;font-family:'Inter',sans-serif;padding:6px 10px" title="Manually simulate translation errors (only relevant when translation is active)">
+        <input type="checkbox" id="errorToggle" onchange="toggleErrorStates(this.checked)" style="width:14px;height:14px;cursor:pointer">
+        <span>Simulate translation errors (FR-9)</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- ===== SCENARIO CONTEXT BANNER (prototype demo aid) ===== -->
+  <div id="scenarioBanner" style="display:none;position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:9998;padding:8px 14px;border-radius:6px;font-family:'Inter',sans-serif;font-size:12px;font-weight:500;box-shadow:0 4px 12px rgba(0,0,0,0.08)"></div>
+
+  <style>
+    .scen-btn:hover { background:#f9fafb !important; }
+    .scen-btn.active { background:#eff6ff !important; border-color:#1d4ed8 !important; }
+    .scen-btn.active > div:first-child { color:#1d4ed8 !important; }
+  </style>
+
+  <script>
+  // ============================================================
+  // SCROLL SHADOW FOR STICKY COLUMNS
+  // ============================================================
+  (function() {
+    const wrap = document.getElementById('tableWrap');
+    if (wrap) {
+      wrap.addEventListener('scroll', function() {
+        wrap.classList.toggle('is-scrolled', wrap.scrollLeft > 0);
+      });
+    }
+  })();
+
+  // ============================================================
+  // SIDEDRAWER ENGINE
+  // ============================================================
+  const DD_OPTIONS = {
+    folder: ['01 Cash and cash equivalents','02 Accounts receivable','03 Prepaid expenses','04 Other current assets'],
+    account: ['1225 - Accounts Receivable: Non-trade','1400 - Prepaid Expenses','1010 - Cash in Bank - USD Operating','1020 - Cash in Bank - USD Payroll','1030 - Cash in Bank - EUR Operating'],
+    accounts: ['1010 - Cash in Bank - USD Operating','1020 - Cash in Bank - USD Payroll','1030 - Cash in Bank - EUR Operating','1030 - Cash in Bank - EUR Operating (1)'],
+    frequency: ['Monthly','Quarterly','Annually'],
+    assignee: ['Sean Bean','Elijah Wood','Viggo Mortensen','Sean Astin','Orlando Bloom','Ian McKellen','Liv Tyler','Cate Blanchett','Karl Urban','Andy Serkis'],
+    role: ['Monthly Reviewer','Preparer','Approver'],
+    dueType: ['Business Day','Calendar Day'],
+    dimension: ['Company','Bank Account','Book Code','Currency'],
+    dimensionValues: {
+      'Company': ['Global Modern Services, Inc. (USD)','Acme Corp (USD)','Widget LLC (JPY)','Canada Operations, Inc. (CAD)','Mexico Services S.A. (MXN)','UK Holdings Ltd. (GBP)'],
+      'Bank Account': ['Morgan Stanley','(No Value)','Bank of America'],
+      'Book Code': ['Book Code A','Book Code B','Book Code C'],
+      'Currency': ['CAD (Canadian Dollar)','EUR (Euro)','GBP (British Pound)','JPY (Japanese Yen)','MXN (Mexican Peso)','USD (US Dollar)'],
+    },
+    currency: ['__functional__','CAD (Canadian Dollar)','EUR (Euro)','GBP (British Pound)','JPY (Japanese Yen)','MXN (Mexican Peso)','USD (US Dollar)'],
+    targetCompany: ['__none__','USD (US Dollar)','EUR (Euro)','GBP (British Pound)','JPY (Japanese Yen)','CAD (Canadian Dollar)','MXN (Mexican Peso)'],
+    kebab: ['Edit','Delete'],
+    kebabGroup: ['Edit','Remove from Group','Delete'],
+  };
+
+  // Individual account data (one per table row)
+  const INDIVIDUAL_ACCTS = [
+    { name:'1225 - Accounts Receivable: Non-trade', company:'Global Modern Services, Inc. (USD)', bank:'(No Value)', book:'Book Code A', currency:'USD (US Dollar)',
+      filters:[{dim:'Company',vals:['Global Modern Services, Inc. (USD)']},{dim:'Bank Account',vals:['(No Value)']},{dim:'Book Code',vals:['Book Code A']}] },
+    { name:'1400 - Prepaid Expenses', company:'Global Modern Services, Inc. (USD)', bank:'(No Value)', book:'Book Code B', currency:'USD (US Dollar)',
+      filters:[{dim:'Company',vals:['Global Modern Services, Inc. (USD)']}] },
+  ];
+
+  // Group account data (multiple accounts in group)
+  const GROUP_ACCTS = [
+    { name:'1010 - Cash in Bank - USD Operating', company:'Global Modern Services, Inc. (USD)', bank:'Morgan Stanley', book:'Book Code A', currency:'USD (US Dollar)',
+      filters:[{dim:'Company',vals:['Global Modern Services, Inc. (USD)']},{dim:'Bank Account',vals:['Morgan Stanley','(No Value)']},{dim:'Book Code',vals:['Book Code A','Book Code C']}] },
+    { name:'1020 - Cash in Bank - USD Payroll', company:'Global Modern Services, Inc. (USD)', bank:'Morgan Stanley', book:'Book Code A', currency:'USD (US Dollar)',
+      filters:[{dim:'Company',vals:['Global Modern Services, Inc. (USD)']},{dim:'Bank Account',vals:['Morgan Stanley']},{dim:'Book Code',vals:['Book Code A']}] },
+    { name:'1030 - Cash in Bank - EUR Operating', company:'Global Modern Services, Inc. (USD)', bank:'Morgan Stanley', book:'Book Code A', currency:'USD (US Dollar)',
+      filters:[{dim:'Company',vals:['Global Modern Services, Inc. (USD)']},{dim:'Bank Account',vals:['Morgan Stanley']},{dim:'Book Code',vals:['Book Code A']}] },
+    { name:'1030 - Cash in Bank - EUR Operating (1)', company:'Global Modern Services, Inc. (USD)', bank:'Morgan Stanley', book:'Book Code C', currency:'USD (US Dollar)',
+      filters:[{dim:'Company',vals:['Global Modern Services, Inc. (USD)']},{dim:'Bank Account',vals:['Morgan Stanley']},{dim:'Book Code',vals:['Book Code C']}] },
+  ];
+
+  // ACCT_DATA is set dynamically based on drawer type
+  let ACCT_DATA = [];
+
+  // ---- Group expand/collapse ----
+  let groupExpanded = true;
+  let groupAnimating = false;
+  const SLIDE_MS = 220;
+
+  // Slide a row from its current natural height to 0 (or vice versa) by setting
+  // measured pixel heights on its tds. Uses requestAnimationFrame for proper
+  // browser layout sequencing so the transition kicks in.
+  function slideRow(tr, direction, onDone) {
+    const tds = Array.from(tr.querySelectorAll('td'));
+    if (direction === 'collapse') {
+      // Capture natural heights and paddings
+      const naturalHeights = tds.map(td => td.offsetHeight);
+      tds.forEach((td, i) => {
+        td.style.height = naturalHeights[i] + 'px';
+        td.style.boxSizing = 'border-box';
+      });
+      tr.classList.add('is-sliding');
+      // Force reflow so the height set above is committed
+      void tr.offsetHeight;
+      requestAnimationFrame(() => {
+        tds.forEach(td => {
+          td.style.height = '0';
+          td.style.paddingTop = '0';
+          td.style.paddingBottom = '0';
+          td.style.opacity = '0';
+        });
+      });
+      setTimeout(() => {
+        tr.style.display = 'none';
+        tds.forEach(td => {
+          td.style.height = '';
+          td.style.paddingTop = '';
+          td.style.paddingBottom = '';
+          td.style.opacity = '';
+          td.style.boxSizing = '';
+        });
+        tr.classList.remove('is-sliding');
+        if (onDone) onDone();
+      }, SLIDE_MS);
+    } else {
+      // EXPAND: show row, measure natural height, animate from 0 to natural
+      tr.style.display = '';
+      // Briefly remove transition to take a clean measurement
+      tr.classList.remove('is-sliding');
+      tds.forEach(td => {
+        td.style.height = 'auto';
+        td.style.paddingTop = '';
+        td.style.paddingBottom = '';
+        td.style.opacity = '';
+      });
+      const naturalHeights = tds.map(td => td.offsetHeight);
+      // Set to collapsed state instantly
+      tds.forEach((td, i) => {
+        td.style.height = '0';
+        td.style.paddingTop = '0';
+        td.style.paddingBottom = '0';
+        td.style.opacity = '0';
+        td.style.boxSizing = 'border-box';
+      });
+      // Force reflow then add transition class and animate to natural
+      void tr.offsetHeight;
+      tr.classList.add('is-sliding');
+      requestAnimationFrame(() => {
+        tds.forEach((td, i) => {
+          td.style.height = naturalHeights[i] + 'px';
+          td.style.paddingTop = '';
+          td.style.paddingBottom = '';
+          td.style.opacity = '1';
+        });
+      });
+      setTimeout(() => {
+        tds.forEach(td => {
+          td.style.height = '';
+          td.style.opacity = '';
+          td.style.boxSizing = '';
+        });
+        tr.classList.remove('is-sliding');
+        if (onDone) onDone();
+      }, SLIDE_MS);
+    }
+  }
+
+  function toggleGroup() {
+    if (groupAnimating) return;
+    groupAnimating = true;
+    groupExpanded = !groupExpanded;
+
+    const childRows = Array.from(document.querySelectorAll('.group-expandable'));
+    const totalExpanded = document.getElementById('totalRowExpanded');
+    const totalCollapsed = document.getElementById('totalRowCollapsed');
+    const ghCells = ['gh-gl','gh-rb','gh-ri','gh-df'].map(id => document.getElementById(id)).filter(Boolean);
+    const ghEmpty = document.querySelectorAll('.gh-empty');
+
+    if (!groupExpanded) {
+      // COLLAPSING: slide children + expanded total up
+      const rowsToCollapse = [...childRows];
+      if (totalExpanded) rowsToCollapse.push(totalExpanded);
+      rowsToCollapse.forEach(tr => slideRow(tr, 'collapse'));
+      setTimeout(() => {
+        ghEmpty.forEach(td => td.style.display = 'none');
+        ghCells.forEach(td => td.style.display = '');
+        if (totalCollapsed) totalCollapsed.style.display = '';
+        groupAnimating = false;
+      }, SLIDE_MS);
+    } else {
+      // EXPANDING: hide collapsed-state instantly, slide children down
+      ghCells.forEach(td => td.style.display = 'none');
+      if (totalCollapsed) totalCollapsed.style.display = 'none';
+      ghEmpty.forEach(td => td.style.display = '');
+      const rowsToExpand = [...childRows];
+      if (totalExpanded) rowsToExpand.push(totalExpanded);
+      rowsToExpand.forEach(tr => slideRow(tr, 'expand'));
+      setTimeout(() => { groupAnimating = false; }, SLIDE_MS);
+    }
+  }
+
+  // Avatar photos (consistent per person)
+  const PHOTOS = {
+    'Sean Bean': 'https://i.pravatar.cc/64?img=33',
+    'Liv Tyler': 'https://i.pravatar.cc/64?img=47',
+    'Elijah Wood': 'https://i.pravatar.cc/64?img=11',
+    'Viggo Mortensen': 'https://i.pravatar.cc/64?img=52',
+    'Sean Astin': 'https://i.pravatar.cc/64?img=59',
+    'Orlando Bloom': 'https://i.pravatar.cc/64?img=14',
+    'Ian McKellen': 'https://i.pravatar.cc/64?img=60',
+    'Cate Blanchett': 'https://i.pravatar.cc/64?img=44',
+    'Karl Urban': 'https://i.pravatar.cc/64?img=53',
+    'Andy Serkis': 'https://i.pravatar.cc/64?img=57',
+  };
+  function photoAvatar(name, size) {
+    const s = size || 24;
+    const src = PHOTOS[name] || 'https://i.pravatar.cc/64?img=3';
+    return `<div style="width:${s}px;height:${s}px;border-radius:50%;overflow:hidden;flex-shrink:0"><img src="${src}" style="width:100%;height:100%;object-fit:cover" alt="${esc(name)}"></div>`;
+  }
+
+  // Currency conversion
+  const FUNCTIONAL_CURRENCY = 'USD (US Dollar)';
+
+  // Per-cell functional currency for mixed-currency demo (S-3).
+  // Standalone recs and US group children are USD; CA group children are CAD.
+  const CELL_FUNCTIONAL = {
+    r1: 'USD (US Dollar)',
+    r2: 'USD (US Dollar)',
+    g1: 'USD (US Dollar)',
+    g2: 'USD (US Dollar)',
+    g3: 'CAD (Canadian Dollar)',
+    g4: 'CAD (Canadian Dollar)',
+    gt: null, // Total row (expanded) - mixed
+    gh: null, // Group header collapsed total - mixed
+  };
+  const FX_RATES = {
+    'USD (US Dollar)': { rate: 1, sym: '$', code: 'USD', rateDisplay: '1.00' },
+    'EUR (Euro)': { rate: 0.92, sym: '\u20AC', code: 'EUR', rateDisplay: '0.92' },
+    'GBP (British Pound)': { rate: 0.79, sym: '\u00A3', code: 'GBP', rateDisplay: '0.79' },
+    'JPY (Japanese Yen)': { rate: 149.50, sym: '\u00A5', code: 'JPY', rateDisplay: '149.50' },
+    'CAD (Canadian Dollar)': { rate: 1.36, sym: 'C$', code: 'CAD', rateDisplay: '1.36' },
+    'MXN (Mexican Peso)': { rate: 17.15, sym: 'MX$', code: 'MXN', rateDisplay: '17.15' },
+  };
+  const PERIOD_END = 'March 31, 2025';
+  const NO_TARGET_COMPANY = 'No Target Currency';
+  const COMPANY_CURRENCY_MAP = {
+    'Global Modern Services, Inc. (USD)': 'USD (US Dollar)',
+    'Acme Corp (USD)': 'USD (US Dollar)',
+    'Widget LLC (JPY)': 'JPY (Japanese Yen)',
+    'Canada Operations, Inc. (CAD)': 'CAD (Canadian Dollar)',
+    'Mexico Services S.A. (MXN)': 'MXN (Mexican Peso)',
+    'UK Holdings Ltd. (GBP)': 'GBP (British Pound)',
+  };
+  function companyToCurrency(company) {
+    if (!company || company === NO_TARGET_COMPANY) return FUNCTIONAL_CURRENCY;
+    // Now that the dropdown stores currency names directly, pass them through.
+    // Legacy: if a company name was stored, look up its currency.
+    if (FX_RATES[company]) return company;
+    return COMPANY_CURRENCY_MAP[company] || FUNCTIONAL_CURRENCY;
+  }
+
+  // Error state demo (FR-9)
+  // Two error patterns:
+  //   ERROR_RATE_UNAVAILABLE: "Rate N/A" - rate exists but missing for this period
+  //   ERROR_API_DOWN: "Unable to load" - Balances API silent failure (Lynn's flag)
+  // Toggleable via the demo picker. Default off so the happy path is clean.
+  let ERROR_RATE_UNAVAILABLE = {};
+  let ERROR_API_DOWN = {};
+
+  // Map: which table cell IDs belong to which drawer type / account index
+  const TABLE_CELLS_BY_ROW = {
+    0: [['r1-gl','r1-rb','r1-ri','r1-df']],
+    1: [['r2-gl','r2-rb','r2-ri','r2-df']],
+  };
+  const TABLE_CELLS = {
+    individual: {
+      0: null,
+    },
+    group: {
+      0: [['g1-gl','g1-rb','g1-ri','g1-df']],
+      1: [['g2-gl','g2-rb','g2-ri','g2-df']],
+      2: [['g3-gl','g3-rb','g3-ri','g3-df']],
+      3: [['g4-gl','g4-rb','g4-ri','g4-df']],
+      bulk: [
+        ['g1-gl','g1-rb','g1-ri','g1-df'],
+        ['g2-gl','g2-rb','g2-ri','g2-df'],
+        ['g3-gl','g3-rb','g3-ri','g3-df'],
+        ['g4-gl','g4-rb','g4-ri','g4-df'],
+        ['gt-gl','gt-rb','gt-ri','gt-df'],
+        ['gh-gl','gh-rb','gh-ri','gh-df'],
+      ],
+    },
+  };
+
+  function fmtAmount(amount, fx) {
+    if (fx.code === 'JPY') {
+      return fx.sym + amount.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0});
+    }
+    return fx.sym + amount.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+
+  function convertTableCells(cellIds, currencyKey, targetCompanyName) {
+    const isFunctional = !currencyKey || currencyKey === FUNCTIONAL_CURRENCY || currencyKey === 'Functional Currency';
+    const fx = isFunctional ? FX_RATES[FUNCTIONAL_CURRENCY] : (FX_RATES[currencyKey] || FX_RATES[FUNCTIONAL_CURRENCY]);
+    const funcFx = FX_RATES[FUNCTIONAL_CURRENCY];
+
+    // Count how many non-total rec balance cells in this batch have errors,
+    // so the total row can show a "(partial)" indicator.
+    let errorCount = 0;
+    cellIds.forEach(row => row.forEach(cellId => {
+      if (cellId.endsWith('-rb') && !cellId.startsWith('gt-')) {
+        if (ERROR_RATE_UNAVAILABLE[cellId] || ERROR_API_DOWN[cellId]) errorCount++;
+      }
+    }));
+
+    cellIds.forEach(row => {
+      row.forEach(cellId => {
+        const cell = document.getElementById(cellId);
+        if (!cell) return;
+        const usd = parseFloat(cell.dataset.usd);
+        const star = cell.dataset.star === '1';
+        const isRb = cellId.endsWith('-rb'); // Rec. Balance column
+
+        // FR-9 Error states - FlowUI warning Badge pattern (node 4137:101053 / 101067)
+        if (ERROR_RATE_UNAVAILABLE[cellId]) {
+          const pid = registerPopover(`<p class="pop-title">Rate unavailable</p><p class="pop-body">No exchange rate is available for this period. The functional currency value is still accessible.</p><div class="pop-footer"><span class="pop-footer-name">ASC 830</span><span class="pop-footer-meta">end-of-period</span></div>`);
+          cell.innerHTML = `<div class="fui-cell-error">
+            <span class="error-label">Rate N/A</span>
+            <span class="info-trigger fui-warn-row" onclick="showInfoPopover(this,event)" data-popid="${pid}" style="cursor:pointer">
+              <span class="mi">report_problem</span>
+              <span class="fui-warn-badge">Translation skipped</span>
+            </span>
+          </div>`;
+          return;
+        }
+        if (ERROR_API_DOWN[cellId]) {
+          const pid = registerPopover(`<p class="pop-title">Balance unavailable</p><p class="pop-body">We couldn't retrieve this balance. This may be a temporary issue.</p><div class="pop-footer"><span class="pop-footer-name">Try Refresh</span><span class="pop-footer-meta">or contact support</span></div>`);
+          cell.innerHTML = `<div class="fui-cell-error">
+            <span class="info-trigger fui-warn-row" onclick="showInfoPopover(this,event)" data-popid="${pid}" style="cursor:pointer">
+              <span class="mi">report_problem</span>
+              <span class="fui-warn-badge">Unable to load</span>
+            </span>
+          </div>`;
+          return;
+        }
+
+        const converted = usd * fx.rate;
+        const formatted = fmtAmount(converted, fx) + (star ? '*' : '');
+
+        const isTotal = cellId.startsWith('gt-');
+        if (!isFunctional && isRb) {
+          // Show translated indicator on Rec. Balance
+          const tcName = targetCompanyName || fx.code;
+          const sourceCo = (typeof getRecSourceCompany === 'function') ? getRecSourceCompany() : 'Source company';
+          const popoverHtml = `<p class="pop-title">Translated balance</p>`
+            + `<p class="pop-body">From <b>${esc(sourceCo)}</b> to <b>${esc(tcName)}</b>.</p>`
+            + `<p class="rate-line">Rate: 1 ${funcFx.code} = ${fx.rateDisplay} ${fx.code} as of end of ${PERIOD_END}.</p>`
+            + `<div class="pop-footer"><span class="pop-footer-name">ASC 830</span><span class="pop-footer-meta">via Balances API</span></div>`;
+          const pid = registerPopover(popoverHtml);
+          // Total row gets a "Partial" indicator when sub-rows had errors (FlowUI warning Badge - node 4137:101082)
+          const partialBadge = (isTotal && errorCount > 0) ? `
+            <span class="fui-warn-row" style="margin-top:2px">
+              <span class="mi">report_problem</span>
+              <span class="fui-warn-badge">Partial translation</span>
+            </span>
+          ` : '';
+          cell.innerHTML = `<div style="display:flex;flex-direction:column;align-items:flex-end">
+            <span>${formatted}</span>
+            <span class="translated-badge">
+              ${funcFx.code} <span class="arrow">\u2192</span> ${fx.code}
+              <span class="info-trigger" onclick="showInfoPopover(this,event)" data-popid="${pid}">
+                <span class="mi">info</span>
+              </span>
+            </span>
+            ${partialBadge}
+          </div>`;
+        } else {
+          cell.textContent = formatted;
+        }
+      });
+    });
+  }
+
+  function onCurrencyChanged(acctIdx, currencyKey) {
+    const mapping = TABLE_CELLS[drawerType];
+    if (!mapping) return;
+    const cellGroups = mapping[acctIdx];
+    if (cellGroups) convertTableCells(cellGroups, currencyKey);
+  }
+
+  // Mixed-currency display for S-3: each cell prefixed with its functional currency code.
+  // Total row marked as "Mixed" with USD + CAD pill indicating mixed-currency sum.
+  // Render group cells in mixed-currency mode.
+  // opts.currencyLabel: text shown under "Mixed" in totals (e.g. "USD + CAD" for S-3, "USD + MXN" for S-5)
+  // opts.cellMapOverride: optional override mapping (e.g. for S-5, remap g3/g4 from CAD to MXN)
+  function applyMixedCurrencyDisplay(opts = {}) {
+    const currencyLabel = opts.currencyLabel || 'USD + CAD';
+    const cellMap = opts.cellMapOverride || CELL_FUNCTIONAL;
+    const allCells = TABLE_CELLS.group.bulk;
+    allCells.forEach(row => {
+      row.forEach(cellId => {
+        const cell = document.getElementById(cellId);
+        if (!cell) return;
+        const usd = parseFloat(cell.dataset.usd);
+        const star = cell.dataset.star === '1';
+        const prefix = cellId.split('-')[0]; // 'g1', 'gt', etc.
+
+        if (prefix === 'gt' || prefix === 'gh') {
+          // Total rows: FlowUI Mixed indicator (Figma node 4137:95731)
+          // "Mixed" Inter Medium 12px/18px in warning-primary #DB7712 (no italic)
+          // currencyLabel Inter Medium 12px/18px in muted-text #adb2bb (no pill)
+          cell.innerHTML = `<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;font-family:'Inter',sans-serif;font-weight:500;font-size:12px;line-height:18px">
+            <span style="color:#DB7712">Mixed</span>
+            <span style="color:#adb2bb">${currencyLabel}</span>
+          </div>`;
+          return;
+        }
+
+        const currencyKey = cellMap[prefix] || FUNCTIONAL_CURRENCY;
+        const fx = FX_RATES[currencyKey];
+        const converted = usd * fx.rate;
+        // Strip dollar-variant country letter (C$, MX$, A$ → $) since the code prefix already disambiguates.
+        // Keep distinctive symbols (£, ¥, €) since they are already unique.
+        const cleanSym = fx.sym.replace(/^[A-Z]+\$$/, '$');
+        const fxClean = { ...fx, sym: cleanSym };
+        const formatted = fmtAmount(converted, fxClean) + (star ? '*' : '');
+        cell.innerHTML = `<div style="display:inline-flex;align-items:baseline;justify-content:flex-end;gap:5px;width:100%"><span style="font-family:'Inter',sans-serif;font-size:10px;font-weight:600;color:#6b7280;letter-spacing:0.02em">${fx.code}</span><span>${formatted}</span></div>`;
+      });
+    });
+  }
+
+  function onBulkCurrencyChanged(currencyKey, targetCompanyName) {
+    const mapping = TABLE_CELLS.group;
+    if (mapping && mapping.bulk) convertTableCells(mapping.bulk, currencyKey, targetCompanyName);
+  }
+
+  // ============================================================
+  // DEMO SCENARIO PICKER
+  // S-1: Single entity, no translation - US, display USD as-is
+  // S-2: Single entity, translated - US to GBP
+  // S-3: Multi entity, no translation - US + CA, mixed-currency sum (raw)
+  // S-4: Multi entity, translated - US + CA to GBP (translate-then-sum)
+  // ============================================================
+  let currentScenario = null;
+  // First-time education for translation (FR-10/11)
+  // Shows once per session when user first picks a Target Company.
+  let firstTargetEducationShown = false;
+  let firstTargetEducationDismissed = false;
+  const SCENARIO_LABELS = {
+    S1: 'S-1 · Single entity, no translation',
+    S2: 'S-2 · Single entity, translated',
+    S3: 'S-3 · Multi entity, no translation',
+    S4: 'S-4 · Multi entity, translated',
+    S5: 'S-5 · No shared currency',
+    S6: 'S-6 · Translation errors',
+  };
+
+  // Scenarios where translation is actively happening (FX lookups can fail).
+  // The error toggle is only meaningful in these scenarios; elsewhere it's disabled.
+  const TRANSLATION_ACTIVE_SCENARIOS = ['S2','S4','S6'];
+
+  // Update the error toggle availability based on the active scenario.
+  // - S-1, S-3, S-5: no translation, no FX call, errors are conceptually impossible -> disable toggle.
+  // - S-2, S-4: translation active, allow manual toggling.
+  // - S-6: translation active AND errors are the demo point -> auto-on, locked.
+  function updateErrorToggleAvailability(scenario) {
+    const wrap = document.getElementById('errorToggleWrap');
+    const label = document.getElementById('errorToggleLabel');
+    const cb = document.getElementById('errorToggle');
+    if (!wrap || !label || !cb) return;
+
+    const active = TRANSLATION_ACTIVE_SCENARIOS.indexOf(scenario) !== -1;
+
+    if (scenario === 'S6') {
+      // Force errors on and lock the toggle - errors are the whole point of S-6.
+      cb.checked = true;
+      cb.disabled = true;
+      label.style.opacity = '1';
+      label.style.cursor = 'not-allowed';
+      label.title = 'S-6 demonstrates translation errors - locked on';
+      setErrorStates(true);
+    } else if (active) {
+      // S-2, S-4: free toggling.
+      cb.disabled = false;
+      label.style.opacity = '1';
+      label.style.cursor = 'pointer';
+      label.title = 'Manually simulate translation errors (FR-9)';
+    } else {
+      // S-1, S-3, S-5: no translation -> nothing to err on.
+      cb.checked = false;
+      cb.disabled = true;
+      label.style.opacity = '0.45';
+      label.style.cursor = 'not-allowed';
+      label.title = 'No translation active - nothing to error on';
+      setErrorStates(false);
+    }
+  }
+
+  // Migration callout is hidden in all scenarios - the inline banner copy is parked
+  // pending PM/content sign-off. Keep this function as a no-op so the call sites
+  // elsewhere don't break.
+  function updateMigrationCalloutVisibility(scenario) {
+    const callout = document.getElementById('migrationCallout');
+    if (!callout) return;
+    callout.style.display = 'none';
+  }
+
+  function toggleScenarioMenu(ev) {
+    if (ev) ev.stopPropagation();
+    const menu = document.getElementById('scenarioMenu');
+    const btn = document.getElementById('demoScenariosBtn');
+    if (!menu || !btn) return;
+    if (menu.style.display === 'block') {
+      menu.style.display = 'none';
+      return;
+    }
+    const rect = btn.getBoundingClientRect();
+    menu.style.top = (rect.bottom + 4) + 'px';
+    menu.style.left = (rect.right - 300) + 'px';
+    menu.style.display = 'block';
+  }
+
+  // Close menu on outside click
+  document.addEventListener('click', (e) => {
+    const menu = document.getElementById('scenarioMenu');
+    if (!menu || menu.style.display !== 'block') return;
+    if (e.target.closest('#scenarioMenu') || e.target.closest('#demoScenariosBtn')) return;
+    menu.style.display = 'none';
+  });
+
+  function applyScenario(name) {
+    currentScenario = name;
+    // Set error state FIRST, before cells render. S-6 locks errors on; S-1/S-3/S-5
+    // (no translation) lock errors off. S-2/S-4 leave whatever the user had set.
+    if (name === 'S6') {
+      setErrorStates(true);
+    } else if (TRANSLATION_ACTIVE_SCENARIOS.indexOf(name) === -1) {
+      setErrorStates(false);
+    }
+    // Update active button styling
+    ['S1','S2','S3','S4','S5','S6'].forEach(s => {
+      const btn = document.getElementById('scen'+s);
+      if (btn) btn.classList.toggle('active', s === name);
+    });
+    // Update top-right dropdown button label
+    const label = document.getElementById('demoScenariosLabel');
+    if (label) label.textContent = SCENARIO_LABELS[name] || 'Demo Scenarios ( Prototype Only )';
+    // Auto-close menu after selection
+    const menu = document.getElementById('scenarioMenu');
+    if (menu) menu.style.display = 'none';
+
+    const banner = document.getElementById('scenarioBanner');
+
+    // Convert all table cells under group
+    const mapping = TABLE_CELLS.group;
+    const allCells = mapping && mapping.bulk ? mapping.bulk : [];
+
+    if (name === 'S1') {
+      // Reset to functional currency
+      convertTableCells(allCells, FUNCTIONAL_CURRENCY, null);
+      banner.style.display = 'none';
+      banner.innerHTML = ''; // clear stale text from previous scenario
+      setTranslationStatusPill(null);
+    } else if (name === 'S2') {
+      // Translate to GBP
+      convertTableCells(allCells, 'GBP (British Pound)', 'GBP (British Pound)');
+      setTranslationStatusPill('GBP');
+      banner.style.background = '#eff6ff';
+      banner.style.border = '1px solid #bfdbfe';
+      banner.style.color = '#1d4ed8';
+      banner.innerHTML = '<span class="mi" style="font-size:14px;vertical-align:middle;margin-right:6px">currency_exchange</span>S-2 · Balances shown in GBP using the March 31, 2025 closing rate';
+      banner.style.display = 'none';
+    } else if (name === 'S3') {
+      // Mixed currency - render each cell with its functional currency prefix (USD / CAD)
+      applyMixedCurrencyDisplay();
+      setTranslationStatusPill(null);
+      banner.style.background = '#fffbeb';
+      banner.style.border = '1px solid #fde68a';
+      banner.style.color = '#92400e';
+      banner.innerHTML = '<span class="mi" style="font-size:14px;vertical-align:middle;margin-right:6px">warning</span>S-3 · US and Canada balances shown side by side - totals stay separate since no reporting currency is set yet';
+      banner.style.display = 'none';
+    } else if (name === 'S4') {
+      // Translate-then-sum to GBP
+      convertTableCells(allCells, 'GBP (British Pound)', 'GBP (British Pound)');
+      setTranslationStatusPill('GBP');
+      banner.style.background = '#ecfdf5';
+      banner.style.border = '1px solid #a7f3d0';
+      banner.style.color = '#065f46';
+      banner.innerHTML = '<span class="mi" style="font-size:14px;vertical-align:middle;margin-right:6px">currency_exchange</span>S-4 · US and Canada balances each converted to GBP, then summed for the group total';
+      banner.style.display = 'none';
+    } else if (name === 'S5') {
+      // No common parent - mixed-currency display (US + MX), since translation is structurally
+      // impossible. Falls back to S-3 visual treatment with USD + MXN as the source currencies.
+      // The drawer's Target Company dropdown will be disabled (see drawer logic).
+      applyMixedCurrencyDisplay({
+        currencyLabel: 'USD + MXN',
+        cellMapOverride: { ...CELL_FUNCTIONAL, g3: 'MXN (Mexican Peso)', g4: 'MXN (Mexican Peso)' },
+      });
+      setTranslationStatusPill(null);
+      banner.style.background = '#fef2f2';
+      banner.style.border = '1px solid #fecaca';
+      banner.style.color = '#991b1b';
+      banner.innerHTML = '<span class="mi" style="font-size:14px;vertical-align:middle;margin-right:6px">block</span>S-5 · The selected entities don\'t share a target currency, so translation isn\'t available for this group';
+      banner.style.display = 'none';
+    } else if (name === 'S6') {
+      // Translation errors - same target as S-2 (US to GBP) but with rate failures.
+      // updateErrorToggleAvailability auto-locks errors on for S-6.
+      convertTableCells(allCells, 'GBP (British Pound)', 'GBP (British Pound)');
+      setTranslationStatusPill('GBP');
+      banner.style.background = '#fff8eb';
+      banner.style.border = '1px solid #DB7712';
+      banner.style.color = '#92400e';
+      banner.innerHTML = '<span class="mi" style="font-size:14px;vertical-align:middle;margin-right:6px">report_problem</span>S-6 · Some balances couldn\'t be converted - the rate provider is missing data or temporarily unavailable';
+      banner.style.display = 'none';
+    }
+
+    // Toggle error simulation availability and migration callout based on scenario
+    updateErrorToggleAvailability(name);
+    updateMigrationCalloutVisibility(name);
+
+    // Mirror to formState so an open drawer reflects the scenario
+    applyScenarioToFormState(name);
+    const sdPanel = document.getElementById('sdPanel');
+    if (sdPanel && sdPanel.classList.contains('open') && typeof renderDrawerContent === 'function') {
+      renderDrawerContent();
+    }
+  }
+
+  // ============================================================
+  // PAGE-LEVEL FILTER (scopes rec list - drives bulk translation scope)
+  // ============================================================
+  let pageFilter = 'all'; // 'all' | 'standalone' | 'group'
+  const PAGE_FILTER_LABELS = {
+    all: 'All reconciliations',
+    standalone: 'Standalone only',
+    group: 'Group only',
+  };
+
+  function togglePageFilterMenu(ev) {
+    if (ev) ev.stopPropagation();
+    const menu = document.getElementById('pageFilterMenu');
+    menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+  }
+  document.addEventListener('click', (e) => {
+    const menu = document.getElementById('pageFilterMenu');
+    if (!menu || menu.style.display !== 'block') return;
+    if (e.target.closest('#pageFilterMenu') || e.target.closest('#pageFilterBtn')) return;
+    menu.style.display = 'none';
+  });
+
+  function setPageFilter(value) {
+    pageFilter = value;
+    // Update menu checkmarks
+    ['all','standalone','group'].forEach(k => {
+      const ic = document.getElementById('pfi-' + k);
+      if (ic) ic.style.visibility = (k === value) ? 'visible' : 'hidden';
+    });
+    // Update button label
+    const lbl = document.getElementById('pageFilterBtnLabel');
+    if (lbl) lbl.textContent = (value === 'all') ? 'Filter' : ('Filter: ' + PAGE_FILTER_LABELS[value]);
+    // Update button visual emphasis when filter is active
+    const btn = document.getElementById('pageFilterBtn');
+    if (btn) {
+      btn.style.borderColor = (value === 'all') ? '' : '#3d7bf7';
+      btn.style.color = (value === 'all') ? '' : '#3d7bf7';
+    }
+    // Show / hide rows
+    document.querySelectorAll('tr[data-rec-type]').forEach(tr => {
+      const t = tr.getAttribute('data-rec-type');
+      const matches = (value === 'all') || (t === value);
+      // Preserve original display for collapsed total row
+      if (tr.id === 'totalRowCollapsed') return; // handled by group-collapse logic
+      tr.style.display = matches ? '' : 'none';
+    });
+    // Close menu
+    const menu = document.getElementById('pageFilterMenu');
+    if (menu) menu.style.display = 'none';
+  }
+
+  function getVisibleRecsForBulk() {
+    return REC_BULK_CATALOG.filter(rec => {
+      if (pageFilter === 'all') return true;
+      const tr = document.querySelector('tr[data-rec-id="' + rec.id + '"]');
+      if (!tr) return true;
+      const t = tr.getAttribute('data-rec-type');
+      return t === pageFilter;
+    });
+  }
+
+  // ============================================================
+  // BULK TRANSLATION MODAL (page-level, multi-rec apply)
+  // ============================================================
+  // Maps each rec row to the table cells it owns, so we can re-translate
+  // those cells when the user applies a target via the modal.
+  const REC_BULK_CATALOG = [
+    { id: 'rec-r1', label: '1225 - Accounts Receivable: Non-trade ($10,000)', cells: [['r1-gl','r1-rb','r1-ri','r1-df']], sourceCompany: 'Global Modern Services, Inc. (USD)' },
+    { id: 'rec-r2', label: '1400 - Prepaid Expenses ($20,000)',               cells: [['r2-gl','r2-rb','r2-ri','r2-df']], sourceCompany: 'Global Modern Services, Inc. (USD)' },
+    { id: 'rec-hd', label: 'Hamburger Donuts (4 accounts, group)',            cells: TABLE_CELLS.group.bulk,             sourceCompany: 'Global Modern Services, Inc. (USD)' },
+  ];
+  let bulkModalTargetCompany = null;
+  // Within-modal multi-select. Filter narrows scope; user can still uncheck individual recs.
+  let bulkRecsSelected = []; // labels of recs currently checked in the modal
+
+  function openBulkTranslationModal() {
+    bulkModalTargetCompany = null;
+    // Default: all visible (filtered) recs are checked
+    bulkRecsSelected = getVisibleRecsForBulk().map(r => r.label);
+    document.getElementById('bulkTransOverlay').style.display = 'block';
+    document.getElementById('bulkTransModal').style.display = 'block';
+    renderBulkModalContent();
+  }
+
+  function closeBulkTranslationModal() {
+    document.getElementById('bulkTransOverlay').style.display = 'none';
+    document.getElementById('bulkTransModal').style.display = 'none';
+  }
+
+  function renderBulkModalContent() {
+    // Scope: drawn from the page filter (Option C). Modal lists those recs; user can uncheck individuals.
+    const visibleRecs = getVisibleRecsForBulk();
+    const visibleLabels = visibleRecs.map(r => r.label);
+    // Drop any previously-checked recs that are no longer in the filtered scope
+    bulkRecsSelected = bulkRecsSelected.filter(l => visibleLabels.includes(l));
+
+    // Scope chip near the label
+    const chipText = document.getElementById('bulkScopeChipText');
+    if (chipText) chipText.textContent = `Filter: ${PAGE_FILTER_LABELS[pageFilter]} (${visibleRecs.length})`;
+
+    // Multi-select dropdown of filtered recs (real component, search included)
+    const placeholder = bulkRecsSelected.length === visibleLabels.length
+      ? `All ${visibleLabels.length} reconciliation${visibleLabels.length === 1 ? '' : 's'} in scope`
+      : `${bulkRecsSelected.length} of ${visibleLabels.length} selected`;
+    document.getElementById('bulkRecsDropdown').innerHTML = renderDropdown(
+      'bulkModalRecs', null, visibleLabels,
+      { multi: true, selected: bulkRecsSelected, placeholder, borderActive: true }
+    );
+
+    // Source Company (auto-derived from CHECKED recs)
+    const checkedRecs = REC_BULK_CATALOG.filter(r => bulkRecsSelected.includes(r.label));
+    // Source Company dropdown removed - source is auto-derived from selected recs
+    // and not user-editable, so no need to display it.
+
+    // Target Currency (single select, real component)
+    document.getElementById('bulkTargetDropdown').innerHTML = renderDropdown(
+      'bulkModalTarget', bulkModalTargetCompany || 'No Target Currency',
+      DD_OPTIONS.targetCompany, { borderActive: true }
+    );
+
+    // Apply button enabled only when valid
+    const applyBtn = document.getElementById('bulkTransApplyBtn');
+    const valid = bulkRecsSelected.length > 0 && bulkModalTargetCompany;
+    applyBtn.style.opacity = valid ? '1' : '0.5';
+    applyBtn.style.cursor = valid ? 'pointer' : 'not-allowed';
+    applyBtn.textContent = (bulkRecsSelected.length && bulkRecsSelected.length < visibleLabels.length)
+      ? `Apply to ${bulkRecsSelected.length} of ${visibleLabels.length}`
+      : 'Apply Translation';
+  }
+
+  function applyBulkTranslation() {
+    if (!bulkModalTargetCompany || bulkRecsSelected.length === 0) return;
+    const currencyKey = companyToCurrency(bulkModalTargetCompany);
+    const flashIds = [];
+    REC_BULK_CATALOG.forEach(rec => {
+      if (bulkRecsSelected.includes(rec.label)) {
+        convertTableCells(rec.cells, currencyKey, bulkModalTargetCompany);
+        flashIds.push(rec.id);
+      }
+    });
+    // Pill: show currency code from the target company
+    const fx = FX_RATES[currencyKey];
+    setTranslationStatusPill(fx ? fx.code : null);
+    closeBulkTranslationModal();
+    // Flash all the rows that were just translated
+    setTimeout(() => flashIds.forEach(id => flashTranslatedRow(id)), 100);
+  }
+
+  // Flash a translated row light blue (info-secondary) so the user can see what just changed
+  function flashTranslatedRow(recId) {
+    if (!recId) return;
+    const rows = document.querySelectorAll(`tr[data-rec-id="${recId}"]`);
+    rows.forEach(r => {
+      r.classList.remove('row-translated-flash'); // reset if mid-animation
+      void r.offsetWidth;                          // force reflow so re-add restarts animation
+      r.classList.add('row-translated-flash');
+    });
+    setTimeout(() => {
+      rows.forEach(r => r.classList.remove('row-translated-flash'));
+    }, 4100);
+  }
+
+  // Translation status pill near page title - shows current target currency
+  function setTranslationStatusPill(currencyCode) {
+    const pill = document.getElementById('translationStatusPill');
+    const text = document.getElementById('translationStatusPillText');
+    if (!pill || !text) return;
+    if (currencyCode) {
+      text.textContent = 'Translating to ' + currencyCode;
+      pill.style.display = 'inline-flex';
+    } else {
+      pill.style.display = 'none';
+    }
+  }
+
+  function dismissFirstTargetEducation() {
+    firstTargetEducationDismissed = true;
+    firstTargetEducationShown = false;
+    if (typeof renderDrawerContent === 'function') renderDrawerContent();
+  }
+
+  // Set error state values WITHOUT re-rendering. Safe to call from inside applyScenario.
+  function setErrorStates(on) {
+    if (on) {
+      // Demo: one row with rate unavailable, one row with API down.
+      // Cascading error: Difference column also fails when Rec Balance fails,
+      // since Difference = Rec Balance - Per GL relies on the translated balance.
+      // Pending Edson confirmation - if Difference is calculated from Per GL only,
+      // remove the cascade.
+      ERROR_RATE_UNAVAILABLE = { 'g2-rb': true, 'g2-df': true };
+      ERROR_API_DOWN = { 'g3-rb': true, 'g3-df': true };
+    } else {
+      ERROR_RATE_UNAVAILABLE = {};
+      ERROR_API_DOWN = {};
+    }
+  }
+
+  // User-facing toggle: sets state AND re-renders. Called from the checkbox onchange.
+  // Do NOT call this from updateErrorToggleAvailability (which itself runs inside
+  // applyScenario) - that would create infinite recursion. Use setErrorStates instead.
+  function toggleErrorStates(on) {
+    setErrorStates(on);
+    if (currentScenario) applyScenario(currentScenario);
+  }
+
+  // State
+  let drawerType = null; // 'individual' | 'group'
+  let individualRowIdx = 0; // which table row opened the individual drawer
+  let editingAcctIdx = -1;
+  let inlineEditSnapshot = null;
+  let bulkEditOpen = false;
+  let openDropdownId = null;
+  let ddCounter = 0;
+
+  // Form state
+  let formState = {};
+  let initialFormSnapshot = '';
+
+  function snapshotForm() {
+    return JSON.stringify({
+      folder: formState.folder,
+      account: formState.account,
+      groupName: formState.groupName,
+      accounts: formState.accounts,
+      frequency: formState.frequency,
+      assignees: formState.assignees,
+      acctFilters: formState.acctFilters,
+      bulkFilters: formState.bulkFilters,
+      bulkTargetCompany: formState.bulkTargetCompany,
+      recTargetCompany: formState.recTargetCompany,
+    });
+  }
+
+  function hasFormChanged() {
+    return snapshotForm() !== initialFormSnapshot;
+  }
+
+  function initForm(type) {
+    // Set ACCT_DATA based on drawer type
+    if (type === 'individual') {
+      ACCT_DATA = [INDIVIDUAL_ACCTS[individualRowIdx]];
+    } else {
+      ACCT_DATA = GROUP_ACCTS;
+    }
+
+    formState = {
+      folder: '01 Cash and cash equivalents',
+      account: type === 'individual' ? ACCT_DATA[0].name : null,
+      groupName: 'Hamburger Donuts',
+      accounts: type === 'group' ? ['1010 - Cash in Bank - USD Operating','1020 - Cash in Bank - USD Payroll'] : [],
+      frequency: 'Monthly',
+      assignees: [{ name:'Sean Bean', role:'Monthly Reviewer', dueType:'Business Day', dueVal:'15', estTime:'05h 45m' }],
+      // Deep clone account filters
+      acctFilters: ACCT_DATA.map(a => ({ targetCompany: null, filters: a.filters.map(f => ({dim:f.dim,vals:[...f.vals]})) })),
+      bulkFilters: [],
+      bulkTargetCompany: null,
+      bulkAccounts: [...DD_OPTIONS.accounts],
+      recTargetCompany: null,
+    };
+  }
+
+  // Close any open dropdown on outside click
+  document.addEventListener('click', e => {
+    if (openDropdownId && !e.target.closest('.dd-wrapper')) {
+      openDropdownId = null;
+      document.querySelectorAll('.dd-menu').forEach(m => m.remove());
+    }
+  });
+
+  // ---- Dropdown renderer ----
+  function uid() { return 'dd' + (++ddCounter); }
+
+  function renderDropdown(id, value, options, opts = {}) {
+    const { placeholder, multi, selected, onSelect, borderActive } = Object.assign({ placeholder:'Select...', multi:false, selected:[], onSelect:()=>{}, borderActive:false }, opts);
+    const display = multi
+      ? (selected.length ? selected.join(', ') : placeholder)
+      : (value || placeholder);
+    const isPlaceholder = multi ? !selected.length : !value;
+    const border = borderActive ? '#cbd2e1' : '#e1e6ef';
+    return `<div class="dd-wrapper" style="position:relative" id="wrap-${id}">
+      <div onclick="toggleDD('${id}',${JSON.stringify(options).replace(/"/g,'&quot;')},${multi})" class="sd-dropdown" style="border-color:${border};cursor:pointer">
+        <span class="val${isPlaceholder?' placeholder':''}" style="font-size:12px">${esc(display)}</span>
+        <span class="mi chev">expand_more</span>
+      </div>
+    </div>`;
+  }
+
+  function toggleDD(id, options, multi) {
+    event.stopPropagation();
+    // Close existing
+    document.querySelectorAll('.dd-menu').forEach(m => m.remove());
+    if (openDropdownId === id) { openDropdownId = null; return; }
+    openDropdownId = id;
+
+    const wrap = document.getElementById('wrap-' + id);
+    const rect = wrap.querySelector('.sd-dropdown').getBoundingClientRect();
+    const wrapRect = wrap.getBoundingClientRect();
+
+    const menu = document.createElement('div');
+    menu.className = 'dd-menu';
+    menu.style.cssText = `position:absolute;top:100%;left:0;right:0;z-index:100;margin-top:4px;background:white;border:1px solid #e1e6ef;border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,0.1);overflow:hidden;max-height:240px;overflow-y:auto`;
+
+    // Determine if this is a multi-select value dropdown (acctVal or bulkVal)
+    const isValueDD = id.startsWith('acctVal') || id.startsWith('bulkVal') || id.startsWith('recSourceCompany') || id.startsWith('bulkModalRecs') || id.startsWith('bulkModalSource');
+    const realOptions = options.filter(o => o !== '__functional__' && o !== '__none__');
+
+    // Add search input for value dropdowns with 3+ options
+    if (multi && isValueDD && realOptions.length >= 3) {
+      const searchWrap = document.createElement('div');
+      searchWrap.style.cssText = 'padding:8px 10px;border-bottom:1px solid #e1e6ef;position:sticky;top:0;background:white;z-index:1';
+      searchWrap.innerHTML = `<input type="text" placeholder="Search" oninput="filterDD(this)" style="width:100%;font-size:12px;border:1px solid #e1e6ef;border-radius:4px;padding:4px 8px;font-family:'Inter',sans-serif;outline:none;">`;
+      searchWrap.onclick = (e) => e.stopPropagation();
+      menu.appendChild(searchWrap);
+    }
+
+    // Parse current state from the id
+    const parts = id.split('-');
+    options.forEach(opt => {
+      // Handle functional currency sentinel
+      if (opt === '__functional__') {
+        const isCurrencyField = id.startsWith('acctCurrency') || id.startsWith('bulkCurrency');
+        if (!isCurrencyField) return; // skip for non-currency dropdowns
+        const fcItem = document.createElement('div');
+        const fcSelected = isSingleSelected(id, 'Functional Currency');
+        fcItem.style.cssText = `display:flex;align-items:center;justify-content:space-between;padding:8px 12px;font-size:12px;font-weight:500;color:#6b7280;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.1s;font-style:italic;${fcSelected?'background:#f0fdf4;color:#1d2433':''}`;
+        fcItem.onmouseenter = () => fcItem.style.background = fcSelected ? '#e6f7ed' : '#f3f4f6';
+        fcItem.onmouseleave = () => fcItem.style.background = fcSelected ? '#f0fdf4' : '';
+        fcItem.innerHTML = `Functional Currency${fcSelected?'<span class="mi" style="font-size:16px;color:#1c895f">check</span>':''}`;
+        fcItem.onclick = (e) => { e.stopPropagation(); handleDDSelect(id, 'Functional Currency', multi); };
+        menu.appendChild(fcItem);
+        const divider = document.createElement('div');
+        divider.className = 'dd-divider';
+        menu.appendChild(divider);
+        return;
+      }
+      // Handle no target company sentinel
+      if (opt === '__none__') {
+        const isTargetCompanyField = id.startsWith('acctTargetCompany') || id.startsWith('bulkTargetCompany') || id.startsWith('recTargetCompany') || id.startsWith('bulkModalTarget');
+        if (!isTargetCompanyField) return;
+        const noneItem = document.createElement('div');
+        const noneSelected = isSingleSelected(id, NO_TARGET_COMPANY);
+        noneItem.style.cssText = `display:flex;align-items:center;justify-content:space-between;padding:8px 12px;font-size:12px;font-weight:500;color:#6b7280;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.1s;font-style:italic;${noneSelected?'background:#f0fdf4;color:#1d2433':''}`;
+        noneItem.onmouseenter = () => noneItem.style.background = noneSelected ? '#e6f7ed' : '#f3f4f6';
+        noneItem.onmouseleave = () => noneItem.style.background = noneSelected ? '#f0fdf4' : '';
+        noneItem.innerHTML = `No Target Currency${noneSelected?'<span class="mi" style="font-size:16px;color:#1c895f">check</span>':''}`;
+        noneItem.onclick = (e) => { e.stopPropagation(); handleDDSelect(id, NO_TARGET_COMPANY, multi); };
+        menu.appendChild(noneItem);
+        const divider2 = document.createElement('div');
+        divider2.className = 'dd-divider';
+        menu.appendChild(divider2);
+        return;
+      }
+
+      const item = document.createElement('div');
+      item.dataset.ddOption = opt.toLowerCase();
+      const isSelected = multi ? isMultiSelected(id, opt) : isSingleSelected(id, opt);
+
+      if (multi && isValueDD) {
+        // Checkbox style for multi-select value dropdowns
+        item.style.cssText = `display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.1s;${isSelected?'background:#f0fdf4':''}`;
+        item.onmouseenter = () => item.style.background = isSelected ? '#e6f7ed' : '#f3f4f6';
+        item.onmouseleave = () => item.style.background = isSelected ? '#f0fdf4' : '';
+        item.innerHTML = `<div style="width:16px;height:16px;border-radius:3px;border:1.5px solid ${isSelected?'#1c895f':'#cbd2e1'};background:${isSelected?'#1c895f':'white'};flex-shrink:0;display:flex;align-items:center;justify-content:center;">${isSelected?'<span class="mi" style="font-size:12px;color:white;line-height:1;">check</span>':''}</div><span style="font-size:12px;font-weight:500;color:#1d2433;font-family:'Inter',sans-serif;">${esc(opt)}</span>`;
+      } else {
+        // Standard style for single-select and non-value multi-select
+        item.style.cssText = `display:flex;align-items:center;justify-content:space-between;padding:8px 12px;font-size:12px;font-weight:500;color:#1d2433;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.1s;${isSelected?'background:#f0fdf4':''}`;
+        item.onmouseenter = () => item.style.background = isSelected ? '#e6f7ed' : '#f3f4f6';
+        item.onmouseleave = () => item.style.background = isSelected ? '#f0fdf4' : '';
+        item.innerHTML = `${esc(opt)}${isSelected?'<span class="mi" style="font-size:16px;color:#1c895f">check</span>':''}`;
+      }
+      item.onclick = (e) => {
+        e.stopPropagation();
+        handleDDSelect(id, opt, multi);
+      };
+      menu.appendChild(item);
+    });
+
+    wrap.appendChild(menu);
+  }
+
+  function filterDD(input) {
+    const term = input.value.toLowerCase();
+    const menu = input.closest('.dd-menu');
+    if (!menu) return;
+    menu.querySelectorAll('[data-dd-option]').forEach(item => {
+      item.style.display = item.dataset.ddOption.includes(term) ? '' : 'none';
+    });
+  }
+
+  function handleDDSelect(id, val, multi) {
+    const parts = id.split('-');
+    const field = parts[0];
+
+    if (field === 'folder') { formState.folder = val; }
+    else if (field === 'account') { formState.account = val; }
+    else if (field === 'frequency') { formState.frequency = val; }
+    else if (field === 'accounts') {
+      const idx = formState.accounts.indexOf(val);
+      if (idx >= 0) formState.accounts.splice(idx, 1);
+      else formState.accounts.push(val);
+    }
+    else if (field === 'assigneeName') {
+      const ai = parseInt(parts[1]);
+      formState.assignees[ai].name = val;
+    }
+    else if (field === 'assigneeRole') {
+      const ai = parseInt(parts[1]);
+      formState.assignees[ai].role = val;
+    }
+    else if (field === 'assigneeDue') {
+      const ai = parseInt(parts[1]);
+      formState.assignees[ai].dueType = val;
+    }
+    else if (field === 'acctDim') {
+      const ai = parseInt(parts[1]), fi = parseInt(parts[2]);
+      formState.acctFilters[ai].filters[fi].dim = val;
+      formState.acctFilters[ai].filters[fi].vals = [];
+    }
+    else if (field === 'acctVal') {
+      const ai = parseInt(parts[1]), fi = parseInt(parts[2]);
+      const vals = formState.acctFilters[ai].filters[fi].vals;
+      const idx = vals.indexOf(val);
+      if (idx >= 0) vals.splice(idx, 1); else vals.push(val);
+    }
+    else if (field === 'acctTargetCompany') {
+      const ai = parseInt(parts[1]);
+      formState.acctFilters[ai].targetCompany = (val === NO_TARGET_COMPANY) ? null : val;
+    }
+    else if (field === 'bulkDim') {
+      const fi = parseInt(parts[1]);
+      formState.bulkFilters[fi].dim = val;
+      formState.bulkFilters[fi].vals = [];
+    }
+    else if (field === 'bulkVal') {
+      const fi = parseInt(parts[1]);
+      const vals = formState.bulkFilters[fi].vals;
+      const idx = vals.indexOf(val);
+      if (idx >= 0) vals.splice(idx, 1); else vals.push(val);
+    }
+    else if (field === 'bulkTargetCompany') { formState.bulkTargetCompany = (val === NO_TARGET_COMPANY) ? null : val; }
+    else if (field === 'recTargetCompany') {
+      const prev = formState.recTargetCompany;
+      formState.recTargetCompany = (val === NO_TARGET_COMPANY) ? null : val;
+      // Trigger first-time education when going from null -> set
+      if (!prev && formState.recTargetCompany && !firstTargetEducationDismissed) {
+        firstTargetEducationShown = true;
+      }
+    }
+    else if (field === 'recSourceCompany') { /* read-only: auto-derived from acctFilters Company values */ }
+    else if (field === 'bulkModalRecs') {
+      const idx = bulkRecsSelected.indexOf(val);
+      if (idx >= 0) bulkRecsSelected.splice(idx, 1); else bulkRecsSelected.push(val);
+      renderBulkModalContent();
+      return; // skip the default re-render below since we re-render the modal
+    }
+    else if (field === 'bulkModalSource') { /* read-only: auto-derived from selected recs */ }
+    else if (field === 'bulkModalTarget') {
+      bulkModalTargetCompany = (val === NO_TARGET_COMPANY) ? null : val;
+      openDropdownId = null;
+      document.querySelectorAll('.dd-menu').forEach(m => m.remove());
+      renderBulkModalContent();
+      return;
+    }
+    else if (field === 'bulkAccounts') {
+      const idx = formState.bulkAccounts.indexOf(val);
+      if (idx >= 0) formState.bulkAccounts.splice(idx, 1);
+      else formState.bulkAccounts.push(val);
+    }
+
+    if (!multi) {
+      openDropdownId = null;
+      document.querySelectorAll('.dd-menu').forEach(m => m.remove());
+    }
+    renderDrawerContent();
+  }
+
+  function isMultiSelected(id, val) {
+    const parts = id.split('-');
+    if (parts[0] === 'accounts') return formState.accounts.includes(val);
+    if (parts[0] === 'acctVal') {
+      const ai = parseInt(parts[1]), fi = parseInt(parts[2]);
+      return formState.acctFilters[ai]?.filters[fi]?.vals?.includes(val) || false;
+    }
+    if (parts[0] === 'bulkVal') {
+      const fi = parseInt(parts[1]);
+      return formState.bulkFilters[fi]?.vals?.includes(val) || false;
+    }
+    if (parts[0] === 'bulkAccounts') return formState.bulkAccounts.includes(val);
+    if (parts[0] === 'recSourceCompany') return getRecSourceCompanyList().includes(val);
+    if (parts[0] === 'bulkModalRecs') return bulkRecsSelected.includes(val);
+    if (parts[0] === 'bulkModalSource') {
+      const sourceList = [...new Set(REC_BULK_CATALOG.filter(r => bulkRecsSelected.includes(r.label)).map(r => r.sourceCompany))];
+      return sourceList.includes(val);
+    }
+    return false;
+  }
+
+  function isSingleSelected(id, val) {
+    const parts = id.split('-');
+    if (parts[0] === 'folder') return formState.folder === val;
+    if (parts[0] === 'account') return formState.account === val;
+    if (parts[0] === 'frequency') return formState.frequency === val;
+    if (parts[0] === 'assigneeName') return formState.assignees[parseInt(parts[1])]?.name === val;
+    if (parts[0] === 'assigneeRole') return formState.assignees[parseInt(parts[1])]?.role === val;
+    if (parts[0] === 'assigneeDue') return formState.assignees[parseInt(parts[1])]?.dueType === val;
+    if (parts[0] === 'acctDim') {
+      const ai = parseInt(parts[1]), fi = parseInt(parts[2]);
+      return formState.acctFilters[ai]?.filters[fi]?.dim === val;
+    }
+    if (parts[0] === 'acctTargetCompany') {
+      const tc = formState.acctFilters[parseInt(parts[1])]?.targetCompany;
+      if (val === NO_TARGET_COMPANY) return !tc;
+      return tc === val;
+    }
+    if (parts[0] === 'bulkDim') return formState.bulkFilters[parseInt(parts[1])]?.dim === val;
+    if (parts[0] === 'bulkTargetCompany') {
+      if (val === NO_TARGET_COMPANY) return !formState.bulkTargetCompany;
+      return formState.bulkTargetCompany === val;
+    }
+    if (parts[0] === 'recTargetCompany') {
+      if (val === NO_TARGET_COMPANY) return !formState.recTargetCompany;
+      return formState.recTargetCompany === val;
+    }
+    if (parts[0] === 'bulkModalTarget') {
+      if (val === NO_TARGET_COMPANY) return !bulkModalTargetCompany;
+      return bulkModalTargetCompany === val;
+    }
+    return false;
+  }
+
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  // Derive Source Company from selected Company values across acctFilters
+  function getRecSourceCompanyList() {
+    const companies = new Set();
+    (formState.acctFilters || []).forEach(af => {
+      (af.filters || []).forEach(f => {
+        if (f.dim === 'Company') (f.vals || []).forEach(v => companies.add(v));
+      });
+    });
+    return [...companies];
+  }
+  function getRecSourceCompany() {
+    const list = getRecSourceCompanyList();
+    if (list.length === 0) return 'No company selected in filters';
+    if (list.length === 1) return list[0];
+    return 'Multiple (' + list.length + ')';
+  }
+  // Hardcoded entity hierarchy for prototype demo.
+  // Each entity belongs to a parent group. Two source companies share a "common parent"
+  // if their parent groups intersect. In production this comes from Mark Thomas's hierarchy API.
+  const ENTITY_PARENT_GROUPS = {
+    'Global Modern Services, Inc. (USD)': ['NorthAmericaHoldings'],
+    'Acme Corp (USD)': ['NorthAmericaHoldings'],
+    'Widget LLC (JPY)': ['NorthAmericaHoldings'],
+    'Canada Operations, Inc. (CAD)': ['NorthAmericaHoldings'],
+    'Mexico Services S.A. (MXN)': ['LatinAmericaHoldings'],
+    'UK Holdings Ltd. (GBP)': ['EuropeHoldings'],
+  };
+  function hasCommonParent() {
+    const list = getRecSourceCompanyList();
+    if (list.length <= 1) return true;
+    let intersection = null;
+    for (const co of list) {
+      const groups = ENTITY_PARENT_GROUPS[co] || [];
+      if (intersection === null) intersection = new Set(groups);
+      else intersection = new Set(groups.filter(g => intersection.has(g)));
+    }
+    return intersection && intersection.size > 0;
+  }
+
+  // ---- Kebab menu ----
+  function showKebab(acctIdx, isGroup, e) {
+    e.stopPropagation();
+    document.querySelectorAll('.dd-menu,.kebab-menu').forEach(m => m.remove());
+    const opts = isGroup ? DD_OPTIONS.kebabGroup : DD_OPTIONS.kebab;
+    const btn = e.currentTarget;
+    const menu = document.createElement('div');
+    menu.className = 'kebab-menu';
+    menu.style.cssText = 'position:absolute;right:0;top:100%;z-index:100;margin-top:4px;background:white;border:1px solid #e1e6ef;border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,0.1);overflow:hidden;min-width:160px';
+    opts.forEach(opt => {
+      const item = document.createElement('div');
+      item.style.cssText = 'padding:8px 14px;font-size:12px;font-weight:500;color:#1d2433;cursor:pointer;font-family:Inter,sans-serif;transition:background 0.1s';
+      item.textContent = opt;
+      item.onmouseenter = () => item.style.background = '#f3f4f6';
+      item.onmouseleave = () => item.style.background = '';
+      item.onclick = (ev) => { ev.stopPropagation(); menu.remove(); };
+      menu.appendChild(item);
+    });
+    btn.style.position = 'relative';
+    btn.appendChild(menu);
+    setTimeout(() => document.addEventListener('click', function rm() { menu.remove(); document.removeEventListener('click', rm); }), 0);
+  }
+
+  // ---- Required fields check ----
+  function isFormValid() {
+    if (!formState.folder || !formState.frequency) return false;
+    if (drawerType === 'individual' && !formState.account) return false;
+    if (drawerType === 'group' && (!formState.groupName || !formState.accounts.length)) return false;
+    return true;
+  }
+
+  // ---- Render ----
+  function renderDrawerContent() {
+    const panel = document.getElementById('sdPanel');
+    const isGroup = drawerType === 'group';
+    const changed = hasFormChanged();
+    const doneActive = isFormValid() && changed;
+    const accts = isGroup ? ACCT_DATA : [ACCT_DATA[0]];
+
+    let html = '';
+    // Header
+    html += `<div class="flex items-center gap-4 px-6 pt-6 pb-5 shrink-0">
+      <h2 class="flex-1 font-museo font-bold text-[16px] leading-[20px] text-[#000]">Becky's Donuts</h2>
+      <button onclick="closeDrawer()" class="sd-icon-btn"><span class="mi" style="font-size:20px;color:#6b7280">close</span></button>
+    </div>`;
+
+    // Body
+    html += '<div class="sd-scroll">';
+
+    // Folder
+    html += `<div>
+      <div class="sd-label"><span class="req"></span><label>Folder</label></div>
+      ${renderDropdown('folder', formState.folder, DD_OPTIONS.folder, {borderActive:true})}
+    </div>`;
+
+    // Group Name (group only)
+    if (isGroup) {
+      html += `<div>
+        <div class="sd-label"><span class="req"></span><label>Group Name</label></div>
+        <div class="sd-input"><span>${esc(formState.groupName)}</span></div>
+      </div>`;
+    }
+
+    // Account / Accounts
+    if (isGroup) {
+      html += `<div>
+        <div class="sd-label"><span class="req"></span><label>Accounts</label></div>
+        ${renderDropdown('accounts', null, DD_OPTIONS.accounts, {multi:true, selected:formState.accounts, placeholder:formState.accounts.length+' Accounts Selected'})}
+      </div>`;
+    } else {
+      html += `<div>
+        <div class="sd-label"><span class="req"></span><label>Account</label></div>
+        ${renderDropdown('account', formState.account, DD_OPTIONS.account, {borderActive:true})}
+      </div>`;
+    }
+
+    // Account Balance Filters
+    html += '<div>';
+    html += '<div class="sd-label sd-label-plain"><label>Account Balance Filters</label></div>';
+    html += '<div class="border border-[#e1e6ef] rounded-[6px] overflow-visible">';
+
+    // Bulk header (group only)
+    if (isGroup) {
+      if (bulkEditOpen) {
+        // Expanded: replace button row with full edit
+        html += renderBulkEdit();
+      } else {
+        // Collapsed: show button + Edit
+        html += `<div class="flex items-center justify-between border-b border-[#e1e6ef] px-3 py-2">
+          <button onclick="toggleBulkEdit()" class="flex items-center gap-1.5 px-1 py-1 rounded-[6px] hover:bg-gray-50">
+            <span class="mi" style="font-size:16px;color:#6b7280">add</span>
+            <span class="font-bold text-[11px] text-[#6b7280] leading-[14px]" style="font-family:'Museo Sans',sans-serif">Bulk Account Balance Filters</span>
+          </button>
+          <span onclick="toggleBulkEdit()" class="text-[11px] font-bold text-[#6b7280] px-1.5 py-1 rounded-[6px] cursor-pointer hover:bg-gray-50" style="font-family:'Museo Sans',sans-serif">Edit</span>
+        </div>`;
+      }
+    }
+
+    // Account rows
+    accts.forEach((a, i) => {
+      const isEditing = editingAcctIdx === i;
+      const isLast = i === accts.length - 1;
+      if (isEditing) {
+        html += renderAccountInlineEdit(a, i, isGroup);
+      } else {
+        html += `<div class="px-3 py-3${!isLast?' border-b border-[#eef0f4]':''}">
+          <div class="sd-account-row">
+            <div class="info">
+              <span class="name">${esc(a.name)}</span>
+              <span class="meta"><b>Company:</b> ${esc(a.company)}</span>
+              <span class="meta"><b>Bank Account:</b> ${esc(a.bank)}</span>
+              <span class="meta"><b>Book Code:</b> ${esc(a.book)}</span>
+            </div>
+            <div class="actions">
+              <div class="sd-icon-btn" onclick="openInlineEdit(${i})"><span class="mi" style="font-size:18px;color:#9ca3af">edit</span></div>
+              <div class="sd-icon-btn" style="position:relative" onclick="showKebab(${i},${isGroup},event)"><span class="mi" style="font-size:18px;color:#9ca3af">more_vert</span></div>
+            </div>
+          </div>
+        </div>`;
+      }
+    });
+
+    html += '</div></div>';
+
+    // Translation (rec-level, above Frequency) - matches Figma 4121:31398
+    // Source Company: derived from acctFilter Company values, displayed via the same
+    // multi-select dropdown component as Account Balance Filters values for engineer parity.
+    // The component is read-only: handleDDSelect ignores recSourceCompany changes.
+    const sourceCompanyList = getRecSourceCompanyList();
+    const sourceCompanyDisplay = getRecSourceCompany();
+    const targetEnabled = hasCommonParent();
+    const noParentTooltipPid = registerPopover(`<p class="pop-title">No shared target currency</p><p class="pop-body">The selected source companies don't share any target currencies in common. Translation requires at least one target currency that's available for all sources.</p>`);
+
+    html += `<div>
+      <p style="font-family:'Inter',sans-serif;font-weight:500;font-size:12px;line-height:18px;color:#424867;margin:0 0 8px 0">Translation</p>
+      <div style="border:1px solid #e1e6ef;border-radius:6px;padding:12px;display:flex;flex-direction:column;gap:8px;background:#fff">
+        <div style="display:flex;gap:16px;align-items:flex-start">
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+            <label style="font-family:'Inter',sans-serif;font-weight:500;font-size:12px;line-height:18px;color:#1d2433;height:20px;display:flex;align-items:center">Target Currency</label>
+            ${targetEnabled
+              ? renderDropdown('recTargetCompany', formState.recTargetCompany || 'No Target Currency', DD_OPTIONS.targetCompany, {borderActive:true})
+              : `<div style="background:#fff;border:1px dashed #cbd2e1;border-radius:6px;height:40px;padding:0 8px;display:flex;align-items:center;gap:8px;width:100%;cursor:not-allowed">
+                  <span style="flex:1;min-width:0;font-family:'Inter',sans-serif;font-weight:400;font-size:12px;line-height:16px;color:#9ca3af;font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">No shared target currency</span>
+                  <span class="info-trigger" onclick="showInfoPopover(this,event)" data-popid="${noParentTooltipPid}" style="display:inline-flex;align-items:center;cursor:pointer;flex-shrink:0">
+                    <span class="mi" style="font-size:16px;color:#9ca3af">info</span>
+                  </span>
+                </div>`}
+          </div>
+        </div>
+        ${(() => {
+          if (!targetEnabled) {
+            return `<p style="font-family:'Inter',sans-serif;font-weight:400;font-size:11px;line-height:16px;color:#92400e;margin:0;background:#fffbeb;border:1px solid #fde68a;border-radius:4px;padding:6px 8px"><span class="mi" style="font-size:13px;vertical-align:middle;margin-right:4px">warning</span>Translation unavailable - the selected source companies don't share any target currencies in common.</p>`;
+          }
+          if (!formState.recTargetCompany) {
+            return `<p style="font-family:'Inter',sans-serif;font-weight:400;font-size:11px;line-height:16px;color:rgba(29,36,51,0.65);margin:0">Select a Target Currency to translate the rec balance.</p>`;
+          }
+          return `<p style="font-family:'Inter',sans-serif;font-weight:400;font-size:11px;line-height:16px;color:rgba(29,36,51,0.65);margin:0">Balance will be translated from source to target currency. Translation only, no consolidation adjustments.</p>`;
+        })()}
+        ${firstTargetEducationShown && formState.recTargetCompany ? `
+          <div style="display:flex;align-items:flex-start;gap:8px;padding:10px 12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;margin-top:4px">
+            <span class="mi" style="font-size:16px;color:#1d4ed8;flex-shrink:0;line-height:18px">info</span>
+            <div style="flex:1;min-width:0">
+              <p style="font-family:'Inter',sans-serif;font-weight:600;font-size:12px;line-height:18px;color:#1d4ed8;margin:0">Currency Translation</p>
+              <p style="font-family:'Inter',sans-serif;font-weight:400;font-size:11px;line-height:16px;color:#1d4ed8;margin:4px 0 0 0">Balances are translated to your reporting currency each period. Consolidation adjustments are not included.</p>
+            </div>
+            <button onclick="dismissFirstTargetEducation()" aria-label="Dismiss" style="background:none;border:none;cursor:pointer;padding:0;flex-shrink:0;display:inline-flex;align-items:center;color:#1d4ed8">
+              <span class="mi" style="font-size:16px">close</span>
+            </button>
+          </div>
+        ` : ''}
+      </div>
+    </div>`;
+
+    // Frequency
+    html += `<div>
+      <div class="sd-label"><span class="req"></span><label>Frequency</label></div>
+      ${renderDropdown('frequency', formState.frequency, DD_OPTIONS.frequency, {borderActive:true})}
+    </div>`;
+
+    // Assignees
+    html += '<div>';
+    html += '<div class="sd-section-header" style="margin-bottom:4px"><span class="title">Assignees</span></div>';
+    html += '<div class="border border-[#e1e6ef] rounded-[4px] p-3 flex flex-col gap-3">';
+    formState.assignees.forEach((asg, ai) => {
+      if (ai > 0) html += '<div class="h-px bg-[#e1e6ef]"></div>';
+      html += `<div class="flex flex-col gap-2">
+        <div class="flex items-start gap-3">
+          <div class="flex-1 flex flex-col gap-1">
+            <div class="flex gap-3">
+              <div class="flex-1">
+                <label class="text-[11px] font-medium text-[#6b7280] mb-1 block" style="font-family:'Inter',sans-serif">Assignee</label>
+                <div class="dd-wrapper" style="position:relative" id="wrap-assigneeName-${ai}">
+                  <div onclick="toggleDD('assigneeName-${ai}',${JSON.stringify(DD_OPTIONS.assignee).replace(/"/g,'&quot;')},false)" class="sd-dropdown" style="height:36px;border-color:#cbd2e1;cursor:pointer">
+                    ${photoAvatar(asg.name, 24)}
+                    <span class="val" style="font-size:12px">${esc(asg.name)}</span>
+                    <span class="mi" style="font-size:16px;color:#6b7280">expand_more</span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex-1">
+                <label class="text-[11px] font-medium text-[#6b7280] mb-1 block" style="font-family:'Inter',sans-serif">Role</label>
+                ${renderDropdown('assigneeRole-'+ai, asg.role, DD_OPTIONS.role, {borderActive:true})}
+              </div>
+            </div>
+          </div>
+          <div class="pt-5">
+            <div class="sd-icon-btn" style="width:32px;height:32px" onclick="removeAssignee(${ai})"><span class="mi" style="font-size:18px;color:#9ca3af">delete</span></div>
+          </div>
+        </div>
+        <div class="flex items-end gap-3">
+          <div class="flex items-center gap-2 flex-1">
+            <div class="flex-1">
+              ${renderDropdown('assigneeDue-'+ai, asg.dueType, DD_OPTIONS.dueType, {borderActive:true})}
+            </div>
+            <div class="w-[44px]"><div class="sd-input" style="height:36px"><span style="font-size:12px">${esc(asg.dueVal)}</span></div></div>
+          </div>
+          <div class="flex-1">
+            <label class="text-[11px] font-medium text-[#6b7280] mb-1 block" style="font-family:'Inter',sans-serif">Estimated Time</label>
+            <div class="sd-input" style="height:36px"><span style="font-size:12px">${esc(asg.estTime)}</span></div>
+          </div>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+    html += `<button onclick="addAssignee()" class="flex items-center gap-1.5 mt-2 px-1 py-1.5 hover:bg-gray-50 rounded-[6px]">
+      <span class="mi" style="font-size:18px;color:#6b7280">add</span>
+      <span class="text-[12px] font-medium text-[#6b7280]" style="font-family:'Inter',sans-serif">Add Assignee</span>
+    </button></div>`;
+
+    // General Settings
+    html += `<div>
+      <div class="sd-section-header" style="margin-bottom:4px"><span class="title">General Settings</span><span class="edit-btn">Edit</span></div>
+      <div class="sd-settings-box">
+        <div class="sd-settings-row"><span class="k">Currency:</span><span class="v">USD</span></div>
+        <div class="sd-settings-row"><span class="k">Rec Type:</span><span class="v">AutoRec Disabled</span></div>
+        <div class="sd-settings-row"><span class="k">Fixed Balance:</span><span class="v">NA</span></div>
+        <div class="sd-settings-row"><span class="k">Threshold:</span><span class="v">$100.00</span></div>
+      </div>
+    </div>`;
+
+    // Controls
+    html += `<div>
+      <div class="sd-label sd-label-plain"><label>Controls</label></div>
+      <div class="sd-dropdown" style="border-color:#e1e6ef;cursor:pointer"><span class="val placeholder" style="font-size:12px">Select Controls</span><span class="mi chev">expand_more</span></div>
+    </div>`;
+
+    // Tags
+    html += `<div>
+      <div class="sd-label sd-label-plain"><label>Tags</label></div>
+      <div class="sd-dropdown" style="border-color:#e1e6ef;cursor:pointer"><span class="val placeholder" style="font-size:12px">Select Tags</span><span class="mi chev">expand_more</span></div>
+    </div>`;
+
+    html += '</div>'; // end sd-scroll
+
+    // Footer
+    html += `<div class="flex items-center justify-end gap-4 px-4 py-4 bg-[#f8fafc] h-[72px] shrink-0">
+      <button onclick="closeDrawer()" class="fui-btn fui-btn-secondary" style="border:none;background:transparent">Cancel</button>
+      <button onclick="${doneActive?'applyAndClose()':''}" class="fui-btn fui-btn-primary" style="cursor:${doneActive?'pointer':'default'};opacity:${doneActive?'1':'0.5'}">Done</button>
+    </div>`;
+
+    panel.innerHTML = html;
+    // Re-open dropdown if one was open
+    if (openDropdownId) {
+      const wrap = document.getElementById('wrap-' + openDropdownId);
+      if (wrap) wrap.querySelector('.sd-dropdown')?.click();
+    }
+  }
+
+  function renderAccountInlineEdit(acct, idx, isGroup) {
+    const af = formState.acctFilters[idx];
+    let html = '<div class="border-b border-[#e1e6ef]">';
+    // Subheader
+    html += `<div class="px-6 pt-4 pb-0">
+      <p class="text-[13px] font-semibold text-[#1d2433] mb-4" style="font-family:'Inter',sans-serif">${esc(acct.name)}</p>`;
+
+    // Filters
+    html += '<div class="flex flex-col gap-3 mb-4">';
+    html += '<span class="sd-filter-label">Filters</span>';
+    af.filters.forEach((f, fi) => {
+      const dimVals = DD_OPTIONS.dimensionValues[f.dim] || [];
+      html += `<div>
+        <div class="flex gap-3 mb-1">
+          <div class="filter-col"><label class="text-[11px] font-medium text-[#6b7280] block" style="font-family:'Inter',sans-serif">Dimension</label></div>
+          <div class="filter-col"><label class="text-[11px] font-medium text-[#6b7280] block" style="font-family:'Inter',sans-serif">Value(s)</label></div>
+          <div style="width:32px"></div>
+        </div>
+        <div class="flex gap-3 items-center">
+          <div class="filter-col">${renderDropdown('acctDim-'+idx+'-'+fi, f.dim, DD_OPTIONS.dimension)}</div>
+          <div class="filter-col">${renderDropdown('acctVal-'+idx+'-'+fi, null, dimVals, {multi:true, selected:f.vals, placeholder:'Select...'})}</div>
+          <div class="sd-icon-btn" style="width:32px;height:32px;flex-shrink:0" onclick="removeFilter(${idx},${fi})"><span class="mi" style="font-size:18px;color:#adb2bb">delete</span></div>
+        </div>
+      </div>`;
+    });
+    html += `<button onclick="addFilter(${idx})" class="flex items-center gap-1 text-[12px] font-medium text-[#1c895f] w-fit" style="font-family:'Inter',sans-serif">
+      <span class="mi" style="font-size:16px;color:#1c895f">add</span> Add Dimension
+    </button></div>`;
+
+    // Cancel / Done
+    const inlineDoneActive = hasInlineEditChanged(idx);
+    html += `<div class="flex items-center justify-end gap-3 pb-4">
+      <button onclick="closeInlineEdit()" class="fui-btn fui-btn-secondary" style="border:none;background:transparent">Cancel</button>
+      <button onclick="${inlineDoneActive?'closeInlineEdit()':''}" class="fui-btn fui-btn-secondary" style="cursor:${inlineDoneActive?'pointer':'default'};opacity:${inlineDoneActive?'1':'0.5'}">Done</button>
+    </div>`;
+
+    html += '</div></div>';
+    return html;
+  }
+
+  function renderBulkEdit() {
+    let html = '<div class="border-b border-[#e1e6ef]"><div class="px-6 pt-4 pb-0">';
+    html += '<p class="text-[13px] font-semibold text-[#1d2433] mb-4" style="font-family:\'Inter\',sans-serif">Bulk Account Balance Filters</p>';
+
+    // Applying to accounts - show abbreviated account numbers
+    const acctNums = formState.bulkAccounts.map(a => a.match(/^\d+/)?.[0] || a).join(',');
+    const acctDisplay = formState.bulkAccounts.length + ' Accounts Selected - ' + acctNums;
+    html += `<div class="mb-4">
+      <label class="text-[11px] font-medium text-[#6b7280] mb-1 block" style="font-family:'Inter',sans-serif">Applying to accounts:</label>
+      ${renderDropdown('bulkAccounts', null, DD_OPTIONS.accounts, {multi:true, selected:formState.bulkAccounts, placeholder:acctDisplay})}
+    </div>`;
+
+    // Filters
+    html += '<div class="flex flex-col gap-3 mb-4">';
+    html += '<span class="sd-filter-label">Filters</span>';
+    formState.bulkFilters.forEach((f, fi) => {
+      const dimVals = DD_OPTIONS.dimensionValues[f.dim] || [];
+      html += `<div>
+        <div class="flex gap-3 mb-1">
+          <div class="filter-col"><label class="text-[11px] font-medium text-[#6b7280] block" style="font-family:'Inter',sans-serif">Dimension</label></div>
+          <div class="filter-col"><label class="text-[11px] font-medium text-[#6b7280] block" style="font-family:'Inter',sans-serif">Value(s)</label></div>
+          <div style="width:32px"></div>
+        </div>
+        <div class="flex gap-3 items-center">
+          <div class="filter-col">${renderDropdown('bulkDim-'+fi, f.dim, DD_OPTIONS.dimension)}</div>
+          <div class="filter-col">${renderDropdown('bulkVal-'+fi, null, dimVals, {multi:true, selected:f.vals, placeholder:'Select...'})}</div>
+          <div class="sd-icon-btn" style="width:32px;height:32px;flex-shrink:0" onclick="removeBulkFilter(${fi})"><span class="mi" style="font-size:18px;color:#adb2bb">delete</span></div>
+        </div>
+      </div>`;
+    });
+    html += `<button onclick="addBulkFilter()" class="flex items-center gap-1 text-[12px] font-medium text-[#1c895f] w-fit" style="font-family:'Inter',sans-serif">
+      <span class="mi" style="font-size:16px;color:#1c895f">add</span> Add Dimension
+    </button></div>`;
+
+    html += `<div class="flex items-center justify-end gap-3 pb-4">
+      <button onclick="toggleBulkEdit()" class="fui-btn fui-btn-secondary" style="border:none;background:transparent">Cancel</button>
+      <button onclick="toggleBulkEdit()" class="fui-btn fui-btn-secondary">Done</button>
+    </div>`;
+
+    html += '</div></div>';
+    return html;
+  }
+
+  // ---- Actions ----
+  function openDrawer(type, rowIdx) {
+    drawerType = type;
+    individualRowIdx = rowIdx || 0;
+    editingAcctIdx = -1;
+    bulkEditOpen = false;
+    openDropdownId = null;
+    initForm(type);
+    // Re-apply current scenario so drawer reflects S-1..S-5 state
+    if (currentScenario) {
+      applyScenarioToFormState(currentScenario);
+    }
+    initialFormSnapshot = snapshotForm();
+    renderDrawerContent();
+    document.getElementById('sdOverlay').classList.add('open');
+    document.getElementById('sdPanel').classList.add('open');
+  }
+
+  // Apply scenario state to formState (extracted so openDrawer can re-apply after initForm)
+  function applyScenarioToFormState(name) {
+    if (!formState || !Object.keys(formState).length) return;
+    if (name === 'S2' || name === 'S4' || name === 'S6') {
+      formState.recTargetCompany = 'GBP (British Pound)';
+      formState.bulkTargetCompany = 'GBP (British Pound)';
+    } else {
+      formState.recTargetCompany = null;
+      formState.bulkTargetCompany = null;
+    }
+    let sourceCompanies;
+    if (name === 'S3' || name === 'S4') sourceCompanies = ['Global Modern Services, Inc. (USD)', 'Canada Operations, Inc. (CAD)'];
+    else if (name === 'S5') sourceCompanies = ['Global Modern Services, Inc. (USD)', 'Mexico Services S.A. (MXN)'];
+    else sourceCompanies = ['Global Modern Services, Inc. (USD)'];
+    (formState.acctFilters || []).forEach(af => {
+      let companyFilter = (af.filters || []).find(f => f.dim === 'Company');
+      if (companyFilter) companyFilter.vals = [...sourceCompanies];
+      else if (af.filters) af.filters.unshift({ dim: 'Company', vals: [...sourceCompanies] });
+    });
+  }
+
+  // ---- Target Currency subtext ----
+  // Map drawer rows to Account column td ids
+  const ACCT_SUBTEXT_IDS = {
+    individual: { 0: 'acct-subtext-r1', 1: 'acct-subtext-r2' },
+    group: { 0: 'acct-subtext-g1', 1: 'acct-subtext-g2', 2: 'acct-subtext-g3', 3: 'acct-subtext-g4' },
+  };
+
+  function rebuildAccountSubtext(tdId, acctFilterState) {
+    const td = document.getElementById(tdId);
+    if (!td) return;
+    // Keep the account name line (first <p>) and remove everything else
+    const nameP = td.querySelector('p');
+    if (!nameP) return;
+    const nameHtml = nameP.outerHTML;
+    // Build new subtext lines from formState
+    let html = nameHtml;
+    // Filter dimension lines
+    acctFilterState.filters.forEach(f => {
+      if (f.dim && f.vals && f.vals.length > 0) {
+        html += '\n              <p class="text-[11px] text-meta leading-[16px]"><span class="font-semibold">' + esc(f.dim) + ':</span><span class="font-normal"> ' + esc(f.vals.join(', ')) + '</span></p>';
+      }
+    });
+    // Target Company moved to rec-level Translation section
+    // Hash anchor line - always last
+    html += '\n              <p class="text-[11px] text-meta leading-[16px] flex items-center gap-1">#FQ-adf2304-123213 <span class="mi" style="font-size:12px;color:#c0c4cc;cursor:pointer">content_copy</span></p>';
+    td.innerHTML = html;
+  }
+
+  function applyAndClose() {
+    // Translation is now rec-level - apply formState.recTargetCompany to this rec's cells.
+    const recTC = formState.recTargetCompany;
+    const recCurrency = companyToCurrency(recTC);
+
+    let flashRecId = null;
+    if (drawerType === 'individual') {
+      const cells = TABLE_CELLS_BY_ROW[individualRowIdx];
+      if (cells) convertTableCells(cells, recCurrency, recTC);
+      const subtextId = ACCT_SUBTEXT_IDS.individual[individualRowIdx];
+      if (subtextId) rebuildAccountSubtext(subtextId, formState.acctFilters[0]);
+      flashRecId = individualRowIdx === 0 ? 'rec-r1' : 'rec-r2';
+    } else if (drawerType === 'group') {
+      const mapping = TABLE_CELLS[drawerType];
+      if (mapping && mapping.bulk) {
+        convertTableCells(mapping.bulk, recCurrency, recTC);
+      }
+      formState.acctFilters.forEach((af, i) => {
+        const subtextId = ACCT_SUBTEXT_IDS.group[i];
+        if (subtextId) rebuildAccountSubtext(subtextId, af);
+      });
+      flashRecId = 'rec-hd';
+    }
+
+    // Update the page-level translation status pill
+    const fx = recCurrency ? FX_RATES[recCurrency] : null;
+    setTranslationStatusPill(fx && recTC ? fx.code : null);
+
+    closeDrawer();
+
+    // After drawer closes, flash the row(s) so user can see what just changed.
+    // Only flash when a target was actually set (skip when clearing translation).
+    if (recTC && flashRecId) {
+      // Brief delay so the flash animation kicks off after the drawer slide-out
+      setTimeout(() => flashTranslatedRow(flashRecId), 200);
+    }
+  }
+
+  function closeDrawer() {
+    document.getElementById('sdOverlay').classList.remove('open');
+    document.getElementById('sdPanel').classList.remove('open');
+    drawerType = null;
+    editingAcctIdx = -1;
+    bulkEditOpen = false;
+    openDropdownId = null;
+  }
+
+  function openInlineEdit(idx) {
+    editingAcctIdx = idx;
+    inlineEditSnapshot = JSON.stringify(formState.acctFilters[idx]);
+    bulkEditOpen = false;
+    openDropdownId = null;
+    renderDrawerContent();
+  }
+
+  function hasInlineEditChanged(idx) {
+    if (inlineEditSnapshot === null) return false;
+    return JSON.stringify(formState.acctFilters[idx]) !== inlineEditSnapshot;
+  }
+
+  function closeInlineEdit() {
+    editingAcctIdx = -1;
+    inlineEditSnapshot = null;
+    openDropdownId = null;
+    renderDrawerContent();
+  }
+
+  function toggleBulkEdit() {
+    bulkEditOpen = !bulkEditOpen;
+    editingAcctIdx = -1;
+    openDropdownId = null;
+    if (bulkEditOpen && formState.bulkFilters.length === 0) {
+      // Pre-populate with the same 3 filters from account data
+      formState.bulkFilters = [
+        {dim:'Company', vals:['Global Modern Services, Inc. (USD)']},
+        {dim:'Bank Account', vals:['Morgan Stanley','(No Value)']},
+        {dim:'Book Code', vals:['Book Code A','Book Code C']},
+      ];
+      formState.bulkAccounts = [...DD_OPTIONS.accounts];
+    }
+    renderDrawerContent();
+  }
+
+  function addFilter(acctIdx) {
+    formState.acctFilters[acctIdx].filters.push({dim:'',vals:[]});
+    openDropdownId = null;
+    renderDrawerContent();
+  }
+
+  function removeFilter(acctIdx, filterIdx) {
+    formState.acctFilters[acctIdx].filters.splice(filterIdx, 1);
+    openDropdownId = null;
+    renderDrawerContent();
+  }
+
+  function addBulkFilter() {
+    formState.bulkFilters.push({dim:'',vals:[]});
+    openDropdownId = null;
+    renderDrawerContent();
+  }
+
+  function removeBulkFilter(fi) {
+    formState.bulkFilters.splice(fi, 1);
+    openDropdownId = null;
+    renderDrawerContent();
+  }
+
+  function addAssignee() {
+    formState.assignees.push({ name:'', role:'', dueType:'Business Day', dueVal:'1', estTime:'00h 00m' });
+    openDropdownId = null;
+    renderDrawerContent();
+  }
+
+  function removeAssignee(idx) {
+    formState.assignees.splice(idx, 1);
+    openDropdownId = null;
+    renderDrawerContent();
+  }
+  // ---- Fixed-position popover ----
+  let activePopover = null;
+  let activePopoverTrigger = null;
+  const popoverRegistry = {};
+  let popoverId = 0;
+  function registerPopover(html) {
+    const id = 'pop' + (++popoverId);
+    popoverRegistry[id] = html;
+    return id;
+  }
+  function showInfoPopover(trigger, e) {
+    e.preventDefault();
+    e.stopPropagation();
+    // If clicking same trigger, close
+    if (activePopoverTrigger === trigger) {
+      hidePopover();
+      return;
+    }
+    hidePopover();
+    const id = trigger.dataset.popid;
+    const html = popoverRegistry[id];
+    if (!html) { console.warn('No popover content for', id); return; }
+    const rect = trigger.getBoundingClientRect();
+    const el = document.createElement('div');
+    el.className = 'info-popover-fixed';
+    el.innerHTML = html;
+    el.onclick = function(ev) { ev.stopPropagation(); };
+    document.body.appendChild(el);
+    const popW = 340;
+    const popH = el.offsetHeight;
+    let left = rect.left + rect.width / 2 - popW / 2;
+    if (left < 8) left = 8;
+    if (left + popW > window.innerWidth - 8) left = window.innerWidth - popW - 8;
+    // Position above if room, else below. Caret class controls triangle direction.
+    let top = rect.top - popH - 10;
+    let positionClass = 'popover-above';
+    if (top < 8) {
+      top = rect.bottom + 10;
+      positionClass = 'popover-below';
+    }
+    el.classList.add(positionClass);
+    el.style.left = left + 'px';
+    el.style.top = top + 'px';
+    // Position the caret horizontally to align with the trigger center
+    const triggerCenterX = rect.left + rect.width / 2;
+    const caretOffsetFromPopover = triggerCenterX - left;
+    el.style.setProperty('--caret-x', caretOffsetFromPopover + 'px');
+    activePopover = el;
+    activePopoverTrigger = trigger;
+  }
+  function hidePopover() {
+    if (activePopover) {
+      activePopover.remove();
+      activePopover = null;
+      activePopoverTrigger = null;
+    }
+  }
+  // Close popover on outside click (delayed to avoid same-tick issue)
+  document.addEventListener('click', function(e) {
+    if (!activePopover) return;
+    if (e.target.closest('.info-trigger')) return;
+    if (activePopover.contains(e.target)) return;
+    hidePopover();
+  });
+  </script>
+
+</body>
+</html>
