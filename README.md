@@ -25,12 +25,14 @@ FloQast product design prototypes - source backup, case study archive, and cross
 | [inbox-prototype](inbox-prototype/) | HTML | prototyping | - |
 | [mike-ux-feedback-4-2026](mike-ux-feedback-4-2026/) | Vite + React + FlowUI | review | - |
 | [recs-ag-grid](recs-ag-grid/) | Vite + React + AG Grid | prototyping | - |
-| [recs-multicurrency](recs-multicurrency/) | Vite + React + FlowUI | prototyping | [live](https://sturdy-adventure-7p4zk32.pages.github.io/projects/recs-multicurrency/) |
-| [recs-side-drawer](recs-side-drawer/) | Vite + React + FlowUI | active | [live](https://sturdy-adventure-7p4zk32.pages.github.io/projects/recs-side-drawer/) |
-| [recs-translation](recs-translation/) | HTML | prototyping | [live](https://sturdy-adventure-7p4zk32.pages.github.io/projects/recs-translation/) |
+| [recs-multicurrency](recs-multicurrency/) | Vite + React + FlowUI | prototyping | [live*](https://sturdy-adventure-7p4zk32.pages.github.io/projects/recs-multicurrency/) |
+| [recs-side-drawer](recs-side-drawer/) | Vite + React + FlowUI | active | [live*](https://sturdy-adventure-7p4zk32.pages.github.io/projects/recs-side-drawer/) |
+| [recs-translation](recs-translation/) | HTML | prototyping | [live*](https://sturdy-adventure-7p4zk32.pages.github.io/projects/recs-translation/) |
 | [scheduler-1-many](scheduler-1-many/) | Vite + React + FlowUI | prototyping | - |
 | [table-standards](table-standards/) | HTML | prototyping | - |
 | [transform-extract](transform-extract/) | HTML | prototyping | - |
+
+\* Live links require FloQast GitHub org access - they redirect to a login page for other accounts. Run locally instead (see below).
 
 ---
 
