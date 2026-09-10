@@ -12,12 +12,16 @@ import { AddGroupDrawer } from './components/drawers/AddGroupDrawer'
 import { AddAccountDrawer } from './components/drawers/AddAccountDrawer'
 import { AddTaskDrawer } from './components/drawers/AddTaskDrawer'
 import { DocumentsDrawer } from './components/drawers/DocumentsDrawer'
+import { ReviewNotesDrawer } from './components/drawers/ReviewNotesDrawer'
 import {
   MOCK_GROUP_ROWS,
   MOCK_TASK_SETTINGS,
   MOCK_DOCUMENTS_SEED,
+  MOCK_RECONCILIATION_HEADER,
+  MOCK_REVIEW_NOTES_SEED,
   type ExistingGroupSettings,
   type DocumentFile,
+  type ReviewNote,
 } from './components/drawers/addGroupTypes'
 import { usePostCreateFeedback } from './hooks/usePostCreateFeedback'
 
@@ -45,6 +49,8 @@ type DrawerMode =
   | 'view-task-closing'
   | 'documents'
   | 'documents-closing'
+  | 'review-notes'
+  | 'review-notes-closing'
 
 type Page = 'reconciliations' | 'checklist'
 
@@ -76,6 +82,17 @@ function App() {
     'checklist-data-2': MOCK_DOCUMENTS_SEED,
   })
   const [documentsRowKey, setDocumentsRowKey] = useState<string | null>(null)
+  // Same 3 rows per table as the Documents seed above - these accounts are
+  // the demo's "flagged" rows with both documents and review notes.
+  const [savedReviewNotesByRowKey, setSavedReviewNotesByRowKey] = useState<Record<string, ReviewNote[]>>({
+    'recs-data-0': MOCK_REVIEW_NOTES_SEED,
+    'recs-data-1': MOCK_REVIEW_NOTES_SEED,
+    'recs-data-3': MOCK_REVIEW_NOTES_SEED,
+    'checklist-data-0': MOCK_REVIEW_NOTES_SEED,
+    'checklist-data-1': MOCK_REVIEW_NOTES_SEED,
+    'checklist-data-2': MOCK_REVIEW_NOTES_SEED,
+  })
+  const [reviewNotesRowKey, setReviewNotesRowKey] = useState<string | null>(null)
 
   const goToPage = (next: Page) => {
     if (next === page) return
@@ -113,6 +130,14 @@ function App() {
   const openDocuments = (rowKey: string) => {
     setDocumentsRowKey(rowKey)
     setDrawerMode('documents')
+  }
+  const closeReviewNotes = () => {
+    setDrawerMode('review-notes-closing')
+    window.setTimeout(() => setDrawerMode('closed'), DRAWER_CLOSE_MS)
+  }
+  const openReviewNotes = (rowKey: string) => {
+    setReviewNotesRowKey(rowKey)
+    setDrawerMode('review-notes')
   }
 
   return (
@@ -152,6 +177,11 @@ function App() {
                       Object.entries(savedDocumentsByRowKey).map(([key, docs]) => [key, docs.length]),
                     )}
                     defaultDocumentCount={0}
+                    onOpenReviewNotes={openReviewNotes}
+                    reviewNoteCounts={Object.fromEntries(
+                      Object.entries(savedReviewNotesByRowKey).map(([key, notes]) => [key, notes.length]),
+                    )}
+                    defaultReviewNoteCount={0}
                   />
                 </div>
               </>
@@ -170,6 +200,11 @@ function App() {
                       Object.entries(savedDocumentsByRowKey).map(([key, docs]) => [key, docs.length]),
                     )}
                     defaultDocumentCount={0}
+                    onOpenReviewNotes={openReviewNotes}
+                    reviewNoteCounts={Object.fromEntries(
+                      Object.entries(savedReviewNotesByRowKey).map(([key, notes]) => [key, notes.length]),
+                    )}
+                    defaultReviewNoteCount={0}
                   />
                 </div>
               </>
@@ -211,6 +246,17 @@ function App() {
           initialDocuments={savedDocumentsByRowKey[documentsRowKey] ?? []}
           onSave={(documents) =>
             setSavedDocumentsByRowKey((prev) => ({ ...prev, [documentsRowKey]: documents }))
+          }
+        />
+      )}
+      {(drawerMode === 'review-notes' || drawerMode === 'review-notes-closing') && reviewNotesRowKey && (
+        <ReviewNotesDrawer
+          show={drawerMode === 'review-notes'}
+          onCancel={closeReviewNotes}
+          header={MOCK_RECONCILIATION_HEADER}
+          initialNotes={savedReviewNotesByRowKey[reviewNotesRowKey] ?? []}
+          onSave={(notes) =>
+            setSavedReviewNotesByRowKey((prev) => ({ ...prev, [reviewNotesRowKey]: notes }))
           }
         />
       )}

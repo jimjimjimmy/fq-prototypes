@@ -55,6 +55,14 @@ declare module '@floqastinc/flow-ui_core' {
     className?: string
   }>>
 
+  export const TableStatusBadge: React.FC<React.PropsWithChildren<{
+    color?: 'default' | 'info' | 'danger' | 'success' | 'warning' | 'highlight'
+    hasIcon?: boolean
+    size?: 'default' | 'xs'
+    truncateText?: boolean
+    className?: string
+  }>>
+
   export const ActionableBadge: React.FC<React.PropsWithChildren<{
     color?: 'dark' | 'info' | 'danger' | 'success'
     size?: 'default' | 'small'

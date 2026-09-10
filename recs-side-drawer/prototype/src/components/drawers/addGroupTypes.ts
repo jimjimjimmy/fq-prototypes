@@ -426,3 +426,76 @@ export const MOCK_DOCUMENTS_SEED: DocumentFile[] = [
   { id: 'doc-5', name: 'FloQast_Checklist_Template_San_Jose_Fri_Jun_12_2026_95906_AM.xlsx', date: '06/20/2026', addedBy: 'Cate Blanchett' },
   { id: 'doc-6', name: 'FloQast_Checklist_Template_San_Jose_Fri_Jun_12_2026_95906_AM.xlsx', date: '06/18/2026', addedBy: 'Karl Urban' },
 ]
+
+// Review Notes drawer (per Figma node 8725:243259). The 4 reference frames
+// are flattened screenshots, not real layers - there's no nested spec to
+// pull props from, so layout/spacing below is read visually off those
+// frames. Neither table has a per-row data model (see MOCK_TASK_SETTINGS/
+// MOCK_DOCUMENTS_SEED above), so every row's comment icon opens the same
+// canned reconciliation header.
+export interface ReconciliationHeaderData {
+  title: string
+  descriptionFields: { label: string; value: string }[]
+  tagIds: string[]
+}
+
+// Figma's own Description text is one run-on sentence ("1000 Cash - Book
+// Code: ... - Company: ... - Ledger: ..."). Per explicit direction, this is
+// deliberately NOT what's built here - the attached reference screenshot
+// (account title + "Bank Account:"/"Book Code:" on their own lines) is used
+// for the layout instead, with AccountBalanceFiltersSection's row styling
+// (bold label + regular value) for the formatting.
+export const MOCK_RECONCILIATION_HEADER: ReconciliationHeaderData = {
+  title: '1010 - Cash in Bank - USD Operating',
+  descriptionFields: [
+    { label: 'Bank Account', value: 'Morgan Stanley' },
+    { label: 'Book Code', value: 'Book Code A' },
+  ],
+  tagIds: ['high-risk', 'journal-entry', 'non-close'],
+}
+
+export interface ReviewNoteReply {
+  id: string
+  authorName: string
+  date: string
+  body: string
+}
+
+export interface ReviewNote {
+  id: string
+  authorName: string
+  date: string
+  // Maps to the compose screen's helper text ("Unassigned notes will
+  // default to closed status") - assigning someone sets 'unresolved',
+  // clearing the assignee falls back to 'closed'.
+  status: 'unresolved' | 'closed'
+  assignedTo: string | null
+  body: string
+  replies: ReviewNoteReply[]
+}
+
+// Figma reuses one demo user ("Jimmy Chen") for every avatar in the Review
+// Notes mock (author, assignee, and reply) - substituted here with two
+// distinct names from this prototype's existing roster (AVATAR_SRC_BY_NAME)
+// so the seeded thread reads as a real back-and-forth, not one person
+// replying to themselves.
+export const MOCK_REVIEW_NOTES_SEED: ReviewNote[] = [
+  {
+    id: 'note-1',
+    authorName: 'Elijah Wood',
+    date: '08/04/2026',
+    status: 'unresolved',
+    assignedTo: 'Elijah Wood',
+    body: 'Hi there.',
+    replies: [{ id: 'reply-1', authorName: 'Cate Blanchett', date: '08/05/2026', body: "s'up" }],
+  },
+]
+
+// Options for the compose/detail screens' "Assignee(s)" field - a subset of
+// the existing name roster (AVATAR_SRC_BY_NAME), matching how AssigneesDrillIn
+// scopes its own TEAM_MEMBER_OPTIONS.
+export const NOTE_ASSIGNEE_OPTIONS = [
+  { label: 'Elijah Wood', value: 'Elijah Wood' },
+  { label: 'Cate Blanchett', value: 'Cate Blanchett' },
+  { label: 'Karl Urban', value: 'Karl Urban' },
+]

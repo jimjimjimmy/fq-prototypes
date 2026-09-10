@@ -66,14 +66,18 @@ function RowActions({
   onOpenSettings,
   onOpenDocuments,
   documentCount,
+  onOpenReviewNotes,
+  reviewNoteCount,
 }: {
   onOpenSettings: () => void
   onOpenDocuments: () => void
   documentCount: number
+  onOpenReviewNotes: () => void
+  reviewNoteCount: number
 }) {
   return (
     <div className="flex items-start justify-end gap-[4px] p-[12px] self-stretch shrink-0" style={{ width: 168 }}>
-      <IconButton size="table" onClick={() => {}}>
+      <IconButton size="table" onClick={onOpenReviewNotes} numericalIndicator={reviewNoteCount}>
         <AddCommentOutlined className="size-[20px]" />
       </IconButton>
       <IconButton size="table" onClick={onOpenDocuments} numericalIndicator={documentCount}>
@@ -93,10 +97,14 @@ function DataRow({
   onOpenSettings,
   onOpenDocuments,
   documentCount,
+  onOpenReviewNotes,
+  reviewNoteCount,
 }: {
   onOpenSettings: () => void
   onOpenDocuments: () => void
   documentCount: number
+  onOpenReviewNotes: () => void
+  reviewNoteCount: number
 }) {
   return (
     <div className="group border-b border-solid border-[#e1e6ef] flex items-start h-[109px] w-full shrink-0 hover:bg-[#f1f3f9]">
@@ -120,7 +128,13 @@ function DataRow({
           <Bar pr={pr} color="#d1d2d3" height={16} />
         </Cell>
       ))}
-      <RowActions onOpenSettings={onOpenSettings} onOpenDocuments={onOpenDocuments} documentCount={documentCount} />
+      <RowActions
+        onOpenSettings={onOpenSettings}
+        onOpenDocuments={onOpenDocuments}
+        documentCount={documentCount}
+        onOpenReviewNotes={onOpenReviewNotes}
+        reviewNoteCount={reviewNoteCount}
+      />
     </div>
   )
 }
@@ -136,12 +150,16 @@ function CreatedTableRow({
   registerRef,
   onOpenDocuments,
   documentCount,
+  onOpenReviewNotes,
+  reviewNoteCount,
 }: {
   isHighlighted: boolean
   onHighlightDone: () => void
   registerRef: (el: HTMLDivElement | null) => void
   onOpenDocuments: () => void
   documentCount: number
+  onOpenReviewNotes: () => void
+  reviewNoteCount: number
 }) {
   return (
     <div
@@ -170,7 +188,13 @@ function CreatedTableRow({
           <Bar pr={pr} color="#d1d2d3" height={16} />
         </Cell>
       ))}
-      <RowActions onOpenSettings={() => {}} onOpenDocuments={onOpenDocuments} documentCount={documentCount} />
+      <RowActions
+        onOpenSettings={() => {}}
+        onOpenDocuments={onOpenDocuments}
+        documentCount={documentCount}
+        onOpenReviewNotes={onOpenReviewNotes}
+        reviewNoteCount={reviewNoteCount}
+      />
     </div>
   )
 }
@@ -187,6 +211,9 @@ interface ChecklistTableProps {
   onOpenDocuments: (rowKey: string) => void
   documentCounts: Record<string, number>
   defaultDocumentCount: number
+  onOpenReviewNotes: (rowKey: string) => void
+  reviewNoteCounts: Record<string, number>
+  defaultReviewNoteCount: number
 }
 
 export function ChecklistTable({
@@ -198,6 +225,9 @@ export function ChecklistTable({
   onOpenDocuments,
   documentCounts,
   defaultDocumentCount,
+  onOpenReviewNotes,
+  reviewNoteCounts,
+  defaultReviewNoteCount,
 }: ChecklistTableProps) {
   const createdRowRefs = useRef(new Map<string, HTMLDivElement>())
 
@@ -223,6 +253,8 @@ export function ChecklistTable({
               }}
               onOpenDocuments={() => onOpenDocuments(rowKey)}
               documentCount={documentCounts[rowKey] ?? defaultDocumentCount}
+              onOpenReviewNotes={() => onOpenReviewNotes(rowKey)}
+              reviewNoteCount={reviewNoteCounts[rowKey] ?? defaultReviewNoteCount}
             />
           )
         })}
@@ -234,6 +266,8 @@ export function ChecklistTable({
               onOpenSettings={onOpenSettings}
               onOpenDocuments={() => onOpenDocuments(rowKey)}
               documentCount={documentCounts[rowKey] ?? defaultDocumentCount}
+              onOpenReviewNotes={() => onOpenReviewNotes(rowKey)}
+              reviewNoteCount={reviewNoteCounts[rowKey] ?? defaultReviewNoteCount}
             />
           )
         })}

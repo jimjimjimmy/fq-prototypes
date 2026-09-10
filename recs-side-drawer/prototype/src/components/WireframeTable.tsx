@@ -78,12 +78,14 @@ interface RowActionsProps {
   onOpenSettings: () => void
   onOpenDocuments: () => void
   documentCount: number
+  onOpenReviewNotes: () => void
+  reviewNoteCount: number
 }
 
-function RowActions({ onOpenSettings, onOpenDocuments, documentCount }: RowActionsProps) {
+function RowActions({ onOpenSettings, onOpenDocuments, documentCount, onOpenReviewNotes, reviewNoteCount }: RowActionsProps) {
   return (
     <div className="flex items-start justify-end gap-[4px] p-[12px] self-stretch shrink-0" style={{ width: COLUMN_WIDTHS[9] }}>
-      <IconButton size="table" onClick={() => {}}>
+      <IconButton size="table" onClick={onOpenReviewNotes} numericalIndicator={reviewNoteCount}>
         <AddCommentOutlined className="size-[20px]" />
       </IconButton>
       <IconButton size="table" onClick={onOpenDocuments} numericalIndicator={documentCount}>
@@ -103,9 +105,11 @@ interface DataRowProps {
   onOpenSettings: () => void
   onOpenDocuments: () => void
   documentCount: number
+  onOpenReviewNotes: () => void
+  reviewNoteCount: number
 }
 
-function DataRow({ onOpenSettings, onOpenDocuments, documentCount }: DataRowProps) {
+function DataRow({ onOpenSettings, onOpenDocuments, documentCount, onOpenReviewNotes, reviewNoteCount }: DataRowProps) {
   return (
     <div className="group border-b border-solid border-[#e1e6ef] flex items-start h-[89px] w-full shrink-0 hover:bg-[#f1f3f9]">
       <Cell width={COLUMN_WIDTHS[0]} stickyLeft={STICKY_LEFT[0]}>
@@ -124,7 +128,13 @@ function DataRow({ onOpenSettings, onOpenDocuments, documentCount }: DataRowProp
           <Bar pr={pr} color="#d1d2d3" height={16} />
         </Cell>
       ))}
-      <RowActions onOpenSettings={onOpenSettings} onOpenDocuments={onOpenDocuments} documentCount={documentCount} />
+      <RowActions
+        onOpenSettings={onOpenSettings}
+        onOpenDocuments={onOpenDocuments}
+        documentCount={documentCount}
+        onOpenReviewNotes={onOpenReviewNotes}
+        reviewNoteCount={reviewNoteCount}
+      />
     </div>
   )
 }
@@ -141,10 +151,14 @@ function GroupMainRow({
   onOpenSettings,
   onOpenDocuments,
   documentCount,
+  onOpenReviewNotes,
+  reviewNoteCount,
 }: {
   onOpenSettings: () => void
   onOpenDocuments: () => void
   documentCount: number
+  onOpenReviewNotes: () => void
+  reviewNoteCount: number
 }) {
   return (
     <div className="group border-b border-solid border-[#e1e6ef] flex items-start h-[89px] w-full shrink-0 hover:bg-[#f1f3f9]">
@@ -169,7 +183,13 @@ function GroupMainRow({
           <Bar pr={pr} color="#d1d2d3" height={16} />
         </Cell>
       ))}
-      <RowActions onOpenSettings={onOpenSettings} onOpenDocuments={onOpenDocuments} documentCount={documentCount} />
+      <RowActions
+        onOpenSettings={onOpenSettings}
+        onOpenDocuments={onOpenDocuments}
+        documentCount={documentCount}
+        onOpenReviewNotes={onOpenReviewNotes}
+        reviewNoteCount={reviewNoteCount}
+      />
     </div>
   )
 }
@@ -230,15 +250,25 @@ function GroupRow({
   onOpenSettings,
   onOpenDocuments,
   documentCount,
+  onOpenReviewNotes,
+  reviewNoteCount,
 }: {
   settings: ExistingGroupSettings
   onOpenSettings: () => void
   onOpenDocuments: () => void
   documentCount: number
+  onOpenReviewNotes: () => void
+  reviewNoteCount: number
 }) {
   return (
     <div className="flex flex-col items-start w-full shrink-0">
-      <GroupMainRow onOpenSettings={onOpenSettings} onOpenDocuments={onOpenDocuments} documentCount={documentCount} />
+      <GroupMainRow
+        onOpenSettings={onOpenSettings}
+        onOpenDocuments={onOpenDocuments}
+        documentCount={documentCount}
+        onOpenReviewNotes={onOpenReviewNotes}
+        reviewNoteCount={reviewNoteCount}
+      />
       {settings.selectedAccountIds.map((accountId) => (
         <GroupAccountRow key={accountId} />
       ))}
@@ -260,12 +290,16 @@ function CreatedTableRow({
   registerRef,
   onOpenDocuments,
   documentCount,
+  onOpenReviewNotes,
+  reviewNoteCount,
 }: {
   isHighlighted: boolean
   onHighlightDone: () => void
   registerRef: (el: HTMLDivElement | null) => void
   onOpenDocuments: () => void
   documentCount: number
+  onOpenReviewNotes: () => void
+  reviewNoteCount: number
 }) {
   return (
     <div
@@ -295,7 +329,13 @@ function CreatedTableRow({
           <Bar pr={pr} color="#d1d2d3" height={16} />
         </Cell>
       ))}
-      <RowActions onOpenSettings={() => {}} onOpenDocuments={onOpenDocuments} documentCount={documentCount} />
+      <RowActions
+        onOpenSettings={() => {}}
+        onOpenDocuments={onOpenDocuments}
+        documentCount={documentCount}
+        onOpenReviewNotes={onOpenReviewNotes}
+        reviewNoteCount={reviewNoteCount}
+      />
     </div>
   )
 }
@@ -309,6 +349,9 @@ interface WireframeTableProps {
   onOpenDocuments: (rowKey: string) => void
   documentCounts: Record<string, number>
   defaultDocumentCount: number
+  onOpenReviewNotes: (rowKey: string) => void
+  reviewNoteCounts: Record<string, number>
+  defaultReviewNoteCount: number
 }
 
 // Mock group rows land at these 0-indexed positions among the plain flat
@@ -326,6 +369,9 @@ export function WireframeTable({
   onOpenDocuments,
   documentCounts,
   defaultDocumentCount,
+  onOpenReviewNotes,
+  reviewNoteCounts,
+  defaultReviewNoteCount,
 }: WireframeTableProps) {
   const groupRowAtPosition = new Map(GROUP_ROW_POSITIONS.map((pos, i) => [pos, MOCK_GROUP_ROWS[i]]))
   const createdRowRefs = useRef(new Map<string, HTMLDivElement>())
@@ -356,6 +402,8 @@ export function WireframeTable({
               }}
               onOpenDocuments={() => onOpenDocuments(rowKey)}
               documentCount={documentCounts[rowKey] ?? defaultDocumentCount}
+              onOpenReviewNotes={() => onOpenReviewNotes(rowKey)}
+              reviewNoteCount={reviewNoteCounts[rowKey] ?? defaultReviewNoteCount}
             />
           )
         })}
@@ -370,6 +418,8 @@ export function WireframeTable({
                 onOpenSettings={() => onOpenSettings(groupRow.settings)}
                 onOpenDocuments={() => onOpenDocuments(rowKey)}
                 documentCount={documentCounts[rowKey] ?? defaultDocumentCount}
+                onOpenReviewNotes={() => onOpenReviewNotes(rowKey)}
+                reviewNoteCount={reviewNoteCounts[rowKey] ?? defaultReviewNoteCount}
               />
             )
           }
@@ -380,6 +430,8 @@ export function WireframeTable({
               onOpenSettings={() => onOpenSettings(MOCK_GROUP_ROWS[0].settings)}
               onOpenDocuments={() => onOpenDocuments(rowKey)}
               documentCount={documentCounts[rowKey] ?? defaultDocumentCount}
+              onOpenReviewNotes={() => onOpenReviewNotes(rowKey)}
+              reviewNoteCount={reviewNoteCounts[rowKey] ?? defaultReviewNoteCount}
             />
           )
         })}
